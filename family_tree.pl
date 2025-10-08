@@ -41,3 +41,22 @@ ancestor(A, D) :- parent(A, D).
 ancestor(A, D) :- 
     parent(A, P),
     ancestor(P, D).
+
+
+% --- Advanced Recursion Example ---
+
+% Declare a constraint for the predicate below.
+:- constraint(count_items/3, [unique(true)]).
+
+% count_items(List, Accumulator, FinalCount)
+% A tail-recursive predicate to count items in a list.
+
+% Base Case: When the list is empty, the final count is the accumulator.
+count_items([], Acc, Acc).
+
+% Recursive Step: For a non-empty list, increment the accumulator
+% and recurse on the tail of the list.
+count_items([_|T], Acc, N) :-
+    Acc1 is Acc + 1,
+    count_items(T, Acc1, N).
+

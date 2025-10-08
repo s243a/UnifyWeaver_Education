@@ -6,9 +6,9 @@ This repository contains educational materials for [UnifyWeaver](https://github.
 
 ## Status
 
-🚧 **Work in Progress** - Currently being developed
+✅ **Up-to-date as of October 2025**
 
-These materials are preliminary and may contain errors or incomplete sections. Contributions and corrections are welcome!
+These materials have been updated to reflect the latest features, including the advanced recursion compilers and constraint-aware optimizations.
 
 ## Chapters
 
