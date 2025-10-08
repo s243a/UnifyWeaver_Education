@@ -98,6 +98,43 @@ user_action_stream() {
 ```
 If you had used `[unique(false), ordered]`, the generated code would be even simpler, omitting the `seen` array and the check entirely, printing every single action as it appears.
 
+### Constraints in Action: The `unique` Optimization
+
+As of the latest updates, the constraint system is now beginning to be used by the **advanced compilers** for optimization, not just for deduplication in the stream compiler.
+
+The `tail_recursion` compiler now understands the `unique(true)` constraint.
+
+Consider a tail-recursive predicate to count list items:
+```prolog
+:- constraint(count_items/3, [unique(true)]).
+
+count_items([], Acc, Acc).
+count_items([_|T], Acc, N) :-
+    Acc1 is Acc + 1,
+    count_items(T, Acc1, N).
+```
+Because this predicate is declared as `unique`, the compiler knows it will only ever produce one final count. It can use this information to generate more efficient code.
+
+**Generated Code WITHOUT `unique(true)` (Conceptual):**
+```bash
+count_items() {
+    # ... loop logic ...
+    echo "$final_accumulator_value"
+}
+```
+
+**Generated Code WITH `unique(true)` (Actual):**
+```bash
+count_items() {
+    # ... loop logic ...
+    echo "$final_accumulator_value"
+    exit 0
+}
+```
+The addition of `exit 0` is a subtle but powerful optimization. It tells the script to terminate immediately after producing its one and only result. In a complex pipeline, this prevents the shell from doing any further work and can significantly improve performance by allowing downstream processes to finish sooner.
+
+This is the first of many planned optimizations that will leverage the constraint system.
+
 ## Runtime Overrides
 
 It is also possible to override declared constraints at compile time by passing them in the options list to `compile_predicate/3`. This can be useful for debugging or for generating a special version of a script without changing the source file.

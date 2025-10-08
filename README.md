@@ -20,10 +20,10 @@ These materials are preliminary and may contain errors or incomplete sections. C
 6. **[Advanced Constraints](06_advanced_constraints.md)** - Constraint system
 7. **[Variable Scope and Process Substitution](07_variable_scope_and_process_substitution.md)** - Bash variable scoping
 8. **[Template System](08_template_system.md)** - Code generation templates
+9. **[Advanced Recursion Patterns](09_advanced_recursion.md)** - Tail, linear, and mutual recursion
 
 ### Planned Chapters
 
-9. **Advanced Recursion Patterns** - Tail, linear, and mutual recursion
 10. **Prolog Introspection and Theory** - How UnifyWeaver analyzes Prolog code
 11. **Test Runner Inference** - Automatic test generation
 

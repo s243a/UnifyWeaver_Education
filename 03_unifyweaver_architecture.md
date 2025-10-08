@@ -17,67 +17,75 @@ The transformation from a Prolog predicate to a Bash script follows a clear pipe
          │
          ▼
 ┌──────────────────┐
-│ Pattern Analysis │
+│ Classify Pattern │ (recursive_compiler.pl)
 └────────┬─────────┘
          │
-    ┌────┴────┐
-    │         │
-    ▼         ▼
-┌─────────┐ ┌───────────┐
-│Non-Rec  │ │ Recursive │
-│(Stream) │ │ (BFS/Memo)│
-└────┬────┘ └─────┬─────┘
-     │             │
-     ▼             ▼
-┌──────────────────┐
-│ Template         │
-│ Rendering        │
-└──────────┬─────────┘
-           │
-           ▼
-    ┌─────────────┐
-    │ Bash Script │
-    └─────────────┘
+         ├────────────────────────┐
+         │                        │
+         ▼                        ▼
+┌──────────────────┐      ┌───────────────────────────┐
+│ Non-Recursive    │      │ Recursive                 │
+│ (stream_compiler)│      │ (advanced_recursive_compiler) │
+└────────┬─────────┘      └───────────┬───────────────┘
+         │                            │
+         │                            ▼
+         │                  ┌───────────────────────────┐
+         │                  │   Try Advanced Patterns   │
+         │                  │  (tail -> linear -> mutual) │
+         │                  └───────────┬───────────────┘
+         │                              │
+         └───────────────┬──────────────┘
+                         │
+                         ▼
+┌──────────────────────────────────┐
+│ Analyze Constraints & Options    │ (constraint_analyzer.pl)
+└────────────────┬─────────────────┘
+                 │
+                 ▼
+┌──────────────────────────────────┐
+│ Select & Render Template         │ (template_system.pl)
+└────────────────┬─────────────────┘
+                 │
+                 ▼
+        ┌────────────────┐
+        │   Bash Script  │
+        └────────────────┘
 ```
 
 1.  **Prolog Predicate:** The process starts with the Prolog predicate you want to compile (e.g., `ancestor/2`).
 
-2.  **Pattern Analysis:** The compiler first inspects the structure of the predicate's rules to classify it. The most important distinction it makes is: Is this predicate recursive?
+2.  **Pattern Analysis:** The main `recursive_compiler` first inspects the predicate to classify its pattern (non-recursive, simple recursion, or a candidate for advanced compilation).
 
-3.  **Strategy Selection:**
+3.  **Strategy Selection & Dispatch:**
     *   If the predicate is **not recursive**, it is handed off to the `stream_compiler`.
-    *   If the predicate is **recursive**, it is passed to the `recursive_compiler` which performs a deeper analysis to identify the specific *type* of recursion (e.g., transitive closure).
+    *   If the predicate is **recursive**, it is passed to the `advanced_recursive_compiler`.
 
-4.  **Template Rendering:** Based on the analysis, the compiler selects an appropriate Bash code template. It then uses the `template_system` to inject the specific details of the Prolog predicate (like names and variable positions) into the template.
+4.  **Advanced Pattern Matching:** The advanced compiler attempts to match the predicate against its known patterns in order of specificity: tail recursion, then linear recursion, then mutual recursion (by detecting Strongly Connected Components).
 
-5.  **Bash Script:** The final output is a complete, executable Bash script or function.
+5.  **Constraint Analysis:** The compiler queries the `constraint_analyzer` to fetch any constraints for the predicate (e.g. `unique(true)`).
+
+6.  **Template Rendering:** Based on the analysis, the compiler selects an appropriate Bash code template and uses the `template_system` to generate the final script.
+
+7.  **Bash Script:** The final output is a complete, executable Bash script or function.
 
 ## The Core Modules
 
-The UnifyWeaver compiler is built on three core Prolog modules.
+The UnifyWeaver compiler is built on a set of core Prolog modules.
 
 ### 1. `template_system.pl`
-This module is a simple but powerful templating engine. It works much like the popular Mustache templating system. It defines a set of Bash code snippets with placeholders (e.g., `{{predicate_name}}`) and provides a predicate to fill in these placeholders with actual values.
-
-This design is crucial because it **separates the logic of compilation from the specifics of the Bash implementation**. If we wanted to optimize a Bash function or change how it works, we would only need to modify the template, not the compiler logic itself.
+This module is a flexible templating engine used to generate the final Bash code. It allows for file-based templates, caching, and a clean separation between the compiler's logic and the Bash implementation details.
 
 ### 2. `stream_compiler.pl`
-This module handles **non-recursive predicates**. It is designed to convert Prolog rules into streaming Unix pipelines. For example, a rule like `grandparent(X, Z) :- parent(X, Y), parent(Y, Z).` is conceptually turned into a pipeline where the output of the first `parent` call is streamed as input to the second.
-
-It handles:
-*   **Facts:** Converts them into efficient data structures in Bash (more on this below).
-*   **Single Rules:** Translates them into a series of piped commands.
-*   **Multiple Rules:** Combines the results of different rules, often using `sort -u` to ensure uniqueness.
+This module handles simple, **non-recursive predicates**, converting them into efficient streaming Unix pipelines.
 
 ### 3. `recursive_compiler.pl`
-This is the most sophisticated part of UnifyWeaver. It analyzes and optimizes **recursive predicates**. Its most important job is to identify the **transitive closure** pattern, which we saw in the `transitive_dependency/2` example from the previous chapter.
+This is the main entry point and **dispatcher**. It performs the initial analysis and decides which specialized compiler to use.
 
-Instead of implementing recursion directly in Bash (which can be clumsy and lead to stack depth issues), the `recursive_compiler` transforms this pattern into a highly optimized **Breadth-First Search (BFS)** algorithm.
+### 4. `constraint_analyzer.pl`
+This module manages and analyzes predicate constraints, such as `unique` and `ordered`, which guide the optimization process.
 
-This BFS implementation uses a work queue and an associative array (to keep track of visited nodes) to traverse the relationship graph. This approach is:
-*   **Memory Efficient:** It processes the graph level by level.
-*   **Cycle-Proof:** It correctly handles cycles in the data (e.g., `A -> B -> C -> A`) without getting stuck in an infinite loop.
-*   **Fast:** It avoids the overhead of recursive function calls in Bash.
+### 5. `advanced_recursive_compiler.pl`
+This is the orchestrator for complex recursion. It uses several sub-modules (`pattern_matchers.pl`, `scc_detection.pl`, `tail_recursion.pl`, etc.) to identify and compile advanced patterns into highly optimized Bash code, such as converting tail recursion into iterative loops.
 
 ## Structure of the Generated Bash Code
 
