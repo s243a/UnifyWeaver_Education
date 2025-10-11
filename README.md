@@ -14,8 +14,9 @@ A Prolog-to-Bash compiler that transforms declarative logic programs into effici
 
 ### Advanced Recursion
 - **Tail recursion optimization** - Converts tail-recursive predicates to iterative bash loops
-- **Linear recursion** - Memoized compilation for single-recursive-call patterns
-- **Tree recursion** - Handles multiple recursive calls (fibonacci, binary tree operations)
+- **Linear recursion** - Memoized compilation for 1+ independent recursive calls (fibonacci, factorial)
+- **Tree recursion** - Structural decomposition with recursive calls on parts (binary tree operations)
+- **Pattern exclusion** - `forbid_linear_recursion/1` to force alternative compilation strategies
 - **Mutual recursion** - Handles predicates that call each other cyclically via SCC detection
 - **Constraint awareness** - Unique and ordering constraints optimize generated code
 - **Pattern detection** - Automatic classification of recursion patterns
@@ -116,6 +117,23 @@ count_items([_|T], Acc, N) :-
 
 % Compile with unique constraint
 ?- compile_advanced_recursive(count_items/3, [unique(true)], BashCode).
+```
+
+#### Linear Recursion (Fibonacci)
+```prolog
+% fib(N, F)
+fib(0, 0).
+fib(1, 1).
+fib(N, F) :-
+    N > 1,
+    N1 is N - 1,
+    N2 is N - 2,
+    fib(N1, F1),
+    fib(N2, F2),
+    F is F1 + F2.
+
+% Compile with linear recursion pattern
+?- compile_advanced_recursive(fib/2, [unique(true)], BashCode).
 ```
 
 #### Tree Recursion (Binary Tree Sum)
@@ -244,8 +262,8 @@ is_even(N), is_odd(N)  % Mutual recursion with shared memo
 
 **Advanced Recursion:**
 - **Tail recursion** - Compiled to iterative loops (e.g., `count([], Acc, Acc). count([_|T], A, N) :- A1 is A+1, count(T, A1, N).`)
-- **Linear recursion** - Compiled with memoization (e.g., `length([], 0). length([_|T], N) :- length(T, N1), N is N1+1.`)
-- **Tree recursion** - Multiple recursive calls with list-based trees (e.g., `tree_sum([], 0). tree_sum([V,L,R], Sum) :- tree_sum(L, LS), tree_sum(R, RS), Sum is V+LS+RS.`)
+- **Linear recursion** - Compiled with memoization for 1+ independent calls (e.g., `fib(N,F) :- N1 is N-1, N2 is N-2, fib(N1,F1), fib(N2,F2), F is F1+F2.`)
+- **Tree recursion** - Structural decomposition with recursive calls on parts (e.g., `tree_sum([V,L,R], Sum) :- tree_sum(L, LS), tree_sum(R, RS), Sum is V+LS+RS.`)
 - **Mutual recursion** - Predicates calling each other in cycles (e.g., `even(N) :- N > 0, N1 is N-1, odd(N1)` with `odd(N) :- N > 0, N1 is N-1, even(N1)`)
 - **SCC detection** - Automatic detection of mutually recursive predicate groups
 - **Constraint optimization** - Unique constraints enable early exit in generated code
