@@ -55,14 +55,21 @@ Welcome to SWI-Prolog ...
 ```
 The `?-` is the Prolog prompt, waiting for your query.
 
+## Step 2.5: Initialize the Environment
+
+Before we can use the UnifyWeaver compiler, we need to initialize the environment. We have provided an `init.pl` file in the `education` directory that sets up the necessary library paths.
+
+At the Prolog prompt, enter the following query:
+```prolog
+?- ['education/init'].
+```
+You will see a message confirming that the environment has been initialized.
+
 ## Step 3: Load the UnifyWeaver Compiler
 
-To use UnifyWeaver, you first need to load its core modules. The easiest way to do this is to load the `recursive_compiler`, which also loads the other modules it depends on.
-
-At the Prolog prompt, enter the following query. Note that we are using the path from the root of the project.
-
+Now that the environment is initialized, we can load the UnifyWeaver compiler.
 ```prolog
-?- use_module('src/unifyweaver/core/recursive_compiler').
+?- use_module(unifyweaver(core/recursive_compiler)).
 true.
 ```
 
@@ -76,55 +83,67 @@ true.
 ```
 (Note: You can omit the `.pl` extension.)
 
-## Step 5: Compile the `ancestor/2` Predicate
+## Step 4.5: Compile the Facts
 
-Now for the main event. We will ask UnifyWeaver to compile our `ancestor/2` predicate. We will use the `compile_recursive/3` predicate, which takes three arguments:
-1.  The predicate to compile, in `functor/arity` format.
-2.  A list of options (we will use an empty list `[]` for now).
-3.  A variable to hold the generated Bash code (we will use `BashCode`).
+Before we compile our `ancestor/2` rule, we need to compile the `parent/2` facts it relies on. UnifyWeaver is smart enough to know that `ancestor/2` depends on `parent/2`, but it's good practice to compile the base facts into their own script. This allows us to reuse the `parent` data for other rules as well.
+
+We will use the `stream_compiler` for this, as `parent/2` is a simple set of facts (non-recursive).
+
+1.  **Load the stream compiler:**
+    ```prolog
+    ?- use_module(unifyweaver(core/stream_compiler)).
+    true.
+    ```
+
+2.  **Compile the facts:**
+    ```prolog
+    ?- stream_compiler:compile_facts(parent, 2, [], BashCode).
+    ```
+    This will generate the Bash code for the `parent/2` facts and store it in the `BashCode` variable.
+
+## Step 5: Compile the `ancestor/2` Rule
+
+Now for the main event. We will ask UnifyWeaver to compile our `ancestor/2` rule. We will use the `compile_recursive/3` predicate.
 
 ```prolog
 ?- compile_recursive(ancestor/2, [], BashCode).
 ```
 
-Prolog will execute the compiler. The `BashCode` variable will be instantiated with a long string containing the full Bash script. Prolog will print this string to the console.
-
 ## Step 6: Save the Generated Code
 
-While seeing the code on the screen is interesting, it's not very useful. We need to save it to a file. We can do this directly from Prolog using built-in predicates.
+Now we will save both the `parent` and `ancestor` scripts.
 
-Let's re-run the compilation but this time, we will also write the output to a file named `family_tree.sh` in the `education` directory.
+1.  **Save the `parent` script:**
+    ```prolog
+    ?- stream_compiler:compile_facts(parent, 2, [], BashCode),
+       open('education/parent.sh', write, Stream),
+       write(Stream, BashCode),
+       close(Stream).
+    true.
+    ```
 
-```prolog
-?- compile_recursive(ancestor/2, [], BashCode),
-   open('education/family_tree.sh', write, Stream),
-   write(Stream, BashCode),
-   close(Stream).
-true.
-```
-
-This command chain does the following:
-1.  `compile_recursive/3`: Compiles the predicate as before.
-2.  `open/3`: Opens the file `education/family_tree.sh` for writing.
-3.  `write/2`: Writes the content of the `BashCode` variable to the file.
-4.  `close/1`: Closes the file stream.
-
-You should now have a new file named `family_tree.sh` in the `education` folder.
+2.  **Save the `ancestor` script:**
+    ```prolog
+    ?- compile_recursive(ancestor/2, [], BashCode),
+       open('education/ancestor.sh', write, Stream),
+       write(Stream, BashCode),
+       close(Stream).
+    true.
+    ```
+You should now have two new files: `parent.sh` and `ancestor.sh`.
 
 ## Step 7: Run the Bash Script
 
-Finally, let's exit Prolog (`halt.`) and run our new script. Open `education/family_tree.sh` in a text editor. You will see that it has generated several functions, including `ancestor_all/1` and `ancestor_check/2`.
+Finally, let's exit Prolog (`halt.`) and run our new scripts.
 
-*   `ancestor_all [NAME]`: Finds all descendants of `[NAME]`.
-*   `ancestor_check [ANCESTOR] [DESCENDANT]`: Checks if the relationship is true.
-
-Let's try them out. From your terminal, first `source` the script to make the functions available, and then call them.
+The `ancestor.sh` script depends on the `parent.sh` script, so we need to source them both.
 
 ```bash
-$ source education/family_tree.sh
+$ source education/parent.sh
+$ source education/ancestor.sh
 
 # Find all known descendants of abraham
-$ ancestor_all abraham
+$ ancestor abraham
 abraham:ishmael
 abraham:isaac
 abraham:esau
@@ -133,17 +152,69 @@ abraham:reuben
 ...
 
 # Check if isaac is an ancestor of judah
-$ ancestor_check isaac judah && echo "Yes" || echo "No"
+$ ancestor isaac judah && echo "Yes" || echo "No"
 Yes
 
 # Check if sarah is an ancestor of esau
-$ ancestor_check sarah esau && echo "Yes" || echo "No"
+$ ancestor sarah esau && echo "Yes" || echo "No"
 Yes
 
 # Check if ishmael is an ancestor of jacob
-$ ancestor_check ishmael jacob && echo "Yes" || echo "No"
+$ ancestor ishmael jacob && echo "Yes" || echo "No"
 No
 ```
+
+## Step 8: Declarative Test Generation
+
+In the previous steps, we manually tested our generated scripts. However, UnifyWeaver provides a more advanced and declarative way to generate a test runner script automatically.
+
+This is done using an "inference-based" approach, where a Prolog script inspects the generated shell scripts and infers the appropriate test cases based on their signatures.
+
+### 1. Compile to the Advanced Output Directory
+
+The test inference system is designed to work with the `output/advanced` directory structure. First, let's re-compile our `parent` and `ancestor` predicates to the `education/output/advanced` directory.
+
+```prolog
+?- stream_compiler:compile_facts(parent, 2, [], BashCode),
+   open('education/output/advanced/parent.sh', write, Stream),
+   write(Stream, BashCode),
+   close(Stream).
+true.
+
+?- compile_recursive(ancestor/2, [], BashCode),
+   open('education/output/advanced/ancestor.sh', write, Stream),
+   write(Stream, BashCode),
+   close(Stream).
+true.
+```
+
+### 2. Generate the Test Runner
+
+Now, we will use the `test_runner_inference.pl` module to generate the test runner. This module is not part of the `unifyweaver` library alias, so we need to load it directly.
+
+```prolog
+?- use_module('src/unifyweaver/core/advanced/test_runner_inference').
+true.
+
+?- generate_test_runner_inferred('education/output/advanced/test_runner.sh', [output_dir('education/output/advanced')]).
+true.
+```
+
+This will:
+1.  Scan the `education/output/advanced` directory for `.sh` files.
+2.  Extract the function signatures from `parent.sh` and `ancestor.sh`.
+3.  Infer a set of test cases for these functions.
+4.  Generate a new test runner script at `education/output/advanced/test_runner.sh`.
+
+### 3. Run the Inferred Test Runner
+
+Finally, let's exit Prolog (`halt.`) and run the generated test runner.
+
+```bash
+$ bash education/output/advanced/test_runner.sh
+```
+
+You will see the output of the test runner, executing the inferred test cases against your compiled scripts. This provides a powerful, declarative, and automated way to ensure your compiled logic is working correctly.
 
 ## Congratulations!
 

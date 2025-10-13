@@ -31,7 +31,8 @@ The transformation from a Prolog predicate to a Bash script follows a clear pipe
          │                            ▼
          │                  ┌───────────────────────────┐
          │                  │   Try Advanced Patterns   │
-         │                  │  (tail -> linear -> mutual) │
+         │                  │  (tail -> linear ->       |
+         |                  |  graph -> mutual)         │
          │                  └───────────┬───────────────┘
          │                              │
          └───────────────┬──────────────┘
@@ -60,7 +61,7 @@ The transformation from a Prolog predicate to a Bash script follows a clear pipe
     *   If the predicate is **not recursive**, it is handed off to the `stream_compiler`.
     *   If the predicate is **recursive**, it is passed to the `advanced_recursive_compiler`.
 
-4.  **Advanced Pattern Matching:** The advanced compiler attempts to match the predicate against its known patterns in order of specificity: tail recursion, then linear recursion, then mutual recursion (by detecting Strongly Connected Components).
+4.  **Advanced Pattern Matching:** The advanced compiler attempts to match the predicate against its known patterns in order of specificity: tail recursion, then linear recursion, then graph, then mutual recursion (by detecting Strongly Connected Components).
 
 5.  **Constraint Analysis:** The compiler queries the `constraint_analyzer` to fetch any constraints for the predicate (e.g. `unique(true)`).
 

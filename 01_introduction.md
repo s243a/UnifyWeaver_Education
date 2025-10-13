@@ -6,7 +6,7 @@ Welcome to the study of UnifyWeaver! This document series will guide you through
 
 At its heart, **UnifyWeaver is a Prolog-to-Bash compiler.**
 
-That statement, while accurate, requires some unpacking. UnifyWeaver uses the logic programming language Prolog as a high-level, declarative language to define data relationships, rules, and queries. It then compiles these definitions into highly efficient, stream-based Bash scripts.
+That statement, while accurate, requires some unpacking. UnifyWeaver uses the logic programming language Prolog as a high-level, declarative language to define data relationships, rules, and queries. It then compiles these definitions into highly efficient, stream-based Bash scripts, where possible and otherwise uses specialized recursion patterns.
 
 Think of it as a bridge between two very different worlds:
 *   **The Declarative World of Prolog:** Where you describe *what* you want to achieve and the logical rules that govern your data.
