@@ -48,6 +48,11 @@ Next, it defines two rules:
 Now, open a terminal in the root directory of the UnifyWeaver project and start the SWI-Prolog interactive console. You can usually do this by typing `swipl`.
 
 ```bash
+# Make sure swipl prolog is installed, and in your execution path.
+#
+# Open a terminal (e.g. cmd (on windows)), in the parent directory of this project.
+#
+# In the parent directory of this project type (and press enter):
 $ swipl
 Welcome to SWI-Prolog ...
 ...
@@ -170,9 +175,40 @@ In the previous steps, we manually tested our generated scripts. However, UnifyW
 
 This is done using an "inference-based" approach, where a Prolog script inspects the generated shell scripts and infers the appropriate test cases based on their signatures.
 
-### 1. Compile to the Advanced Output Directory
+### 1. Prerequisites (Setup Environment)
 
-The test inference system is designed to work with the `output/advanced` directory structure. First, let's re-compile our `parent` and `ancestor` predicates to the `education/output/advanced` directory.
+Since we exited Prolog in Step 7, we need to set up our environment again. As before:
+
+```bash
+# Start SWI-Prolog
+$ swipl
+```
+
+```prolog
+% Initialize the environment
+?- ['education/init'].
+[UnifyWeaver] Educational environment initialized.
+...
+true.
+
+% Load the recursive compiler
+?- use_module(unifyweaver(core/recursive_compiler)).
+true.
+
+% Load the stream compiler
+?- use_module(unifyweaver(core/stream_compiler)).
+true.
+
+% Load the family tree definitions
+?- ['education/family_tree'].
+true.
+```
+
+Now we're ready to proceed with the test generation.
+
+### 2. Compile to the Advanced Output Directory
+
+The test inference system is designed to work with the `output/advanced` directory structure. Let's compile our `parent` and `ancestor` predicates to the `education/output/advanced` directory.
 
 ```prolog
 ?- stream_compiler:compile_facts(parent, 2, [], BashCode),
@@ -188,7 +224,7 @@ true.
 true.
 ```
 
-### 2. Generate the Test Runner
+### 3. Generate the Test Runner
 
 Now, we will use the `test_runner_inference.pl` module to generate the test runner. This module is not part of the `unifyweaver` library alias, so we need to load it directly.
 
@@ -206,7 +242,7 @@ This will:
 3.  Infer a set of test cases for these functions.
 4.  Generate a new test runner script at `education/output/advanced/test_runner.sh`.
 
-### 3. Run the Inferred Test Runner
+### 4. Run the Inferred Test Runner
 
 Finally, let's exit Prolog (`halt.`) and run the generated test runner.
 
