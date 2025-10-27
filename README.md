@@ -21,10 +21,22 @@ A Prolog-to-Bash compiler that transforms declarative logic programs into effici
 - **Constraint awareness** - Unique and ordering constraints optimize generated code
 - **Pattern detection** - Automatic classification of recursion patterns
 
+### Data Source Plugin System (v0.0.2)
+- **4 Production-Ready Plugins** - CSV/TSV, Python, HTTP, JSON data sources
+- **Self-Registering Architecture** - Plugin-based system with automatic discovery
+- **Real-World ETL** - Complete pipelines for data transformation and storage
+- **SQLite Integration** - Python source with automatic database operations
+
+### PowerShell Target (v0.0.2)
+- **Pure PowerShell Mode** - Uses only PowerShell cmdlets (no bash dependencies)
+- **BaaS Mode** - Bash-as-a-Service when performance is critical
+- **Auto Mode** - Automatically selects best mode for data source
+
 ### Control Plane
-- **Firewall** - Enforces security policies for backend and service usage
-- **Preferences** - Guides implementation choices within policy boundaries
-- **Layered Configuration** - Supports global, rule-specific, and runtime overrides
+- **Enhanced Firewall** - Multi-service security for external tools
+- **Network Access Control** - URL/domain whitelisting and blacklisting
+- **Service Restrictions** - Control which external tools can be used
+- **Layered Configuration** - Supports global, firewall, and compilation-level settings
 
 ## Installation
 
