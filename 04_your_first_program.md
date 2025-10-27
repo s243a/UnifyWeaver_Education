@@ -206,19 +206,19 @@ true.
 
 Now we're ready to proceed with the test generation.
 
-### 2. Compile to the Advanced Output Directory
+### 2. Compile to the Output Directory
 
-The test inference system is designed to work with the `output/advanced` directory structure. Let's compile our `parent` and `ancestor` predicates to the `education/output/advanced` directory.
+The test inference system will generate a test runner for all scripts in a directory. Let's compile our `parent` and `ancestor` predicates to the `education/output` directory.
 
 ```prolog
 ?- stream_compiler:compile_facts(parent, 2, [], BashCode),
-   open('education/output/advanced/parent.sh', write, Stream),
+   open('education/output/parent.sh', write, Stream),
    write(Stream, BashCode),
    close(Stream).
 true.
 
 ?- compile_recursive(ancestor/2, [], BashCode),
-   open('education/output/advanced/ancestor.sh', write, Stream),
+   open('education/output/ancestor.sh', write, Stream),
    write(Stream, BashCode),
    close(Stream).
 true.
@@ -232,22 +232,29 @@ Now, we will use the `test_runner_inference.pl` module to generate the test runn
 ?- use_module('src/unifyweaver/core/advanced/test_runner_inference').
 true.
 
-?- generate_test_runner_inferred('education/output/advanced/test_runner.sh', [output_dir('education/output/advanced')]).
+?- generate_test_runner_inferred('education/output/test_runner.sh', [output_dir('education/output')]).
 true.
 ```
 
 This will:
-1.  Scan the `education/output/advanced` directory for `.sh` files.
+1.  Scan the `education/output` directory for `.sh` files.
 2.  Extract the function signatures from `parent.sh` and `ancestor.sh`.
 3.  Infer a set of test cases for these functions.
-4.  Generate a new test runner script at `education/output/advanced/test_runner.sh`.
+4.  Generate a new test runner script at `education/output/test_runner.sh`.
 
 ### 4. Run the Inferred Test Runner
 
-Finally, let's exit Prolog (`halt.`) and run the generated test runner.
+Finally, let's exit Prolog (`halt.`) and run the generated test runner from within the output directory.
 
 ```bash
-$ bash education/output/advanced/test_runner.sh
+$ cd education/output
+$ bash test_runner.sh
+```
+
+You can also run it directly from the project root:
+
+```bash
+$ cd education/output && bash test_runner.sh && cd ../..
 ```
 
 You will see the output of the test runner, executing the inferred test cases against your compiled scripts. This provides a powerful, declarative, and automated way to ensure your compiled logic is working correctly.
