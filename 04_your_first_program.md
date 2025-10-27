@@ -116,12 +116,21 @@ Now for the main event. We will ask UnifyWeaver to compile our `ancestor/2` rule
 
 ## Step 6: Save the Generated Code
 
-Now we will save both the `parent` and `ancestor` scripts.
+Now we will save both the `parent` and `ancestor` scripts to the `education/output` directory.
+
+First, let's create the output directory if it doesn't exist:
+
+```prolog
+?- make_directory_path('education/output').
+true.
+```
+
+Now save the scripts:
 
 1.  **Save the `parent` script:**
     ```prolog
     ?- stream_compiler:compile_facts(parent, 2, [], BashCode),
-       open('education/parent.sh', write, Stream),
+       open('education/output/parent.sh', write, Stream),
        write(Stream, BashCode),
        close(Stream).
     true.
@@ -130,12 +139,12 @@ Now we will save both the `parent` and `ancestor` scripts.
 2.  **Save the `ancestor` script:**
     ```prolog
     ?- compile_recursive(ancestor/2, [], BashCode),
-       open('education/ancestor.sh', write, Stream),
+       open('education/output/ancestor.sh', write, Stream),
        write(Stream, BashCode),
        close(Stream).
     true.
     ```
-You should now have two new files: `parent.sh` and `ancestor.sh`.
+You should now have two new files in `education/output/`: `parent.sh` and `ancestor.sh`.
 
 ## Step 7: Run the Bash Script
 
@@ -144,8 +153,8 @@ Finally, let's exit Prolog (`halt.`) and run our new scripts.
 The `ancestor.sh` script depends on the `parent.sh` script, so we need to source them both.
 
 ```bash
-$ source education/parent.sh
-$ source education/ancestor.sh
+$ source education/output/parent.sh
+$ source education/output/ancestor.sh
 
 # Find all known descendants of abraham
 $ ancestor abraham
