@@ -1,398 +1,234 @@
-# UnifyWeaver
+<!--
+SPDX-License-Identifier: MIT AND CC-BY-4.0
+Copyright (c) 2025 John William Creighton (s243a)
 
-A Prolog-to-Bash compiler that transforms declarative logic programs into efficient streaming bash scripts. UnifyWeaver specializes in compiling data relationships and queries into executable bash code with optimized handling of transitive closures and advanced recursion patterns.
+This documentation is dual-licensed under MIT and CC-BY-4.0.
+-->
 
-## Features
+# UnifyWeaver_Education
 
-### Core Compilation
-- **Stream-based processing** - Memory-efficient compilation using bash pipes and streams
-- **BFS optimization** - Transitive closures automatically optimized to breadth-first search
-- **Cycle detection** - Proper handling of cyclic graphs without infinite loops
-- **Template-based generation** - Clean separation between logic and bash code generation
-- **Duplicate prevention** - Efficient tracking ensures each result appears only once
-- **Process substitution** - Correct variable scoping in bash loops
+**Educational Materials for [UnifyWeaver](https://github.com/s243a/UnifyWeaver)**
 
-### Advanced Recursion
-- **Tail recursion optimization** - Converts tail-recursive predicates to iterative bash loops
-- **Linear recursion** - Memoized compilation for 1+ independent recursive calls (fibonacci, factorial)
-- **Tree recursion** - Structural decomposition with recursive calls on parts (binary tree operations)
-- **Pattern exclusion** - `forbid_linear_recursion/1` to force alternative compilation strategies
-- **Mutual recursion** - Handles predicates that call each other cyclically via SCC detection
-- **Constraint awareness** - Unique and ordering constraints optimize generated code
-- **Pattern detection** - Automatic classification of recursion patterns
+This project contains comprehensive educational materials for learning UnifyWeaver - a Prolog-to-Code compiler that transforms declarative logic programs into efficient streaming scripts. The content is organized into two books covering different aspects of the system.
 
-### Data Source Plugin System (v0.0.2)
-- **4 Production-Ready Plugins** - CSV/TSV, Python, HTTP, JSON data sources
-- **Self-Registering Architecture** - Plugin-based system with automatic discovery
-- **Real-World ETL** - Complete pipelines for data transformation and storage
-- **SQLite Integration** - Python source with automatic database operations
+## Book Structure
 
-### PowerShell Target (v0.0.2)
-- **Pure PowerShell Mode** - Uses only PowerShell cmdlets (no bash dependencies)
-- **BaaS Mode** - Bash-as-a-Service when performance is critical
-- **Auto Mode** - Automatically selects best mode for data source
+### 📘 Book 1: Core UnifyWeaver & Bash Target
+**[📖 Read Book 1](book-1-core-bash/README.md)** | **Location:** `book-1-core-bash/`
 
-### Control Plane
-- **Enhanced Firewall** - Multi-service security for external tools
-- **Network Access Control** - URL/domain whitelisting and blacklisting
-- **Service Restrictions** - Control which external tools can be used
-- **Layered Configuration** - Supports global, firewall, and compilation-level settings
+Covers fundamental concepts and Bash code generation:
+- Prolog basics and UnifyWeaver architecture
+- Stream compilation and template system
+- Advanced recursion patterns
+- Data source plugins (CSV, JSON, Python, HTTP, AWK, XML)
+- Partitioning and parallel execution
+- Complete ETL pipeline examples
+
+**Start here if you're new to UnifyWeaver.**
+
+### 📗 Book 2: C# Target Language
+**[📖 Read Book 2](book-2-csharp-target/README.md)** | **Location:** `book-2-csharp-target/`
+
+Covers multi-target compilation and C# / .NET:
+- C# Stream Target (direct source generation)
+- C# Query Runtime (IR + runtime library)
+- LINQ-based query execution
+- Cross-platform .NET deployment
+- Performance optimization
+
+**Complete Book 1 before starting Book 2.**
+
+### 📓 Jupyter Notebooks
+**[📖 View Notebooks](notebooks/README.md)** | **Location:** `notebooks/`
+
+Interactive notebooks for hands-on experimentation with UnifyWeaver concepts.
+
+## Quick Start
+
+### For Beginners
+1. Read `book-1-core-bash/README.md`
+2. Work through chapters 1-4 (Foundations)
+3. Try the exercises in each chapter
+4. Explore case studies and appendices
+
+### For Experienced Users
+- Jump to specific topics using the chapter guides
+- Review appendices for deep dives on specific patterns
+- Check case studies for real-world examples
+
+### For .NET Developers
+- Complete Book 1 chapters 1-4 (foundations)
+- Skip to Book 2 for C# compilation
+- Reference Book 1 as needed for Prolog concepts
+
+## Learning Paths
+
+### Path 1: Data Engineer
+Focus on data processing and ETL:
+- Book 1: Chapters 1-5, 13-14
+- Data Sources Pipeline Guide
+- Case Study: Production Pipeline
+
+### Path 2: Language Developer
+Focus on compilation and code generation:
+- Book 1: Chapters 1-12
+- Book 2: All chapters
+- Appendices A, B, C
+
+### Path 3: Quick Start
+Minimum to get started:
+- Book 1: Chapters 1-4
+- Data Sources Pipeline Guide
+- Your specific use case examples
+
+## Prerequisites
+
+- Basic command-line knowledge
+- Programming experience (any language)
+- SWI-Prolog 8.0+ installed
+- Bash 4.0+ (for Book 1)
+- .NET SDK 6.0+ (for Book 2, optional)
 
 ## Installation
 
-Requirements:
-- SWI-Prolog 8.0 or higher
-- Bash 4.0+ (for associative arrays)
+### Core Requirements
+```bash
+# Install SWI-Prolog
+# Ubuntu/Debian
+sudo apt-get install swi-prolog
 
+# macOS
+brew install swi-prolog
+
+# Windows
+# Download from https://www.swi-prolog.org/download/stable
+```
+
+### Optional (for Book 2)
+```bash
+# Install .NET SDK
+# See: https://dotnet.microsoft.com/download
+dotnet --version
+```
+
+### Clone Repository
 ```bash
 git clone https://github.com/s243a/UnifyWeaver.git
 cd UnifyWeaver
 ```
 
-## Quick Start
-
-### Test Environment
-
-UnifyWeaver includes a convenient test environment with auto-discovery:
-
-```bash
-# Linux/WSL
-cd scripts/testing
-./init_testing.sh
-
-# Windows (PowerShell)
-cd scripts\testing
-.\Init-TestEnvironment.ps1
-```
-
-Then in the test environment:
-```prolog
-?- test_all.           % Run all tests
-?- test_stream.        % Test stream compilation
-?- test_recursive.     % Test basic recursion
-?- test_advanced.      % Test advanced recursion patterns
-?- test_constraints.   % Test constraint system
-```
-
-### Manual Usage
-
-```prolog
-?- use_module(unifyweaver(core/recursive_compiler)).
-?- test_recursive_compiler.
-```
-
-This generates bash scripts in the `output/` directory:
-```bash
-cd output
-bash test_recursive.sh
-```
-
-## Usage
-
-### Basic Example
-
-Define your Prolog predicates:
-```prolog
-% Facts
-parent(alice, bob).
-parent(bob, charlie).
-
-% Rules
-ancestor(X, Y) :- parent(X, Y).
-ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).
-```
-
-Compile to bash:
-```prolog
-?- compile_recursive(ancestor/2, [], BashCode).
-?- write_bash_file('ancestor.sh', BashCode).
-```
-
-Use the generated script:
-```bash
-source parent.sh
-source ancestor.sh
-
-ancestor_all alice  # Find all descendants of alice
-ancestor_check alice charlie && echo "Yes" || echo "No"  # Check specific relationship
-```
-
-### Advanced Recursion Examples
-
-#### Tail Recursion (Optimized to Loop)
-```prolog
-% Count list items with accumulator
-count_items([], Acc, Acc).
-count_items([_|T], Acc, N) :-
-    Acc1 is Acc + 1,
-    count_items(T, Acc1, N).
-
-% Compile with unique constraint
-?- compile_advanced_recursive(count_items/3, [unique(true)], BashCode).
-```
-
-#### Linear Recursion (Fibonacci)
-```prolog
-% fib(N, F)
-fib(0, 0).
-fib(1, 1).
-fib(N, F) :-
-    N > 1,
-    N1 is N - 1,
-    N2 is N - 2,
-    fib(N1, F1),
-    fib(N2, F2),
-    F is F1 + F2.
-
-% Compile with linear recursion pattern
-?- compile_advanced_recursive(fib/2, [unique(true)], BashCode).
-```
-
-#### Tree Recursion (Binary Tree Sum)
-```prolog
-% Binary tree using list representation: [value, [left], [right]]
-tree_sum([], 0).
-tree_sum([V, L, R], Sum) :-
-    tree_sum(L, LS),
-    tree_sum(R, RS),
-    Sum is V + LS + RS.
-
-% Compile with tree recursion pattern
-?- compile_advanced_recursive(tree_sum/2, [], BashCode).
-```
-
-Generated bash handles nested tree parsing automatically:
-```bash
-source tree_sum.sh
-tree_sum "[10,[5,[],[3,[],[]]],[7,[],[]]]"  # Returns: 25
-```
-
-#### Mutual Recursion (Even/Odd)
-```prolog
-is_even(0).
-is_even(N) :- N > 0, N1 is N - 1, is_odd(N1).
-
-is_odd(1).
-is_odd(N) :- N > 1, N1 is N - 1, is_even(N1).
-
-% Compile predicate group together
-?- compile_predicate_group([is_even/1, is_odd/1], [unique(true)], BashCode).
-```
-
-### Compilation Options
-
-```prolog
-% Basic recursion
-compile_recursive(Pred/Arity, Options, BashCode)
-
-% Advanced recursion (tail, linear, mutual)
-compile_advanced_recursive(Pred/Arity, Options, BashCode)
-
-% Explicit predicate groups (for mutual recursion)
-compile_predicate_group([Pred1/Arity1, Pred2/Arity2, ...], Options, BashCode)
-
-% Options:
-%   unique(true)     - Only one result expected (enables early exit optimization)
-%   unordered(true)  - Results can be in any order (enables optimizations)
-
-% Run full test suite
-test_recursive_compiler
-```
-
-## Architecture
-
-### Module Structure
-
-**Core Modules:**
-- **template_system.pl** - Template rendering engine with mustache-style placeholders
-- **stream_compiler.pl** - Handles non-recursive predicates
-- **recursive_compiler.pl** - Analyzes basic recursion patterns and generates optimized code
-- **constraint_analyzer.pl** - Constraint detection and analysis system
-- **firewall.pl** - Policy enforcement for backend and service usage
-- **preferences.pl** - Manages layered configuration preferences
-
-**Advanced Recursion Modules** (`src/unifyweaver/core/advanced/`):
-- **advanced_recursive_compiler.pl** - Orchestrator for advanced patterns
-- **call_graph.pl** - Build predicate dependency graphs
-- **scc_detection.pl** - Tarjan's algorithm for strongly connected components
-- **pattern_matchers.pl** - Pattern detection utilities
-- **tail_recursion.pl** - Tail recursion → iterative loop compiler
-- **linear_recursion.pl** - Linear recursion → memoized compiler
-- **tree_recursion.pl** - Tree recursion → multi-call pattern compiler
-- **mutual_recursion.pl** - Mutual recursion → joint memo table compiler
-
-### Compilation Pipeline
-
-1. **Classification** - Analyzes predicate to determine recursion pattern
-2. **Constraint Analysis** - Detects unique/ordering constraints
-3. **Pattern Matching** - Tries tail → linear → tree → mutual → basic recursion
-4. **Optimization** - Applies pattern-specific optimizations (BFS, loops, memoization)
-5. **Template Selection** - Chooses appropriate bash template
-6. **Code Generation** - Renders template with predicate-specific values
-
-### Generated Code Features
-
-- Associative arrays for O(1) lookups
-- Work queues for BFS traversal
-- Duplicate detection
-- Process-specific temp files
-- Stream functions for composition
-- Memoization tables for linear/mutual recursion
-- Iterative loops for tail recursion
-
-## Examples
-
-### Family Tree Queries
-```prolog
-ancestor(X, Y)    % Transitive closure of parent
-descendant(X, Y)  % Reverse of ancestor
-sibling(X, Y)     % Same parent, different children
-```
-
-### Graph Reachability
-```prolog
-connected(X, Y)   % Direct connection
-reachable(X, Y)   % Transitive closure of connected
-```
-
-### Recursive Computations
-```prolog
-factorial(N, Result)  % Linear recursion with memoization
-count_items(List, Count)  % Tail recursion optimized to loop
-tree_sum([V,L,R], Sum)  % Tree recursion for binary trees
-is_even(N), is_odd(N)  % Mutual recursion with shared memo
-```
-
-## Recursion Support
-
-### ✅ What Works
-
-**Basic Recursion:**
-- Simple self-recursion with base cases (e.g., `ancestor(X,Z) :- parent(X,Y), ancestor(Y,Z)`)
-- Transitive closure patterns (optimized to BFS)
-- Non-recursive predicates that call each other
-
-**Advanced Recursion:**
-- **Tail recursion** - Compiled to iterative loops (e.g., `count([], Acc, Acc). count([_|T], A, N) :- A1 is A+1, count(T, A1, N).`)
-- **Linear recursion** - Compiled with memoization for 1+ independent calls (e.g., `fib(N,F) :- N1 is N-1, N2 is N-2, fib(N1,F1), fib(N2,F2), F is F1+F2.`)
-- **Tree recursion** - Structural decomposition with recursive calls on parts (e.g., `tree_sum([V,L,R], Sum) :- tree_sum(L, LS), tree_sum(R, RS), Sum is V+LS+RS.`)
-- **Mutual recursion** - Predicates calling each other in cycles (e.g., `even(N) :- N > 0, N1 is N-1, odd(N1)` with `odd(N) :- N > 0, N1 is N-1, even(N1)`)
-- **SCC detection** - Automatic detection of mutually recursive predicate groups
-- **Constraint optimization** - Unique constraints enable early exit in generated code
-
-### ⚠️ Current Limitations
-
-**Recursion Patterns:**
-- Divide-and-conquer patterns (quicksort, mergesort) - not yet supported
-- Recursive aggregation with complex accumulation - partial support
-
-**Tree Recursion:**
-- List-based tree representation only (e.g., `[value, [left], [right]]`)
-- Simple parser with limitations on deeply nested structures
-- Memoization disabled by default in v1.0
-
-### Known Issues
-
-1. **Process ID in Templates**: Some older generated scripts may have `$` instead of `$$` for process IDs, potentially causing temp file collisions in parallel executions. (Recent templates fixed)
-
-2. **SIGPIPE Handling**: When piping output to commands like `head`, you may see "permission denied" errors after the pipe closes. Workaround: use `2>/dev/null` or write to temp file first.
-
-3. **Dependency Ordering**: Related predicates that depend on each other must be sourced in the correct order in test scripts.
-
-4. **Variable Scoping**: The system requires bash 4+ with associative arrays. Earlier bash versions will not work.
-
-### Scope
-
-This compiler focuses on transforming Prolog predicates that represent data relationships and queries into efficient bash scripts. It is not intended for:
-- Arithmetic-heavy computations (though basic arithmetic is supported)
-- General-purpose Prolog execution
-- Complex constraint solving
-- Meta-predicates or higher-order logic
-
-## Testing
-
-### Test Environment
-
-The test environment provides automatic test discovery:
-
-```bash
-cd scripts/testing
-./init_testing.sh  # or Init-TestEnvironment.ps1 on Windows
-
-# In SWI-Prolog:
-?- test_all.          % All tests (manual + auto-discovered)
-?- test_stream.       % Stream compilation tests
-?- test_recursive.    % Basic recursion tests
-?- test_advanced.     % Advanced recursion tests
-?- test_constraints.  % Constraint system tests
-?- test_auto.         % Auto-discovered tests only
-```
-
-### Manual Testing
-
-Run individual test suites:
-```prolog
-?- test_template_system.      % Test template rendering
-?- test_stream_compiler.      % Test non-recursive compilation
-?- test_recursive_compiler.   % Test recursive predicate compilation
-```
-
-Verify generated scripts:
-```bash
-cd output
-bash test.sh           # Test non-recursive predicates
-bash test_recursive.sh  # Test recursive predicates
-cd advanced
-bash test_runner.sh    # Test advanced recursion patterns
-```
-
-## Documentation
-
-- [TESTING.md](docs/TESTING.md) - Test environment and adding tests
-- [ADVANCED_RECURSION.md](docs/ADVANCED_RECURSION.md) - Advanced recursion patterns
-- [PROJECT_STATUS.md](context/PROJECT_STATUS.md) - Current status and roadmap
-
-## Contributing
-
-Issues and pull requests welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
-
-Key areas for contribution:
-- Additional recursion patterns (divide-and-conquer, N-ary trees)
-- Improved tree recursion (better parser, memoization by default)
-- Enhanced arithmetic operation support
-- Additional graph algorithms
-- Performance optimizations
-- External data source integration (AWK, SQL)
-
-## Future Enhancements
-
-- **Dynamic sources** - Plugin system for AWK, SQL, and other data sources
-- **External optimization** - GNU Parallel and Hadoop Streaming integration
-- **Automatic dependency ordering** in generated scripts
-- **Enhanced arithmetic** - More complex mathematical operations
-- **Parallel execution** support
-- **Incremental compilation**
+## Additional Resources
+
+### Documentation
+- Main README: `../README.md`
+- API Documentation: `../docs/`
+- Change Log: `CHANGELOG.md`
+
+### Examples
+- Code examples: `../examples/`
+- Test cases: `../tests/`
+- Generated output: `./output/` (after running exercises)
+
+### Community
+- GitHub Issues: https://github.com/s243a/UnifyWeaver/issues
+- Discussions: https://github.com/s243a/UnifyWeaver/discussions
+- Contributing: `CONTRIBUTING.md`
+
+## Book Contents Overview
+
+### Book 1 Chapters (13+ chapters)
+1. Introduction
+2. Prolog Fundamentals
+3. UnifyWeaver Architecture
+4. Your First Program
+5. Stream Compilation
+6. Advanced Constraints
+7. Variable Scope and Process Substitution
+8. Template System
+9. Advanced Recursion
+10. Prolog Introspection
+11. Test Runner Inference
+12. Recursive Compilation
+13. Partitioning and Parallel Execution
+14. XML Source Plugin
+- Plus: Appendices, Case Studies, Guides
+
+### Book 2 Chapters (4 chapters)
+1. Introduction to Multi-Target Compilation
+2. C# Stream Target
+3. C# Query Runtime
+4. Runtime Libraries and Deployment
+
+## Progress Tracking
+
+Track your progress:
+- [ ] Completed Book 1 Foundations (Chapters 1-4)
+- [ ] Completed Book 1 Core Techniques (Chapters 5-8)
+- [ ] Completed Book 1 Advanced Topics (Chapters 9-14)
+- [ ] Completed Book 2 C# Basics (Chapters 1-2)
+- [ ] Completed Book 2 Advanced (Chapters 3-4)
+
+## Updates and Versions
+
+This educational content tracks UnifyWeaver development:
+- **Book 1:** Covers features up to v0.0.2+
+- **Book 2:** Covers C# target (experimental/in-development)
+
+Check `CHANGELOG.md` for updates.
 
 ## License
 
-Licensed under either of:
+This educational project is separate from the main UnifyWeaver codebase and uses its own licensing:
 
-* Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
-* MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+### Educational Content (Documentation)
 
-at your option.
+All chapters, guides, tutorials, and documentation files (`.md`) are dual-licensed under:
 
-### Contribution
+* **MIT License** ([LICENSE-MIT](LICENSE-MIT))
+* **Creative Commons Attribution 4.0 International** ([LICENSE-CC-BY-4.0](LICENSE-CC-BY-4.0) or https://creativecommons.org/licenses/by/4.0/)
 
-Unless you explicitly state otherwise, any contribution intentionally submitted
-for inclusion in the work by you, as defined in the Apache-2.0 license, shall be
-dual licensed as above, without any additional terms or conditions.
+**SPDX:** `MIT AND CC-BY-4.0`
+
+You are free to share and adapt with attribution under either license.
+
+### Code Examples
+
+All code example files (`.pl`, `.sh`, `.cs`, `.py`, etc.) are licensed under:
+
+* **MIT License** ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+
+**SPDX:** `MIT`
+
+Choose the license that works best for your project.
+
+### Copyright
+
+Copyright (c) 2025 John William Creighton (s243a)
+
+_Note: Educational materials developed with assistance from AI language models (Claude, Gemini)._
+
+## Contributing
+
+Found an error or want to improve the content?
+1. Open an issue describing the problem
+2. Or submit a pull request with fixes
+3. See `CONTRIBUTING.md` for guidelines
+
+### For Content Developers
+- **[Content Planning](docs/development/PLANNING.md)** - Roadmap for future educational content additions
+- **[License Guide](docs/development/LICENSE_GUIDE.md)** - Detailed licensing guide for contributors and users
 
 ## Acknowledgments
 
-Developed as an exploration of compiling declarative logic to imperative scripts while preserving correctness and efficiency. Special focus on making Prolog's power accessible in bash environments.
+UnifyWeaver educational materials created by John William Creighton (@s243a) with contributions from the community.
 
-**Contributors:**
-- John William Creighton (@s243a) - Core development
-- Gemini (via gemini-cli) - Constraint awareness features
-- Claude (via Claude Code) - Advanced recursion system, test infrastructure
+## Get Help
+
+- Check the chapter's "Troubleshooting" section
+- Review related appendices
+- Search GitHub issues
+- Ask in Discussions
+
+---
+
+**Ready to begin?** Start with `book-1-core-bash/README.md` →

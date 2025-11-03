@@ -1,3 +1,10 @@
+<!--
+SPDX-License-Identifier: MIT AND CC-BY-4.0
+Copyright (c) 2025 John William Creighton (s243a)
+
+This documentation is dual-licensed under MIT and CC-BY-4.0.
+-->
+
 # Creative Commons Attribution 4.0 International License (CC-BY-4.0)
 
 Copyright (c) 2025 John William Creighton (@s243a)
