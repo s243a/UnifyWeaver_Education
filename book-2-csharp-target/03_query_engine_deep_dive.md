@@ -418,6 +418,93 @@ var result = parentFacts.Join(newAncestorsFromLastIteration, ...);
 
 **Much faster for deep recursion!**
 
+## Mutual Recursion Support (v0.1)
+
+Starting with UnifyWeaver v0.1 the query runtime can evaluate **strongly connected groups** of predicates (e.g., `is_even/1` and `is_odd/1`). The planner emits a `MutualFixpointNode` containing one `MutualMember` entry per predicate in the SCC, each with its base and recursive plans.
+
+### Key Plan Nodes
+
+- `MutualFixpointNode(members, head)` – orchestrates the group fixpoint.
+- `MutualMember(predicate, basePlan, recursivePlans)` – describes how to seed and extend each predicate.
+- `CrossRefNode(predicate, RecursiveRefKind)` – replaces recursive calls that target **other** predicates in the group.
+
+### Execution Model
+
+The runtime keeps an evaluation context with per-predicate totals and deltas:
+
+```csharp
+var context = new EvaluationContext
+{
+    Totals = { [isEvenId] = totalEven, [isOddId] = totalOdd },
+    Deltas = { [isEvenId] = deltaEven, [isOddId] = deltaOdd }
+};
+
+while (context.Deltas.Values.Any(delta => delta.Count > 0))
+{
+    foreach (var member in node.Members)
+    {
+        context.Current = member.Predicate;
+        foreach (var plan in member.RecursivePlans)
+        {
+            foreach (var tuple in Evaluate(plan, context))
+            {
+                if (TryAddRow(totalSets[predicate], tuple))
+                {
+                    totals[predicate].Add(tuple);
+                    nextDeltas[predicate].Add(tuple);
+                }
+            }
+        }
+    }
+    context.Deltas = nextDeltas;
+}
+```
+
+Only the **new tuples** produced in the last iteration participate in the next one (semi-naive evaluation), ensuring even large SCCs converge quickly.
+
+### Example: Even/Odd Parity
+
+```prolog
+% even when N = 0 or predecessor is odd
+is_even(0).
+is_even(N) :- N > 0, N1 is N - 1, is_odd(N1).
+
+% odd when N = 1 or predecessor is even
+is_odd(1).
+is_odd(N) :- N > 1, N1 is N - 1, is_even(N1).
+```
+
+The planner classifies `{is_even/1, is_odd/1}` as a dependency group and emits:
+
+```csharp
+new MutualFixpointNode(new[]
+{
+    new MutualMember(isEvenId, evenBasePlan, evenRecursivePlans),
+    new MutualMember(isOddId,  oddBasePlan,  oddRecursivePlans)
+}, isEvenId);
+```
+
+Each recursive plan uses `CrossRefNode` instead of `RecursiveRefNode` when referencing the peer predicate. During execution, `CrossRefNode` resolves to either the total or delta list for that predicate, mirroring how Bash pipelines read from memoized tables.
+
+### Distinct Semantics
+
+Both single-predicate and mutual fixpoints use `HashSet<object[]>` to ensure duplicate tuples are discarded. This matches the behaviour of Bash's `sort -u` / hash dedup and avoids exponential growth when SCCs produce overlapping results.
+
+## Testing the Query Runtime (v0.1)
+
+You can validate the full regression suite without running dotnet by setting `SKIP_CSHARP_EXECUTION=1`:
+
+```bash
+SKIP_CSHARP_EXECUTION=1 swipl -q \
+    -f tests/core/test_csharp_query_target.pl \
+    -g test_csharp_query_target:test_csharp_query_target \
+    -t halt
+```
+
+This covers facts, joins, selections, arithmetic, linear recursion, and mutual recursion (even/odd). For end-to-end verification, follow the build-first workflow from [the test plan](https://github.com/s243a/UnifyWeaver/blob/main/docs/development/testing/v0_1_csharp_test_plan.md) to generate a project under `output/csharp/<uuid>/`, run `dotnet build --no-restore`, and execute the compiled binary/DLL (`0`, `2`, `4` should appear for the mutual recursion example).
+
+---
+
 ## Reading Complex IR: A Practical Guide
 
 When you see nested IR like this:

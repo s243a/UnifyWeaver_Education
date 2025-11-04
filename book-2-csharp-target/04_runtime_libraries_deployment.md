@@ -43,6 +43,18 @@ Data (facts, computed results)
 - Processes results
 - Integrates with business logic
 
+### Mutual Fixpoint Runtime Artifacts (v0.1)
+
+To support mutual recursion the runtime now exposes additional types:
+
+- `MutualFixpointNode` – top-level coordinator for strongly connected predicate groups.
+- `MutualMember` – pairs a predicate with its base and recursive plan list.
+- `CrossRefNode` – runtime reference to another predicate within the same SCC (delta/total aware).
+- `EvaluationContext` – tracks per-predicate totals/deltas and the predicate currently being evaluated.
+- `HashSet<object[]>` stores – provide Bash-parity deduplication for every predicate in the group.
+
+Your generated plan will instantiate these nodes automatically when the compiler detects mutual recursion (e.g., `is_even/1` and `is_odd/1`). No manual changes are required, but you should ship the upgraded runtime library alongside your plans.
+
 ## Building Runtime Libraries
 
 ### Option 1: NuGet Package (Recommended)
@@ -738,6 +750,20 @@ This chapter covered:
 - Package and deploy .NET applications
 - Integrate with existing systems
 - Monitor and optimize performance
+
+## Testing & Validation (v0.1)
+
+- Run the automated regression with the skip flag:
+  ```bash
+  SKIP_CSHARP_EXECUTION=1 swipl -q \
+      -f tests/core/test_csharp_query_target.pl \
+      -g test_csharp_query_target:test_csharp_query_target \
+      -t halt
+  ```
+- Optionally execute the full suite `run_all_tests.pl` the same way.
+- For end-to-end verification, follow the build-first flow described in the [C# Query Target Test Plan](https://github.com/s243a/UnifyWeaver/blob/main/docs/development/testing/v0_1_csharp_test_plan.md) to emit a project under `output/csharp/<uuid>/`, run `dotnet build --no-restore`, and execute the compiled binary/DLL.
+
+Document your results (e.g., include command transcripts in release notes) so future releases can reproduce the validation steps.
 
 ---
 

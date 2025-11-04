@@ -24,8 +24,10 @@ Before starting Book 2, you should have:
 - How to compile Prolog to C# source code
 - Two C# target approaches: Stream Target vs Query Runtime
 - LINQ-based query execution
+- Semi-naive fixpoint evaluation and mutual recursion (v0.1)
 - Runtime libraries and IR (Intermediate Representation)
 - Cross-platform deployment with .NET
+- Testing workflow (SKIP_CSHARP_EXECUTION, build-first dotnet runs)
 
 ## C# Targets Overview
 
@@ -39,7 +41,7 @@ UnifyWeaver provides two C# compilation targets:
 
 ### 2. **Query Runtime** (`csharp_query_target.pl`)
 - Generates Intermediate Representation (IR)
-- Uses shared runtime library for execution
+- Uses shared runtime library for execution (semi-naive + mutual fixpoint)
 - Best for: Recursive predicates, complex queries
 - Output: C# projects with runtime dependencies
 
@@ -60,8 +62,9 @@ UnifyWeaver provides two C# compilation targets:
 ### Chapter 3: C# Query Runtime
 - IR (Intermediate Representation) concept
 - Query engine architecture
-- Fixpoint iteration for recursion
-- Semi-naive evaluation
+- Fixpoint iteration for recursion (semi-naive + mutual SCC groups)
+- Plan nodes: `FixpointNode`, `MutualFixpointNode`, `CrossRefNode`
+- Testing with `SKIP_CSHARP_EXECUTION` and manual dotnet builds
 
 ### Chapter 4: Runtime Libraries and Deployment
 - Shared runtime components
@@ -111,6 +114,14 @@ namespace UnifyWeaver.Generated {
     }
 }
 ```
+
+## What's New in v0.1
+
+- Query runtime now handles mutual recursion through `MutualFixpointNode` and `CrossRefNode` plan nodes.
+- Distinct semantics align with Bash via per-predicate `HashSet<object[]>` collections.
+- Updated documentation walks through semi-naive and mutual fixpoint evaluation.
+- Recommended regression workflow: [`C# Query Target Test Plan`](https://github.com/s243a/UnifyWeaver/blob/main/docs/development/testing/v0_1_csharp_test_plan.md) (skip dotnet execution by default, build-first for manual validation).
+- Education examples include parity checks between Bash and C# pipelines.
 
 ## Comparison: Bash vs C# Targets
 

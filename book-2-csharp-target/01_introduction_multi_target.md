@@ -50,6 +50,12 @@ Different environments have different strengths:
 
 The same logic, multiple execution environments.
 
+## Release v0.1 Highlights
+- Query runtime now supports semi-naive and mutual fixpoint evaluation (`MutualFixpointNode`, `CrossRefNode`).
+- `HashSet<object[]>`-based distinct handling matches Bash semantics.
+- Recommended regression workflow documented in the [C# Query Target Test Plan](https://github.com/s243a/UnifyWeaver/blob/main/docs/development/testing/v0_1_csharp_test_plan.md) (use `SKIP_CSHARP_EXECUTION=1`, build-first for manual dotnet tests).
+- Educational chapters have been updated with parity walkthroughs and testing guidance.
+
 ## C# Target Variants
 
 UnifyWeaver provides **two** C# compilation strategies:

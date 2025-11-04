@@ -123,6 +123,7 @@ cd UnifyWeaver
 - Main README: `../README.md`
 - API Documentation: `../docs/`
 - Change Log: `CHANGELOG.md`
+- C# Query Target Test Plan (v0.1): https://github.com/s243a/UnifyWeaver/blob/main/docs/development/testing/v0_1_csharp_test_plan.md
 
 ### Examples
 - Code examples: `../examples/`
