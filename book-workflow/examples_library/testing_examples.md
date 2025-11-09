@@ -57,25 +57,25 @@ chmod +x education/output/advanced/test_runner.sh
 **Expected Output:**
 
 ```
-Testing factorial.sh...
-Test 1: factorial 0
-Expected: 1
+=== Testing Generated Bash Scripts ===
+
+--- Testing factorial.sh ---
+Test 1: Base case 0
+0:1
     Result: PASS
 
-Test 2: factorial 1
-Expected: 1
+Test 2: Base case 1
+1:1
     Result: PASS
 
-Test 3: factorial 5
-Expected: 120
+Test 3: Larger value
+5:120
     Result: PASS
 
-Test 4: factorial 10
-Expected: 3628800
-    Result: PASS
-
-Summary: 4/4 tests passed
+=== All Tests Complete ===
 ```
+
+(Note: Helper functions like factorial_op, build_range_down, and fold_left also get generic tests, which may fail if they require specific input formats)
 
 **Test Runner Features:**
 - **Automatic test case inference**: Recognizes factorial pattern, generates base case (0, 1) and recursive cases
