@@ -72,6 +72,13 @@ UnifyWeaver provides two C# compilation targets:
 - Cross-platform deployment (.NET 6+)
 - Integration with existing .NET applications
 
+### Chapter 5: Semantic Crawling and Vector Search
+- Semantic Runtime Architecture
+- Embedding with ONNX (`OnnxEmbeddingProvider`)
+- Crawling with `PtCrawler`
+- Vector similarity search (`PtSearcher`)
+- Case Study: Focused Knowledge Base Crawling
+
 ## Installation Requirements
 
 ### Required
