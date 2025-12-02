@@ -38,6 +38,17 @@ Covers multi-target compilation and C# / .NET:
 
 **Complete Book 1 before starting Book 2.**
 
+### 🐹 Book: Go Target & Cross-Platform Compilation
+**[📖 Read Go Target Book](book-go-target/README.md)** | **Location:** `book-go-target/`
+
+Covers compiling Prolog to standalone Go binaries:
+- Single binary deployment (no runtime deps)
+- Cross-platform compilation (Linux, Windows, macOS)
+- High-performance stream processing
+- JSON I/O and Regex matching
+
+**Can be read after Book 1.**
+
 ### 📓 Jupyter Notebooks
 **[📖 View Notebooks](notebooks/README.md)** | **Location:** `notebooks/`
 
