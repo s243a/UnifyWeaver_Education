@@ -39,6 +39,11 @@ This book covers how to use UnifyWeaver to compile Prolog predicates into standa
 -   Schema validation
 -   Nested field extraction
 
+**5. Semantic Crawling** (`05_semantic_crawling.md`)
+-   Semantic Search (`semantic_search/3`)
+-   RDF/XML Crawling
+-   Embeddings and Vector Storage
+
 ## License
 
 This educational content is licensed under CC BY 4.0.

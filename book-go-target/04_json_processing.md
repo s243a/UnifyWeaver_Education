@@ -29,6 +29,31 @@ user_city(Name, City) :-
 compile_predicate_to_go(user_city/2, [json_input(true)], Code).
 ```
 
+### Nested Fields
+
+You can extract deeply nested fields using a list path:
+
+```prolog
+% Extract user.address.zipcode
+zip_code(Zip) :-
+    json_get([user, address, zipcode], Zip).
+```
+
+### Array Iteration
+
+Use `json_array_member/2` to iterate over JSON arrays. This generates a Go loop that processes each item in the array.
+
+```prolog
+% Input: {"users": [{"name": "alice"}, {"name": "bob"}]}
+% Output: alice, bob
+user_name(Name) :-
+    json_get([users], UserList),
+    json_array_member(UserList, User),
+    json_get(User, [name], Name).
+```
+
+This supports nested iteration as well (e.g., lists of objects containing lists).
+
 ## JSON Output
 
 You can also output JSON by using `json_output(true)`.
