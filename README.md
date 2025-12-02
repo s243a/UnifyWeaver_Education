@@ -49,6 +49,17 @@ Covers compiling Prolog to standalone Go binaries:
 
 **Can be read after Book 1.**
 
+### 🦀 Book: Rust Target & Safe Compilation
+**[📖 Read Rust Target Book](book-rust-target/README.md)** | **Location:** `book-rust-target/`
+
+Covers compiling Prolog to safe, high-performance Rust binaries:
+- Memory safety without garbage collection
+- Project generation with Cargo
+- Regex matching and JSON I/O
+- Zero-cost abstractions
+
+**Can be read after Book 1.**
+
 ### 📓 Jupyter Notebooks
 **[📖 View Notebooks](notebooks/README.md)** | **Location:** `notebooks/`
 
