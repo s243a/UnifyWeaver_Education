@@ -72,6 +72,19 @@ Covers compiling Prolog to SQL queries for relational databases:
 
 **Can be read after Book 1.**
 
+### 📜 Book: AWK Target & Stream Processing
+**[📖 Read AWK Target Book](book-awk-target/README.md)** | **Location:** `book-awk-target/`
+
+Covers compiling Prolog to self-contained AWK scripts:
+- Facts and filtering with associative arrays
+- Rules, constraints, and arithmetic expressions
+- Aggregations (sum, count, max, min, avg)
+- Tail recursion to while loop transformation
+- Regex pattern matching with match/2, match/3, match/4
+- Practical applications: log analysis, data pipelines
+
+**Can be read after Book 1.**
+
 ### 📓 Jupyter Notebooks
 **[📖 View Notebooks](notebooks/README.md)** | **Location:** `notebooks/`
 
