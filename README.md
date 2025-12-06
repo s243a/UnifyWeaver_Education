@@ -60,6 +60,18 @@ Covers compiling Prolog to safe, high-performance Rust binaries:
 
 **Can be read after Book 1.**
 
+### 🗃️ Book: SQL Target & Query Generation
+**[📖 Read SQL Target Book](book-sql-target/README.md)** | **Location:** `book-sql-target/`
+
+Covers compiling Prolog to SQL queries for relational databases:
+- SELECT, JOIN, GROUP BY, HAVING, ORDER BY
+- Subqueries (IN, EXISTS) and Window Functions
+- CTEs and Recursive CTEs for hierarchical data
+- Set operations (UNION, INTERSECT, EXCEPT)
+- SQL functions (string, date, NULL handling)
+
+**Can be read after Book 1.**
+
 ### 📓 Jupyter Notebooks
 **[📖 View Notebooks](notebooks/README.md)** | **Location:** `notebooks/`
 
