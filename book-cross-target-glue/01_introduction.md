@@ -255,6 +255,126 @@ In Chapter 2, we'll explore the design philosophy in depth:
 
 3. **Format choice**: When would you choose JSON over TSV? When is TSV better?
 
+## Advanced Example: Family Tree Pipeline
+
+This complete example demonstrates a pipeline that processes family relationships - a classic Prolog problem. The pipeline reads parent-child data, computes ancestors, and outputs the results.
+
+### The Complete Pipeline
+
+```prolog
+% family_pipeline.pl
+:- use_module('src/unifyweaver/glue/shell_glue').
+
+% Generate a pipeline that finds all ancestors
+family_pipeline(Script) :-
+    generate_pipeline(
+        [
+            % Stage 1: Parse family data (AWK - fast text parsing)
+            step(parse, awk, '{print $1 "\t" $2}', [
+                separator(" ")
+            ]),
+
+            % Stage 2: Compute transitive closure (Python - recursion)
+            step(ancestors, python, '
+# Build parent dict and find all ancestors
+parents = {}
+for line in open("/dev/stdin"):
+    child, parent = line.strip().split("\\t")
+    parents.setdefault(child, []).append(parent)
+
+def ancestors(person, seen=None):
+    if seen is None:
+        seen = set()
+    for p in parents.get(person, []):
+        if p not in seen:
+            seen.add(p)
+            ancestors(p, seen)
+    return seen
+
+# Output all ancestor relationships
+for child in parents:
+    for anc in ancestors(child):
+        print(f"{child}\\t{anc}")
+', []),
+
+            % Stage 3: Format output (AWK - simple formatting)
+            step(format, awk, '{print $1 " is descended from " $2}', [])
+        ],
+        [input('family.txt')],
+        Script
+    ).
+```
+
+### Sample Input (`family.txt`)
+
+```
+alice bob
+alice carol
+bob david
+bob eve
+carol frank
+david george
+```
+
+### Running the Pipeline
+
+```bash
+$ swipl -l family_pipeline.pl -g "family_pipeline(S), write(S)" -t halt > run.sh
+$ chmod +x run.sh
+$ ./run.sh
+```
+
+### Expected Output
+
+```
+alice is descended from bob
+alice is descended from carol
+alice is descended from david
+alice is descended from eve
+alice is descended from frank
+alice is descended from george
+bob is descended from david
+bob is descended from eve
+bob is descended from george
+carol is descended from frank
+david is descended from george
+```
+
+### How It Works
+
+1. **AWK parse stage**: Reads space-separated "child parent" pairs, outputs TSV
+2. **Python ancestors stage**: Builds a graph, computes transitive closure via recursion
+3. **AWK format stage**: Converts TSV back to human-readable output
+
+This mirrors the classic Prolog ancestor relation:
+
+```prolog
+% Traditional Prolog
+ancestor(X, Y) :- parent(X, Y).
+ancestor(X, Y) :- parent(X, Z), ancestor(Z, Y).
+```
+
+But runs as a streaming pipeline!
+
+### Modification Exercise
+
+**Task**: Modify the pipeline to also compute the **generation distance** between each person and their ancestors.
+
+**Hints**:
+- The Python stage needs to track depth during recursion
+- Output format becomes: `child \t ancestor \t distance`
+- The AWK format stage needs a third field: `$1 " is " $3 " generations from " $2`
+
+**Expected output after modification**:
+```
+alice is 1 generations from bob
+alice is 1 generations from carol
+alice is 2 generations from david
+alice is 2 generations from eve
+alice is 2 generations from frank
+alice is 3 generations from george
+```
+
 ## Further Reading
 
 - Unix Philosophy: https://en.wikipedia.org/wiki/Unix_philosophy

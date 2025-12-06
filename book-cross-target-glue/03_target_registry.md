@@ -460,6 +460,202 @@ In Chapter 4, we'll explore the pipe protocols in detail:
 
 4. **Resolution**: Given `csharp` calling `powershell`, trace through the resolution rules to determine location and transport.
 
+## Advanced Example: Type Inference Pipeline with Target Mapping
+
+This example demonstrates the **target registry and mapping system** by implementing a simple type inference pipeline. Different stages are mapped to optimal targets based on their computational needs.
+
+### The Problem
+
+Given expressions like `add(x, 1)` where `x` is unknown, infer the types. This is a simplified version of Hindley-Milner type inference.
+
+### The Complete Pipeline
+
+```prolog
+% type_inference.pl
+:- use_module('src/unifyweaver/core/target_registry').
+:- use_module('src/unifyweaver/core/target_mapping').
+:- use_module('src/unifyweaver/glue/shell_glue').
+
+% Declare which target handles each stage
+:- declare_target(parse_expr/2, awk).        % Fast text parsing
+:- declare_target(infer_types/2, python).    % Complex recursion
+:- declare_target(format_output/2, awk).     % Simple formatting
+
+% Configure the connection to use TSV (default, but explicit here)
+:- declare_connection(parse_expr/2, infer_types/2, [format(tsv)]).
+:- declare_connection(infer_types/2, format_output/2, [format(tsv)]).
+
+% Generate the pipeline
+type_inference_pipeline(Script) :-
+    generate_pipeline(
+        [
+            % Stage 1: Parse expressions into AST-like TSV
+            % Input: "add(x, 1)" -> Output: "add\tx\t1"
+            step(parse_expr, awk, '
+                {
+                    # Simple parser: func(arg1, arg2) -> func\targ1\targ2
+                    gsub(/[(),]/, "\t")
+                    gsub(/[[:space:]]+/, "\t")
+                    print
+                }
+            ', []),
+
+            % Stage 2: Type inference using unification
+            step(infer_types, python, '
+import sys
+
+# Type environment (what we know)
+type_env = {}
+
+# Built-in function signatures: func -> (arg_types, return_type)
+signatures = {
+    "add": (["int", "int"], "int"),
+    "concat": (["str", "str"], "str"),
+    "length": (["str"], "int"),
+    "tostring": (["int"], "str"),
+}
+
+def unify(t1, t2):
+    """Unify two types, return unified type or None"""
+    if t1 == t2:
+        return t1
+    if t1.startswith("?"):  # Type variable
+        return t2
+    if t2.startswith("?"):
+        return t1
+    return None
+
+def infer(expr_parts):
+    """Infer type of expression"""
+    if len(expr_parts) == 0:
+        return "?unknown"
+
+    func = expr_parts[0]
+    args = expr_parts[1:]
+
+    # Literal integer
+    if func.isdigit():
+        return "int"
+
+    # Literal string (quoted)
+    if func.startswith("\\"") or func.startswith("\\x27"):
+        return "str"
+
+    # Variable - assign fresh type var
+    if func.isalpha() and len(func) == 1:
+        if func not in type_env:
+            type_env[func] = f"?{func}"
+        return type_env[func]
+
+    # Function application
+    if func in signatures:
+        arg_types, ret_type = signatures[func]
+
+        # Infer arg types and unify
+        for i, arg in enumerate(args):
+            if i < len(arg_types):
+                inferred = infer([arg])
+                unified = unify(inferred, arg_types[i])
+                if unified and inferred.startswith("?"):
+                    # Update type environment
+                    var = inferred[1:]
+                    type_env[var] = unified
+
+        return ret_type
+
+    return "?unknown"
+
+# Process expressions
+for line in sys.stdin:
+    parts = line.strip().split("\\t")
+    if parts and parts[0]:
+        result_type = infer(parts)
+        # Output: expression \\t inferred_type \\t bindings
+        bindings = ", ".join(f"{k}:{v}" for k, v in type_env.items())
+        print(f"{parts[0]}\\t{result_type}\\t{bindings}")
+', []),
+
+            % Stage 3: Format nicely
+            step(format_output, awk, '
+                {
+                    printf "%s has type %s", $1, $2
+                    if ($3 != "") printf " (where %s)", $3
+                    print ""
+                }
+            ', [])
+        ],
+        [input('expressions.txt')],
+        Script
+    ).
+```
+
+### Sample Input (`expressions.txt`)
+
+```
+add(x, 1)
+add(y, z)
+concat(s, t)
+length(s)
+add(length(s), 1)
+```
+
+### Expected Output
+
+```
+add has type int (where x:int)
+add has type int (where x:int, y:int, z:int)
+concat has type str (where x:int, y:int, z:int, s:str, t:str)
+length has type int (where x:int, y:int, z:int, s:str, t:str)
+add has type int (where x:int, y:int, z:int, s:str, t:str)
+```
+
+### How Target Mapping Works Here
+
+Query the mappings:
+
+```prolog
+?- predicate_target(parse_expr/2, T).
+T = awk.
+
+?- predicate_target(infer_types/2, T).
+T = python.
+
+?- resolve_transport(parse_expr/2, infer_types/2, Transport).
+Transport = pipe.
+
+?- targets_same_family(awk, python).
+false.  % Different families, so pipes are used
+```
+
+### Why These Targets?
+
+| Stage | Target | Reason |
+|-------|--------|--------|
+| `parse_expr` | AWK | Fast regex-based text parsing |
+| `infer_types` | Python | Complex recursion and data structures |
+| `format_output` | AWK | Simple string formatting |
+
+### Modification Exercise
+
+**Task**: Add a new target mapping for a **validation stage** that checks types are consistent.
+
+**What to do**:
+1. Add a new declaration: `:- declare_target(validate_types/2, python).`
+2. Add a new pipeline step between `infer_types` and `format_output`
+3. The validation step should check that all uses of a variable have the same type
+
+**Hints**:
+- The validation stage reads the type bindings from column 3
+- It should output an error if the same variable has conflicting types
+- Add `[error_on_failure(true)]` to the step options
+
+**Sample validation output**:
+```
+add has type int (where x:int) [OK]
+add has type int (where y:int, z:int) [OK]
+ERROR: Variable 's' has conflicting types: str vs int
+```
+
 ## API Reference
 
 See `docs/design/cross-target-glue/04-api-reference.md` for complete predicate documentation.

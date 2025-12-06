@@ -518,6 +518,239 @@ In Chapter 5, we'll use these protocols to generate complete shell scripts:
 
 4. **Field mapping**: Configure a connection that renames `firstName` to `first_name` and drops `ssn`.
 
+## Advanced Example: Unification over Pipes
+
+This example demonstrates a **unification algorithm** (core to Prolog) implemented as a multi-stage pipeline using TSV and JSON protocols. Each stage handles a different aspect of unification.
+
+### The Problem
+
+Implement term unification: given two terms, find a substitution that makes them equal.
+
+```
+unify(foo(X, bar), foo(baz, Y)) => {X=baz, Y=bar}
+unify(foo(X, X), foo(a, b)) => FAIL (X can't be both a and b)
+```
+
+### The Complete Pipeline
+
+```prolog
+% unification_pipeline.pl
+:- use_module('src/unifyweaver/glue/shell_glue').
+
+% Unification pipeline using TSV for simple data, JSON for substitutions
+unification_pipeline(Script) :-
+    generate_pipeline(
+        [
+            % Stage 1: Parse terms (AWK - fast text parsing)
+            % Input: "foo(X, bar) = foo(baz, Y)"
+            % Output TSV: term1 \t term2
+            step(parse_terms, awk, '
+                {
+                    split($0, parts, " = ")
+                    print parts[1] "\t" parts[2]
+                }
+            ', []),
+
+            % Stage 2: Decompose into unification pairs (Python)
+            % Input TSV: term1 \t term2
+            % Output JSON: {"pairs": [["X", "baz"], ["bar", "Y"]], "vars": ["X", "Y"]}
+            step(decompose, python, '
+import sys
+import json
+import re
+
+def parse_term(s):
+    """Parse term into (functor, args) or just value"""
+    s = s.strip()
+    match = re.match(r"(\\w+)\\((.*)\\)", s)
+    if match:
+        functor = match.group(1)
+        args_str = match.group(2)
+        # Simple arg parsing (no nested terms for this example)
+        args = [a.strip() for a in args_str.split(",")]
+        return ("compound", functor, args)
+    elif s[0].isupper():
+        return ("var", s)
+    else:
+        return ("atom", s)
+
+def decompose_pair(t1, t2):
+    """Decompose two terms into unification pairs"""
+    pairs = []
+    vars_found = set()
+
+    def collect(a, b):
+        pa, pb = parse_term(a), parse_term(b)
+
+        if pa[0] == "var":
+            vars_found.add(pa[1])
+            pairs.append([a, b])
+        elif pb[0] == "var":
+            vars_found.add(pb[1])
+            pairs.append([a, b])
+        elif pa[0] == "atom" and pb[0] == "atom":
+            pairs.append([a, b])
+        elif pa[0] == "compound" and pb[0] == "compound":
+            if pa[1] != pb[1] or len(pa[2]) != len(pb[2]):
+                pairs.append(["FAIL", f"functor mismatch: {pa[1]} vs {pb[1]}"])
+            else:
+                for arg1, arg2 in zip(pa[2], pb[2]):
+                    collect(arg1, arg2)
+        else:
+            pairs.append([a, b])
+
+    collect(t1, t2)
+    return {"pairs": pairs, "vars": list(vars_found)}
+
+for line in sys.stdin:
+    parts = line.strip().split("\\t")
+    if len(parts) == 2:
+        result = decompose_pair(parts[0], parts[1])
+        print(json.dumps(result))
+', []),
+
+            % Stage 3: Solve unification (Python - needs complex logic)
+            % Input JSON: {"pairs": [...], "vars": [...]}
+            % Output JSON: {"success": true, "substitution": {"X": "baz", "Y": "bar"}}
+            step(solve, python, '
+import sys
+import json
+
+def unify_pairs(pairs):
+    """Apply unification algorithm to pairs"""
+    subst = {}
+
+    def apply_subst(term, subst):
+        """Apply substitution to a term"""
+        if term in subst:
+            return apply_subst(subst[term], subst)
+        return term
+
+    def occurs_check(var, term, subst):
+        """Check if var occurs in term"""
+        term = apply_subst(term, subst)
+        if term == var:
+            return True
+        # For compound terms, would recurse into args
+        return False
+
+    for pair in pairs:
+        if pair[0] == "FAIL":
+            return {"success": False, "error": pair[1]}
+
+        t1 = apply_subst(pair[0], subst)
+        t2 = apply_subst(pair[1], subst)
+
+        if t1 == t2:
+            continue
+        elif t1[0].isupper():  # t1 is a variable
+            if occurs_check(t1, t2, subst):
+                return {"success": False, "error": f"occurs check failed: {t1} in {t2}"}
+            subst[t1] = t2
+        elif t2[0].isupper():  # t2 is a variable
+            if occurs_check(t2, t1, subst):
+                return {"success": False, "error": f"occurs check failed: {t2} in {t1}"}
+            subst[t2] = t1
+        else:
+            return {"success": False, "error": f"cannot unify: {t1} with {t2}"}
+
+    return {"success": True, "substitution": subst}
+
+for line in sys.stdin:
+    data = json.loads(line)
+    result = unify_pairs(data["pairs"])
+    print(json.dumps(result))
+', []),
+
+            % Stage 4: Format output (AWK - simple formatting)
+            step(format, awk, '
+                {
+                    # Parse JSON minimally
+                    if (index($0, "\"success\": true") > 0) {
+                        gsub(/.*\"substitution\": /, "")
+                        gsub(/}$/, "")
+                        print "SUCCESS: " $0 "}"
+                    } else {
+                        gsub(/.*\"error\": \"/, "FAILURE: ")
+                        gsub(/\".*/, "")
+                        print
+                    }
+                }
+            ', [])
+        ],
+        [input('unify_problems.txt')],
+        Script
+    ).
+```
+
+### Sample Input (`unify_problems.txt`)
+
+```
+foo(X, bar) = foo(baz, Y)
+pair(A, A) = pair(1, 2)
+cons(H, T) = cons(1, cons(2, nil))
+X = Y
+atom = atom
+func(X) = func(X)
+```
+
+### Expected Output
+
+```
+SUCCESS: {"X": "baz", "Y": "bar"}
+FAILURE: cannot unify: 1 with 2
+SUCCESS: {"H": "1", "T": "cons(2, nil)"}
+SUCCESS: {"X": "Y"}
+SUCCESS: {}
+SUCCESS: {}
+```
+
+### Protocol Flow
+
+```
+┌────────────┐  TSV   ┌────────────┐  JSON  ┌────────────┐  JSON  ┌────────────┐
+│   parse    │ ─────► │ decompose  │ ─────► │   solve    │ ─────► │   format   │
+│   (AWK)    │        │  (Python)  │        │  (Python)  │        │   (AWK)    │
+└────────────┘        └────────────┘        └────────────┘        └────────────┘
+     │                      │                     │                     │
+ text input            structured            algorithm              human
+ fast split            breakdown              result               readable
+```
+
+### Why Different Formats?
+
+| Stage | Format | Reason |
+|-------|--------|--------|
+| parse → decompose | TSV | Simple two-column data |
+| decompose → solve | JSON | Complex nested structure (pairs, vars) |
+| solve → format | JSON | Substitution is a dictionary |
+
+### Modification Exercise
+
+**Task**: Extend the pipeline to handle **nested compound terms** like `foo(bar(X), Y)`.
+
+**What to modify**:
+1. The `parse_term` function needs recursive parsing
+2. The `decompose_pair` function needs to handle nested compounds
+3. Add proper functor/arity checking
+
+**Hints**:
+- Use a stack-based parser or recursive descent
+- The TSV between parse and decompose stays the same
+- The JSON structure for pairs needs to represent nested terms
+
+**Test case to add**:
+```
+foo(bar(X), Y) = foo(bar(1), baz)
+```
+
+**Expected output**:
+```
+SUCCESS: {"X": "1", "Y": "baz"}
+```
+
+**Bonus Challenge**: Implement the **occurs check** properly for nested terms, so that `X = foo(X)` correctly fails.
+
 ## Code Examples
 
 See `examples/02-shell-formats/` for working examples of:

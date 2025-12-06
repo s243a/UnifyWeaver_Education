@@ -387,6 +387,150 @@ In Chapter 3, we'll dive into the target registry and mapping system:
 
 4. **Streaming design**: You need to process a 1TB file. Design a pipeline that never loads more than 1GB in memory.
 
+## Advanced Example: Graph Reachability with Location Transparency
+
+This example demonstrates the **Location Transparency** principle using a graph reachability problem. The same logic works whether stages run locally or remotely.
+
+### The Problem
+
+Given a directed graph, find all nodes reachable from a starting node. This is the classic transitive closure problem.
+
+### The Complete Pipeline
+
+```prolog
+% reachability.pl
+:- use_module('src/unifyweaver/glue/shell_glue').
+
+% Pipeline that computes reachable nodes
+% The logic is identical regardless of where stages execute
+reachability_pipeline(Script) :-
+    generate_pipeline(
+        [
+            % Stage 1: Parse edge list
+            step(parse_edges, awk, '
+                BEGIN { FS="[[:space:]]+" }
+                NF >= 2 { print $1 "\t" $2 }
+            ', []),
+
+            % Stage 2: Compute reachability (streaming BFS)
+            step(compute_reach, python, '
+import sys
+
+# Read all edges first
+edges = {}
+for line in sys.stdin:
+    parts = line.strip().split("\\t")
+    if len(parts) >= 2:
+        src, dst = parts[0], parts[1]
+        edges.setdefault(src, []).append(dst)
+
+# BFS from "start" node
+def reachable_from(start):
+    visited = set()
+    queue = [start]
+    while queue:
+        node = queue.pop(0)
+        if node not in visited:
+            visited.add(node)
+            queue.extend(edges.get(node, []))
+    return visited
+
+# Output reachable pairs
+start = "a"  # Starting node
+for node in reachable_from(start):
+    print(f"{start}\\t{node}")
+', []),
+
+            % Stage 3: Format as readable output
+            step(format, awk, '{print "From " $1 " can reach: " $2}', [])
+        ],
+        [input('graph.txt')],
+        Script
+    ).
+```
+
+### Sample Input (`graph.txt`)
+
+```
+a b
+a c
+b d
+c d
+d e
+e f
+b e
+```
+
+### Expected Output
+
+```
+From a can reach: a
+From a can reach: b
+From a can reach: c
+From a can reach: d
+From a can reach: e
+From a can reach: f
+```
+
+### Demonstrating Location Transparency
+
+The key insight is that this pipeline works identically in three configurations:
+
+**Configuration 1: All Local (Pipes)**
+```prolog
+% Default - everything runs locally via pipes
+reachability_pipeline(Script).
+```
+
+**Configuration 2: Remote Compute (Hypothetical)**
+```prolog
+% Move heavy computation to a remote server
+:- declare_location(compute_reach/2, [
+    host('compute.cluster.local'),
+    transport(http)
+]).
+```
+
+**Configuration 3: Distributed (Hypothetical)**
+```prolog
+% Each stage on different machines
+:- declare_location(parse_edges/2, [host('parser.local')]).
+:- declare_location(compute_reach/2, [host('compute.local')]).
+:- declare_location(format/2, [host('frontend.local')]).
+```
+
+**The predicate logic doesn't change** - only the deployment configuration.
+
+### How This Demonstrates the Principles
+
+| Principle | How It's Demonstrated |
+|-----------|----------------------|
+| **Location Transparency** | Same logic works locally or distributed |
+| **Sensible Defaults** | Pipes work without configuration |
+| **Runtime Family Affinity** | AWK and Python use pipes (shell family) |
+| **Format Negotiation** | TSV flows between all stages |
+| **Streaming** | Each stage processes line-by-line |
+
+### Modification Exercise
+
+**Task**: Modify the pipeline to accept the **starting node as a parameter** instead of hardcoding "a".
+
+**Hints**:
+- The AWK parse stage can pass through a header line specifying the start node
+- Or use an environment variable: `os.environ.get("START_NODE", "a")`
+- The pipeline options can include `[env([start_node("a")])]`
+
+**Challenge Extension**: Modify the Python stage to output the **shortest path length** to each reachable node, demonstrating how you'd add new fields to the TSV protocol.
+
+**Expected output format after modification**:
+```
+From a can reach b in 1 steps
+From a can reach c in 1 steps
+From a can reach d in 2 steps
+From a can reach e in 2 steps
+From a can reach f in 3 steps
+```
+
 ## Further Reading
 
 - Location Transparency: https://en.wikipedia.org/wiki/Location_transparency
