@@ -24,82 +24,66 @@ This book covers the fundamental concepts every UnifyWeaver user needs to unders
 By completing this book, you will understand:
 
 - Core Prolog concepts (facts, rules, queries, unification)
-- UnifyWeaver's compiler architecture
-- The preference system for customizing behavior
+- UnifyWeaver's principal compiler architecture
+- Architecture variants (fixed-point, query engine, generator)
 - How targets are selected and configured
-- The plugin system
 - Basic compilation workflow
 
-## Chapter Overview (Planned)
+## Chapter Overview
 
-### Part 1: Prolog Fundamentals
+### Part 1: Core Concepts (Complete)
 
-**Chapter 1: Introduction to UnifyWeaver**
+**[Chapter 1: Introduction](01_introduction.md)**
 - What is UnifyWeaver?
 - Why declarative-to-imperative compilation?
 - Overview of available targets
 - Installation and setup
 
-**Chapter 2: Prolog Basics**
+**[Chapter 2: Prolog Fundamentals](02_prolog_fundamentals.md)**
 - Facts, rules, and queries
 - Unification and pattern matching
 - Lists and recursion basics
 - The cut operator
 
-**Chapter 3: Advanced Prolog**
-- Meta-predicates
-- DCGs (Definite Clause Grammars)
-- Constraint Logic Programming
-- Module system
+**[Chapter 3: UnifyWeaver Architecture](03_unifyweaver_architecture.md)**
+- The principal architecture (stream-based targets)
+- Compilation pipeline overview
+- Pattern classification
+- Constraint analysis and template rendering
+- Note on architecture variants (fixed-point, query engine, generator)
 
-### Part 2: UnifyWeaver Architecture
+### Part 2: Configuration (Planned)
 
-**Chapter 4: Compiler Pipeline**
-- Source analysis
-- Intermediate representation
-- Target selection
-- Code generation
-
-**Chapter 5: The Preference System**
+**Chapter 4: The Preference System**
 - Default behaviors
 - User preferences
 - Target-specific options
 - Configuration files
 
-**Chapter 6: Plugin Architecture**
+**Chapter 5: Plugin Architecture**
 - Data source plugins
 - Target plugins
 - Custom extensions
 - Plugin lifecycle
 
-### Part 3: Getting Started
+## Architecture Variants
 
-**Chapter 7: Your First Compilation**
-- Writing a simple predicate
-- Choosing a target
-- Running the compiler
-- Understanding the output
+This book introduces the **principal architecture** used by stream-based targets. Other books cover variant architectures:
 
-**Chapter 8: Testing and Debugging**
-- Test runner basics
-- Debugging compiled code
-- Common issues and solutions
+| Architecture | Targets | Covered In |
+|--------------|---------|------------|
+| **Principal (Stream)** | Bash, AWK, Go, Rust | This book + Books 2, 6, 9 |
+| **Fixed-Point** | C# Query Runtime | Book 3: C# Target |
+| **Query Engine** | C# with IR | Book 3: C# Target |
+| **Generator** | Python | Book 5: Python Target |
 
-## Content Status
-
-This book is planned but chapters are not yet written. Content is currently embedded in [Book 2: Bash Target](../book-2-bash-target/README.md) chapters 1-4.
-
-**To get started now**, read these chapters from Book 2:
-- `01_introduction.md` - Introduction to UnifyWeaver
-- `02_prolog_fundamentals.md` - Prolog basics
-- `03_unifyweaver_architecture.md` - Architecture overview
-- `04_your_first_program.md` - First compilation
+The core concepts (classification, constraint analysis) apply across all variants, but execution models differ.
 
 ## What's Next?
 
 After completing Book 1, continue to:
-- [Book 2: Bash Target](../book-2-bash-target/README.md) - Stream compilation basics
-- [Book 3: C# Target](../book-3-csharp-target/README.md) - Fixed-point approaches
+- [Book 2: Bash Target](../book-2-bash-target/README.md) - Stream compilation in depth
+- [Book 3: C# Target](../book-3-csharp-target/README.md) - Fixed-point and query engine approaches
 
 ## License
 

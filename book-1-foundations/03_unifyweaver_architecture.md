@@ -7,11 +7,18 @@ This documentation is dual-licensed under MIT and CC-BY-4.0.
 
 # Chapter 3: The UnifyWeaver Architecture
 
-Now that we have a grasp of basic Prolog, we can explore how UnifyWeaver translates these concepts into executable Bash scripts. This chapter provides a high-level overview of the compiler's architecture and its key components.
+Now that we have a grasp of basic Prolog, we can explore how UnifyWeaver translates these concepts into executable code. This chapter provides a high-level overview of the compiler's **principal architecture**.
+
+> **Note on Architecture Variants**: This chapter describes the *principal architecture* used for stream-based targets (Bash, AWK, Go, Rust). Other targets use variant architectures:
+> - **Fixed-Point Architecture** (Book 3: C# Target) - Uses iterative fixpoint evaluation for recursive predicates
+> - **Query Engine Architecture** (Book 3: C# Target) - Uses IR + runtime library with plan nodes
+> - **Generator Architecture** - Uses Python generators for lazy evaluation
+>
+> The core concepts (classification, constraint analysis, template rendering) apply across all variants, but the execution model differs.
 
 ## The Core Concept Revisited
 
-UnifyWeaver treats Prolog as a **declarative specification language** and Bash as an **efficient execution target**. The primary goal is not to replicate all of Prolog's features in Bash, but to compile a specific, useful subset of Prolog—data relationships and queries—into optimized scripts that work well in a Unix-style pipeline.
+UnifyWeaver treats Prolog as a **declarative specification language** and target languages as **efficient execution targets**. The primary goal is not to replicate all of Prolog's features, but to compile a specific, useful subset of Prolog—data relationships and queries—into optimized code that works well in the target environment.
 
 ## The Compilation Pipeline
 
