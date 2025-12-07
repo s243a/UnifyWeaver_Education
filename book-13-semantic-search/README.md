@@ -15,8 +15,13 @@ This book covers building intelligent semantic agents using UnifyWeaver's Python
 
 ## Prerequisites
 
-- [Book 1: Foundations](../book-1-foundations/README.md) (required)
-- [Book 5: Python Target](../book-5-python-target/README.md) (recommended)
+**Required:**
+- [Book 1: Foundations](../book-1-foundations/README.md)
+
+**Recommended:**
+- [Book 5: Python Target](../book-5-python-target/README.md) - Python code generation basics
+
+**Technical:**
 - Python 3.8+ with pip
 - Basic understanding of embeddings and vector similarity (helpful)
 

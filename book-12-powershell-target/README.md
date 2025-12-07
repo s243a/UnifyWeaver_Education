@@ -15,8 +15,14 @@ This book covers compiling Prolog predicates to PowerShell scripts. PowerShell's
 
 ## Prerequisites
 
-- [Book 1: Foundations](../book-1-foundations/README.md) (required)
-- [Book 3: C# Target](../book-3-csharp-target/README.md) (recommended - shares .NET concepts)
+**Required:**
+- [Book 1: Foundations](../book-1-foundations/README.md)
+
+**Recommended:**
+- [Book 3: C# Target](../book-3-csharp-target/README.md) - shares .NET concepts
+- [Book 9: Rust Target](../book-9-rust-target/README.md) - first book in the Specialized Targets section
+
+**Technical:**
 - PowerShell 7+ (cross-platform) or Windows PowerShell 5.1
 - Basic PowerShell knowledge (helpful)
 

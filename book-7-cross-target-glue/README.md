@@ -15,10 +15,16 @@ This book covers UnifyWeaver's cross-target glue system, which enables predicate
 
 ## Prerequisites
 
-- [Book 1: Foundations](../book-1-foundations/README.md) (required)
-- At least one target book (Books 2, 3, 5, or 6 recommended)
-- Familiarity with at least one target language (Python, Go, Rust, or C#)
+**Required:**
+- [Book 1: Foundations](../book-1-foundations/README.md)
+- At least one target book ([Book 2](../book-2-bash-target/README.md), [3](../book-3-csharp-target/README.md), [5](../book-5-python-target/README.md), or [6](../book-6-go-target/README.md))
+
+**Recommended:**
+- Multiple target books - the more targets you know, the more you can compose
+
+**Technical:**
 - SWI-Prolog 8.0+ installed
+- Familiarity with at least one target language (Python, Go, Rust, or C#)
 
 ## What You'll Learn
 

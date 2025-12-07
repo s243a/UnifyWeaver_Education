@@ -17,9 +17,12 @@ This book covers security considerations for UnifyWeaver deployments, including 
 
 ## Prerequisites
 
-- [Book 1: Foundations](../book-1-foundations/README.md) (required)
-- [Book 7: Cross-Target Glue](../book-7-cross-target-glue/README.md) (recommended)
-- Understanding of at least one target (Books 2, 3, 5, or 6)
+**Required:**
+- [Book 1: Foundations](../book-1-foundations/README.md)
+
+**Recommended:**
+- [Book 7: Cross-Target Glue](../book-7-cross-target-glue/README.md) - first book in the Integration & Security section
+- At least one target book ([Book 2](../book-2-bash-target/README.md), [3](../book-3-csharp-target/README.md), [5](../book-5-python-target/README.md), or [6](../book-6-go-target/README.md))
 
 ## What You'll Learn
 

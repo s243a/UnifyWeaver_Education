@@ -15,9 +15,15 @@ This book covers how to use UnifyWeaver to compile Prolog predicates into standa
 
 ## Prerequisites
 
--   [Book 1: Foundations](../book-1-foundations/README.md) (required)
--   Go 1.16+ installed (for compiling generated code)
--   UnifyWeaver with Go target support (v0.5+)
+**Required:**
+- [Book 1: Foundations](../book-1-foundations/README.md)
+
+**Recommended:**
+- [Book 5: Python Target](../book-5-python-target/README.md) - first book in the Portable Targets section
+
+**Technical:**
+- Go 1.16+ installed (for compiling generated code)
+- UnifyWeaver with Go target support (v0.5+)
 
 ## Learning Path
 

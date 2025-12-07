@@ -15,9 +15,13 @@ This book covers UnifyWeaver's SQL target, enabling you to compile Prolog predic
 
 ## Prerequisites
 
-Before starting this book, you should have:
-- [Book 1: Foundations](../book-1-foundations/README.md) (required)
-- Understanding of Prolog predicates and UnifyWeaver compilation
+**Required:**
+- [Book 1: Foundations](../book-1-foundations/README.md)
+
+**Recommended:**
+- [Book 9: Rust Target](../book-9-rust-target/README.md) - first book in the Specialized Targets section
+
+**Technical:**
 - Basic SQL knowledge (SELECT, JOIN, WHERE, GROUP BY)
 - Access to SQLite or another SQL database (for testing generated queries)
 

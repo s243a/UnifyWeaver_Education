@@ -17,7 +17,13 @@ This book covers compiling Prolog predicates to Python code. Python's ubiquity m
 
 ## Prerequisites
 
-- [Book 1: Foundations](../book-1-foundations/README.md) (required)
+**Required:**
+- [Book 1: Foundations](../book-1-foundations/README.md)
+
+**Recommended:**
+- [Book 2: Bash Target](../book-2-bash-target/README.md) - for stream compilation concepts
+
+**Technical:**
 - Python 3.8+ installed
 - Basic Python knowledge (helpful but not required)
 
