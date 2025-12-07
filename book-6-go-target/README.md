@@ -5,15 +5,17 @@ Copyright (c) 2025 John William Creighton (s243a)
 This documentation is dual-licensed under MIT and CC-BY-4.0.
 -->
 
-# Book: Go Target & Cross-Platform Compilation
+# Book 6: Go Target
 
-**Learning Path for UnifyWeaver's Go Target**
+**Cross-Platform Native Binaries**
+
+*Part of the [UnifyWeaver Education Series](../README.md)*
 
 This book covers how to use UnifyWeaver to compile Prolog predicates into standalone Go executables. The Go target enables high-performance, cross-platform record processing with no runtime dependencies.
 
 ## Prerequisites
 
--   Basic understanding of Prolog (covered in Book 1)
+-   [Book 1: Foundations](../book-1-foundations/README.md) (required)
 -   Go 1.16+ installed (for compiling generated code)
 -   UnifyWeaver with Go target support (v0.5+)
 

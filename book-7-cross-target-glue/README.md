@@ -5,16 +5,18 @@ Copyright (c) 2025 John William Creighton (s243a)
 This documentation is dual-licensed under MIT and CC-BY-4.0.
 -->
 
-# Book: Cross-Target Glue
+# Book 7: Cross-Target Glue
 
-**Learning Path for UnifyWeaver's Cross-Target Communication System**
+**Multi-Language Pipelines and Cloud Deployment**
+
+*Part of the [UnifyWeaver Education Series](../README.md)*
 
 This book covers UnifyWeaver's cross-target glue system, which enables predicates compiled to different languages to communicate and compose seamlessly. You'll learn how to build hybrid systems where each component runs in its optimal environment.
 
 ## Prerequisites
 
-- Completion of Book 1 (Core UnifyWeaver & Bash Target) or equivalent knowledge
-- Basic understanding of UnifyWeaver's compilation model
+- [Book 1: Foundations](../book-1-foundations/README.md) (required)
+- At least one target book (Books 2, 3, 5, or 6 recommended)
 - Familiarity with at least one target language (Python, Go, Rust, or C#)
 - SWI-Prolog 8.0+ installed
 
@@ -125,7 +127,7 @@ By completing this book, you will be able to:
 - Local + remote step mixing
 - Error handling strategies
 
-### Part 7: Production Ready (Chapter 15)
+### Part 7: Production Ready (Chapters 15-16)
 
 **15. Production Deployment** (`15_deployment_production.md`)
 - Service declarations and deployment
@@ -133,6 +135,13 @@ By completing this book, you will be able to:
 - Lifecycle management (start, stop, graceful shutdown)
 - Error resilience (retry, fallback, circuit breaker)
 - Monitoring (health checks, metrics, logging, alerting)
+
+**16. Cloud & Enterprise** (`16_cloud_enterprise.md`)
+- Container deployment (Docker, Kubernetes)
+- Secrets management (Vault, AWS, Azure, GCP)
+- Multi-region deployment and failover
+- Cloud functions (Lambda, GCF, Azure Functions)
+- API Gateway integration
 
 ### Part 8: Reference (Chapters 13-14)
 
@@ -167,6 +176,7 @@ By completing this book, you will be able to:
 | 13 | API Reference | Complete documentation |
 | 14 | Case Studies | Real-world examples |
 | 15 | Production | Deployment, security, monitoring |
+| 16 | Cloud & Enterprise | Containers, secrets, serverless |
 
 ## Implementation Status
 
@@ -180,6 +190,11 @@ The cross-target glue system is fully complete:
 | 4 | Native Targets (Go, Rust) | Complete |
 | 5 | Network Layer (HTTP, sockets) | Complete |
 | 6 | Production Ready (deployment, monitoring) | Complete |
+| 7a | Container Deployment (Docker, Kubernetes) | Complete* |
+| 7b | Secrets Management (Vault, AWS, Azure, GCP) | Complete* |
+| 7c | Multi-Region & Cloud Functions | Complete* |
+
+*Phase 7 features are **EXPERIMENTAL** - code generation is tested, but actual deployment has not been integration-tested.
 
 ## Code Examples
 
@@ -192,6 +207,7 @@ examples/
   03-dotnet-bridge/        # C# + PowerShell integration
   04-native-parallel/      # Go parallel processing
   05-distributed/          # HTTP microservice example
+  06-cloud-deploy/         # Docker, K8s, serverless examples
 ```
 
 ## Additional Resources

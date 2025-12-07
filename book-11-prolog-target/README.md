@@ -1,8 +1,12 @@
-# The Prolog Target: Implementation and Usage Guide
+# Book 11: Prolog Target
 
-**UnifyWeaver Educational Series - Book 3**
+**Prolog-to-Prolog Transpilation and Dialect Support**
+
+*Part of the [UnifyWeaver Education Series](../README.md)*
 
 Welcome to the comprehensive guide to UnifyWeaver's Prolog target system!
+
+> **Note**: Firewall and security content from this book has been extracted to [Book 8: Security & Firewall](../book-8-security-firewall/README.md).
 
 ## What This Book Covers
 

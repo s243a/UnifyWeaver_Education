@@ -5,15 +5,17 @@ Copyright (c) 2025 John William Creighton (s243a)
 This documentation is dual-licensed under MIT and CC-BY-4.0.
 -->
 
-# Book: Rust Target & Safe Compilation
+# Book 9: Rust Target
 
-**Learning Path for UnifyWeaver's Rust Target**
+**Memory-Safe High-Performance Compilation**
+
+*Part of the [UnifyWeaver Education Series](../README.md)*
 
 This book covers how to use UnifyWeaver to compile Prolog predicates into safe, high-performance Rust programs. The Rust target combines the safety of Rust with the declarative power of Prolog.
 
 ## Prerequisites
 
--   Basic understanding of Prolog (covered in Book 1)
+-   [Book 1: Foundations](../book-1-foundations/README.md) (required)
 -   Rust and Cargo installed (`rustc`, `cargo`)
 -   UnifyWeaver with Rust target support
 

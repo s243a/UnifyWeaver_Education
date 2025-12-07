@@ -1,8 +1,12 @@
-# Workflows and Playbooks for AI Agents
+# Book 4: Workflows and Playbooks
 
-**UnifyWeaver Educational Series - Book: Workflow Design**
+**Strategic Guides for AI Agents**
+
+*Part of the [UnifyWeaver Education Series](../README.md)*
 
 Welcome to the comprehensive guide for designing workflows and playbooks that enable AI agents to work effectively with UnifyWeaver!
+
+> **Prerequisites**: Complete [Books 1-3](../README.md) for core concepts. This book helps you plan before exploring more targets.
 
 ## What This Book Covers
 
@@ -393,15 +397,17 @@ All contributions welcome!
 
 This is part of the UnifyWeaver Educational Series:
 
-1. **Book 1: Core Bash** - Bash compilation basics
-2. **Book 2: C# Target** - .NET integration
-3. **Book 3: Prolog Target** - Prolog-to-Prolog transpilation
-4. **Book 4: Workflows and Playbooks** (This Book)
+1. **[Book 1: Foundations](../book-1-foundations/README.md)** - Architecture, Prolog basics
+2. **[Book 2: Bash Target](../book-2-bash-target/README.md)** - Stream compilation
+3. **[Book 3: C# Target](../book-3-csharp-target/README.md)** - Fixed-point approaches
+4. **Book 4: Workflows** (This Book)
+
+**Continue to Book 5 or 6** to explore more targets:
+- [Book 5: Python Target](../book-5-python-target/README.md) - Python code generation
+- [Book 6: Go Target](../book-6-go-target/README.md) - Native binaries
 
 ---
 
-**Version**: 0.1.0
-**Last Updated**: 2025-11-17
+**Version**: 0.2.0
+**Last Updated**: 2025-12-07
 **Focus**: Strategic AI agent guidance
-
-Let's build intelligent, flexible, and economically-aware AI systems! 🚀

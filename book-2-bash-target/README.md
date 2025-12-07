@@ -5,11 +5,15 @@ Copyright (c) 2025 John William Creighton (s243a)
 This documentation is dual-licensed under MIT and CC-BY-4.0.
 -->
 
-# Book 1: Core UnifyWeaver & Bash Target
+# Book 2: Bash Target
 
-**Learning Path for UnifyWeaver's Core Features and Bash Code Generation**
+**Learning Path for UnifyWeaver's Bash Code Generation**
 
-This book covers UnifyWeaver's fundamental architecture, Prolog-to-Bash compilation, data source plugins, and parallel processing capabilities.
+*Part of the [UnifyWeaver Education Series](../README.md)*
+
+This book covers Prolog-to-Bash compilation, stream processing, data source plugins, and parallel processing capabilities.
+
+> **Prerequisites**: Complete [Book 1: Foundations](../book-1-foundations/README.md) first for architecture and Prolog basics.
 
 ## Prerequisites
 
@@ -145,18 +149,18 @@ This book covers UnifyWeaver's fundamental architecture, Prolog-to-Bash compilat
 
 ## What's Next?
 
-After completing Book 1, you'll understand:
-- ✅ Core Prolog and UnifyWeaver concepts
+After completing Book 2, you'll understand:
 - ✅ Bash code generation techniques
+- ✅ Stream compilation and templates
 - ✅ Data source plugins and ETL pipelines
 - ✅ Advanced recursion patterns
 - ✅ Parallel processing strategies
 
-**Continue to Book 2** to learn about:
+**Continue to Book 3** to learn about:
 - C# target language compilation
-- Multi-target code generation
-- Runtime library design
-- Cross-platform deployment
+- Fixed-point approaches
+- LINQ-based query execution
+- Cross-platform .NET deployment
 
 ## License
 

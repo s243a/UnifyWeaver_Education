@@ -5,16 +5,19 @@ Copyright (c) 2025 John William Creighton (s243a)
 This documentation is dual-licensed under MIT and CC-BY-4.0.
 -->
 
-# Book 2: C# Target Language
+# Book 3: C# Target Language
 
 **Multi-Target Compilation: From Prolog to C# / .NET**
 
-This book covers UnifyWeaver's C# code generation targets, enabling you to compile Prolog predicates to idiomatic C# code and .NET assemblies.
+*Part of the [UnifyWeaver Education Series](../README.md)*
+
+This book covers UnifyWeaver's C# code generation targets, enabling you to compile Prolog predicates to idiomatic C# code and .NET assemblies. **This is where fixed-point approaches are introduced.**
 
 ## Prerequisites
 
-Before starting Book 2, you should have:
-- ✅ Completed Book 1 (Core UnifyWeaver & Bash Target)
+Before starting Book 3, you should have:
+- ✅ Completed [Book 1: Foundations](../book-1-foundations/README.md)
+- ✅ Completed [Book 2: Bash Target](../book-2-bash-target/README.md) (recommended)
 - ✅ Understanding of Prolog predicates and UnifyWeaver compilation
 - ✅ Basic C# knowledge (classes, LINQ, generics helpful but not required)
 - ✅ .NET SDK 6.0+ installed (for compiling generated C# code)
@@ -185,11 +188,17 @@ Throughout Book 2, you'll build:
 
 ## Going Further
 
-After completing Book 2, you'll be able to:
+After completing Book 3, you'll be able to:
 - ✅ Compile Prolog predicates to both Bash and C#
+- ✅ Understand and apply fixed-point approaches
 - ✅ Choose appropriate target for your use case
 - ✅ Deploy UnifyWeaver-generated code in .NET environments
 - ✅ Extend the C# runtime for custom requirements
+
+**Continue to Book 4** to learn about:
+- Workflow design for AI agents
+- Strategic planning and playbooks
+- Economic decision-making in pipelines
 
 ## License
 

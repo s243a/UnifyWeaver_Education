@@ -5,16 +5,18 @@ Copyright (c) 2025 John William Creighton (s243a)
 This documentation is dual-licensed under MIT and CC-BY-4.0.
 -->
 
-# Book: SQL Target Language
+# Book 10: SQL Target
 
 **From Prolog to SQL: Declarative Query Generation**
+
+*Part of the [UnifyWeaver Education Series](../README.md)*
 
 This book covers UnifyWeaver's SQL target, enabling you to compile Prolog predicates directly to SQL queries for execution on relational databases.
 
 ## Prerequisites
 
 Before starting this book, you should have:
-- Completed Book 1 (Core UnifyWeaver & Bash Target)
+- [Book 1: Foundations](../book-1-foundations/README.md) (required)
 - Understanding of Prolog predicates and UnifyWeaver compilation
 - Basic SQL knowledge (SELECT, JOIN, WHERE, GROUP BY)
 - Access to SQLite or another SQL database (for testing generated queries)
