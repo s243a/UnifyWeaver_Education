@@ -462,120 +462,204 @@ In Chapter 4, we'll explore the pipe protocols in detail:
 
 ## Advanced Example: Type Inference Pipeline with Target Mapping
 
-This example demonstrates the **target registry and mapping system** by implementing a simple type inference pipeline. Different stages are mapped to optimal targets based on their computational needs.
+This example demonstrates the **target registry and mapping system** by implementing a simple type inference pipeline. UnifyWeaver compiles Prolog predicates to optimal targets based on their characteristics.
 
 ### The Problem
 
 Given expressions like `add(x, 1)` where `x` is unknown, infer the types. This is a simplified version of Hindley-Milner type inference.
 
-### The Complete Pipeline
+### Step 1: Define the Type Inference Logic in Prolog
 
 ```prolog
-% type_inference.pl
+% type_inference.pl - Type inference predicates
+:- module(type_inference, [
+    type_of/2,        % type_of(Expr, Type)
+    unify_types/3,    % unify_types(T1, T2, Unified)
+    infer_expr/3      % infer_expr(Expr, Env, NewEnv)
+]).
+
+% Built-in function signatures
+signature(add, [int, int], int).
+signature(concat, [str, str], str).
+signature(length, [str], int).
+signature(tostring, [int], str).
+
+% Type unification (core of Hindley-Milner)
+unify_types(T, T, T) :- !.
+unify_types(var(X), T, T) :- \+ occurs_in(X, T), !.
+unify_types(T, var(X), T) :- \+ occurs_in(X, T), !.
+unify_types(_, _, fail).
+
+% Occurs check for sound unification
+occurs_in(X, var(X)) :- !.
+occurs_in(X, compound(_, Args)) :- member(A, Args), occurs_in(X, A).
+
+% Type inference for expressions
+type_of(int(_), int).
+type_of(str(_), str).
+type_of(var(X), var(X)).
+type_of(app(F, Args), RetType) :-
+    signature(F, ArgTypes, RetType),
+    maplist(type_of, Args, InferredTypes),
+    maplist(unify_types, ArgTypes, InferredTypes, _).
+
+% Infer with environment threading
+infer_expr(Expr, EnvIn, EnvOut) :-
+    type_of(Expr, Type),
+    update_env(Expr, Type, EnvIn, EnvOut).
+```
+
+### Step 2: Declare Target Mappings
+
+The target registry lets you specify which target compiles each predicate:
+
+```prolog
+% type_inference_config.pl
 :- use_module('src/unifyweaver/core/target_registry').
 :- use_module('src/unifyweaver/core/target_mapping').
-:- use_module('src/unifyweaver/glue/shell_glue').
+:- use_module('src/unifyweaver/targets/python_target').
+:- use_module('src/unifyweaver/targets/awk_target').
 
-% Declare which target handles each stage
-:- declare_target(parse_expr/2, awk).        % Fast text parsing
-:- declare_target(infer_types/2, python).    % Complex recursion
-:- declare_target(format_output/2, awk).     % Simple formatting
+% Register targets with capabilities
+:- register_target(python3, python, [recursion, memoization, complex_data]).
+:- register_target(gawk, shell, [text_processing, streaming, fast_startup]).
 
-% Configure the connection to use TSV (default, but explicit here)
-:- declare_connection(parse_expr/2, infer_types/2, [format(tsv)]).
-:- declare_connection(infer_types/2, format_output/2, [format(tsv)]).
+% Declare which target handles each predicate
+:- declare_target(parse_expr/2, awk).         % Fast text parsing
+:- declare_target(type_of/2, python).         % Needs recursion
+:- declare_target(unify_types/3, python).     % Needs backtracking
+:- declare_target(infer_expr/3, python).      % Complex state
+:- declare_target(format_output/2, awk).      % Simple formatting
 
-% Generate the pipeline
-type_inference_pipeline(Script) :-
-    generate_pipeline(
-        [
-            % Stage 1: Parse expressions into AST-like TSV
-            % Input: "add(x, 1)" -> Output: "add\tx\t1"
-            step(parse_expr, awk, '
-                {
-                    # Simple parser: func(arg1, arg2) -> func\targ1\targ2
-                    gsub(/[(),]/, "\t")
-                    gsub(/[[:space:]]+/, "\t")
-                    print
-                }
-            ', []),
+% Configure connections
+:- declare_connection(parse_expr/2, infer_expr/3, [format(json)]).
+:- declare_connection(infer_expr/3, format_output/2, [format(tsv)]).
+```
 
-            % Stage 2: Type inference using unification
-            step(infer_types, python, '
+### Step 3: Compile Predicates to Targets
+
+UnifyWeaver compiles your Prolog to the declared targets:
+
+```prolog
+% compile_type_inference.pl
+compile_all :-
+    % Compile type inference predicates to Python
+    compile_predicate_to_python(type_of/2, [
+        record_format(json),
+        mode(function)
+    ], TypeOfCode),
+
+    compile_predicate_to_python(unify_types/3, [
+        record_format(json),
+        mode(function)
+    ], UnifyCode),
+
+    compile_predicate_to_python(infer_expr/3, [
+        record_format(json),
+        mode(generator),
+        include_predicates([type_of/2, unify_types/3])
+    ], InferCode),
+
+    % Write to file
+    open('infer_types.py', write, S),
+    write(S, InferCode),
+    close(S).
+```
+
+### Step 4: Generated Python (by UnifyWeaver)
+
+UnifyWeaver generates this Python from your Prolog - you don't write it:
+
+```python
+#!/usr/bin/env python3
+"""
+Generated by UnifyWeaver from type_inference module
+Predicates: type_of/2, unify_types/3, infer_expr/3
+"""
 import sys
+import json
 
-# Type environment (what we know)
-type_env = {}
-
-# Built-in function signatures: func -> (arg_types, return_type)
-signatures = {
+# signature/3 compiled as dictionary
+_signature = {
     "add": (["int", "int"], "int"),
     "concat": (["str", "str"], "str"),
     "length": (["str"], "int"),
     "tostring": (["int"], "str"),
 }
 
-def unify(t1, t2):
-    """Unify two types, return unified type or None"""
+def unify_types(t1, t2):
+    """unify_types(T1, T2, Unified) - Prolog unification"""
     if t1 == t2:
         return t1
-    if t1.startswith("?"):  # Type variable
+    if isinstance(t1, str) and t1.startswith("?"):
         return t2
-    if t2.startswith("?"):
+    if isinstance(t2, str) and t2.startswith("?"):
         return t1
-    return None
+    return None  # fail
 
-def infer(expr_parts):
-    """Infer type of expression"""
-    if len(expr_parts) == 0:
-        return "?unknown"
-
-    func = expr_parts[0]
-    args = expr_parts[1:]
-
-    # Literal integer
-    if func.isdigit():
+def type_of(expr):
+    """type_of(Expr, Type) - infer type of expression"""
+    if isinstance(expr, int) or (isinstance(expr, str) and expr.isdigit()):
         return "int"
-
-    # Literal string (quoted)
-    if func.startswith("\\"") or func.startswith("\\x27"):
+    if isinstance(expr, str) and expr.startswith('"'):
         return "str"
-
-    # Variable - assign fresh type var
-    if func.isalpha() and len(func) == 1:
-        if func not in type_env:
-            type_env[func] = f"?{func}"
-        return type_env[func]
-
-    # Function application
-    if func in signatures:
-        arg_types, ret_type = signatures[func]
-
-        # Infer arg types and unify
-        for i, arg in enumerate(args):
-            if i < len(arg_types):
-                inferred = infer([arg])
-                unified = unify(inferred, arg_types[i])
-                if unified and inferred.startswith("?"):
-                    # Update type environment
-                    var = inferred[1:]
-                    type_env[var] = unified
-
-        return ret_type
-
+    if isinstance(expr, str) and expr[0].isupper():
+        return f"?{expr}"  # Type variable
+    if isinstance(expr, dict) and "func" in expr:
+        func = expr["func"]
+        args = expr.get("args", [])
+        if func in _signature:
+            arg_types, ret_type = _signature[func]
+            inferred = [type_of(a) for a in args]
+            for expected, got in zip(arg_types, inferred):
+                if unify_types(expected, got) is None:
+                    return "type_error"
+            return ret_type
     return "?unknown"
 
-# Process expressions
-for line in sys.stdin:
-    parts = line.strip().split("\\t")
-    if parts and parts[0]:
-        result_type = infer(parts)
-        # Output: expression \\t inferred_type \\t bindings
-        bindings = ", ".join(f"{k}:{v}" for k, v in type_env.items())
-        print(f"{parts[0]}\\t{result_type}\\t{bindings}")
-', []),
+def infer_expr(expr, env):
+    """infer_expr(Expr, EnvIn, EnvOut) - infer with environment"""
+    t = type_of(expr)
+    new_env = env.copy()
+    # Update environment with inferred bindings
+    if isinstance(expr, str) and expr[0].isupper():
+        if t and not t.startswith("?"):
+            new_env[expr] = t
+    return t, new_env
 
-            % Stage 3: Format nicely
+def process_stream():
+    env = {}
+    for line in sys.stdin:
+        data = json.loads(line)
+        expr = data.get("expr")
+        result_type, env = infer_expr(expr, env)
+        bindings = ", ".join(f"{k}:{v}" for k, v in env.items())
+        print(f"{data.get('name', 'expr')}\t{result_type}\t{bindings}")
+
+if __name__ == "__main__":
+    process_stream()
+```
+
+### Step 5: Generate the Complete Pipeline
+
+```prolog
+% type_pipeline.pl
+type_inference_pipeline(Script) :-
+    generate_pipeline(
+        [
+            % Stage 1: Parse expressions (AWK)
+            step(parse_expr, awk, '
+                {
+                    gsub(/[(),]/, "\t")
+                    gsub(/[[:space:]]+/, "\t")
+                    print
+                }
+            ', []),
+
+            % Stage 2: Compiled type inference (Python)
+            step(infer_types, python, 'infer_types.py', []),
+
+            % Stage 3: Format output (AWK)
             step(format_output, awk, '
                 {
                     printf "%s has type %s", $1, $2
