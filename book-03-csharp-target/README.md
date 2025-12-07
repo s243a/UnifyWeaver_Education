@@ -16,8 +16,8 @@ This book covers UnifyWeaver's C# code generation targets, enabling you to compi
 ## Prerequisites
 
 Before starting Book 3, you should have:
-- ✅ Completed [Book 1: Foundations](../book-1-foundations/README.md)
-- ✅ Completed [Book 2: Bash Target](../book-2-bash-target/README.md) (recommended)
+- ✅ Completed [Book 1: Foundations](../book-01-foundations/README.md)
+- ✅ Completed [Book 2: Bash Target](../book-02-bash-target/README.md) (recommended)
 - ✅ Understanding of Prolog predicates and UnifyWeaver compilation
 - ✅ Basic C# knowledge (classes, LINQ, generics helpful but not required)
 - ✅ .NET SDK 6.0+ installed (for compiling generated C# code)

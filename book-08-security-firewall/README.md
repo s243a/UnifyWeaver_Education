@@ -18,11 +18,11 @@ This book covers security considerations for UnifyWeaver deployments, including 
 ## Prerequisites
 
 **Required:**
-- [Book 1: Foundations](../book-1-foundations/README.md)
+- [Book 1: Foundations](../book-01-foundations/README.md)
 
 **Recommended:**
-- [Book 7: Cross-Target Glue](../book-7-cross-target-glue/README.md) - first book in the Integration & Security section
-- At least one target book ([Book 2](../book-2-bash-target/README.md), [3](../book-3-csharp-target/README.md), [5](../book-5-python-target/README.md), or [6](../book-6-go-target/README.md))
+- [Book 7: Cross-Target Glue](../book-07-cross-target-glue/README.md) - first book in the Integration & Security section
+- At least one target book ([Book 2](../book-02-bash-target/README.md), [3](../book-03-csharp-target/README.md), [5](../book-05-python-target/README.md), or [6](../book-06-go-target/README.md))
 
 ## What You'll Learn
 
@@ -90,7 +90,7 @@ By completing this book, you will be able to:
 
 This book is planned. Some content exists in:
 - [Book 11: Prolog Target](../book-11-prolog-target/README.md) - Chapters 7-8 (Firewall, Fallback)
-- [Book 7: Cross-Target Glue](../book-7-cross-target-glue/README.md) - Chapter 15-16 (Production, Cloud)
+- [Book 7: Cross-Target Glue](../book-07-cross-target-glue/README.md) - Chapter 15-16 (Production, Cloud)
 
 ## Quick Example
 
@@ -112,7 +112,7 @@ This book is planned. Some content exists in:
 ## What's Next?
 
 After completing Book 8, continue to:
-- [Book 9: Rust Target](../book-9-rust-target/README.md) - Memory-safe compilation
+- [Book 9: Rust Target](../book-09-rust-target/README.md) - Memory-safe compilation
 - [Book 10: SQL Target](../book-10-sql-target/README.md) - Database queries
 - [Book 11: Prolog Target](../book-11-prolog-target/README.md) - Meta-programming
 

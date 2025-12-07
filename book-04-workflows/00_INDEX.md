@@ -276,10 +276,11 @@ For experienced users:
 
 This book is part of the UnifyWeaver Educational Series:
 
-1. **[Book 1: Core Bash](../book-1-core-bash/)** - Bash compilation fundamentals
-2. **[Book 2: C# Target](../book-2-csharp-target/)** - .NET integration
-3. **[Book 3: Prolog Target](../book-prolog-target/)** - Prolog-to-Prolog transpilation
+1. **[Book 1: Foundations](../book-01-foundations/)** - Architecture and Prolog basics
+2. **[Book 2: Bash Target](../book-02-bash-target/)** - Bash compilation fundamentals
+3. **[Book 3: C# Target](../book-03-csharp-target/)** - .NET integration
 4. **Book 4: Workflows and Playbooks** (This Book) - Strategic AI agent guidance
+5. **[Book 11: Prolog Target](../book-11-prolog-target/)** - Prolog-to-Prolog transpilation
 
 **Cross-References**:
 - GNU Prolog playbook → Prolog Target Book Chapter 15 (Case Study)

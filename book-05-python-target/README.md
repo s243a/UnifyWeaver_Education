@@ -18,10 +18,10 @@ This book covers compiling Prolog predicates to Python code. Python's ubiquity m
 ## Prerequisites
 
 **Required:**
-- [Book 1: Foundations](../book-1-foundations/README.md)
+- [Book 1: Foundations](../book-01-foundations/README.md)
 
 **Recommended:**
-- [Book 2: Bash Target](../book-2-bash-target/README.md) - for stream compilation concepts
+- [Book 2: Bash Target](../book-02-bash-target/README.md) - for stream compilation concepts
 
 **Technical:**
 - Python 3.8+ installed
@@ -110,8 +110,8 @@ filter_even(List, Evens) :- findall(X, (member(X, List), even(X)), Evens).
 ## What's Next?
 
 After completing Book 5, continue to:
-- [Book 6: Go Target](../book-6-go-target/README.md) - Native binaries
-- [Book 7: Cross-Target Glue](../book-7-cross-target-glue/README.md) - Multi-language pipelines
+- [Book 6: Go Target](../book-06-go-target/README.md) - Native binaries
+- [Book 7: Cross-Target Glue](../book-07-cross-target-glue/README.md) - Multi-language pipelines
 - [Book 13: Semantic Search](../book-13-semantic-search/README.md) - AI integration
 
 ## License

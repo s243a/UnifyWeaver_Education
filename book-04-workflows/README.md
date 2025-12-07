@@ -397,14 +397,14 @@ All contributions welcome!
 
 This is part of the UnifyWeaver Educational Series:
 
-1. **[Book 1: Foundations](../book-1-foundations/README.md)** - Architecture, Prolog basics
-2. **[Book 2: Bash Target](../book-2-bash-target/README.md)** - Stream compilation
-3. **[Book 3: C# Target](../book-3-csharp-target/README.md)** - Fixed-point approaches
+1. **[Book 1: Foundations](../book-01-foundations/README.md)** - Architecture, Prolog basics
+2. **[Book 2: Bash Target](../book-02-bash-target/README.md)** - Stream compilation
+3. **[Book 3: C# Target](../book-03-csharp-target/README.md)** - Fixed-point approaches
 4. **Book 4: Workflows** (This Book)
 
 **Continue to Book 5 or 6** to explore more targets:
-- [Book 5: Python Target](../book-5-python-target/README.md) - Python code generation
-- [Book 6: Go Target](../book-6-go-target/README.md) - Native binaries
+- [Book 5: Python Target](../book-05-python-target/README.md) - Python code generation
+- [Book 6: Go Target](../book-06-go-target/README.md) - Native binaries
 
 ---
 

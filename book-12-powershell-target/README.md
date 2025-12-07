@@ -16,11 +16,11 @@ This book covers compiling Prolog predicates to PowerShell scripts. PowerShell's
 ## Prerequisites
 
 **Required:**
-- [Book 1: Foundations](../book-1-foundations/README.md)
+- [Book 1: Foundations](../book-01-foundations/README.md)
 
 **Recommended:**
-- [Book 3: C# Target](../book-3-csharp-target/README.md) - shares .NET concepts
-- [Book 9: Rust Target](../book-9-rust-target/README.md) - first book in the Specialized Targets section
+- [Book 3: C# Target](../book-03-csharp-target/README.md) - shares .NET concepts
+- [Book 9: Rust Target](../book-09-rust-target/README.md) - first book in the Specialized Targets section
 
 **Technical:**
 - PowerShell 7+ (cross-platform) or Windows PowerShell 5.1
@@ -90,8 +90,8 @@ By completing this book, you will be able to:
 This book is planned. Chapters are not yet written.
 
 **For .NET concepts now**, see:
-- [Book 3: C# Target](../book-3-csharp-target/README.md) - Core .NET compilation
-- [Book 7: Cross-Target Glue](../book-7-cross-target-glue/README.md) - PowerShell in-process hosting
+- [Book 3: C# Target](../book-03-csharp-target/README.md) - Core .NET compilation
+- [Book 7: Cross-Target Glue](../book-07-cross-target-glue/README.md) - PowerShell in-process hosting
 
 ## Quick Example
 
@@ -115,8 +115,8 @@ service_running(Name) :-
 ## What's Next?
 
 After completing Book 12, continue to:
-- [Book 7: Cross-Target Glue](../book-7-cross-target-glue/README.md) - .NET bridge integration
-- [Book 8: Security & Firewall](../book-8-security-firewall/README.md) - Enterprise security
+- [Book 7: Cross-Target Glue](../book-07-cross-target-glue/README.md) - .NET bridge integration
+- [Book 8: Security & Firewall](../book-08-security-firewall/README.md) - Enterprise security
 - [Book 13: Semantic Search](../book-13-semantic-search/README.md) - AI capabilities
 
 ## License

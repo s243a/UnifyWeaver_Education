@@ -13,11 +13,11 @@ This documentation is dual-licensed under MIT and CC-BY-4.0.
 
 This book covers Prolog-to-Bash compilation, stream processing, data source plugins, and parallel processing capabilities.
 
-> **Prerequisites**: Complete [Book 1: Foundations](../book-1-foundations/README.md) first for architecture and Prolog basics.
+> **Prerequisites**: Complete [Book 1: Foundations](../book-01-foundations/README.md) first for architecture and Prolog basics.
 
 ## Prerequisites
 
-- [Book 1: Foundations](../book-1-foundations/README.md) completed
+- [Book 1: Foundations](../book-01-foundations/README.md) completed
 - Bash 4.0+ (for associative arrays)
 - Basic understanding of Unix pipelines
 

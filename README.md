@@ -19,30 +19,30 @@ The books are designed to be read in sequence, with each building on concepts fr
 
 | Book | Title | Focus |
 |------|-------|-------|
-| **1** | [Foundations](book-1-foundations/README.md) | Architecture, Prolog basics, preference system |
-| **2** | [Bash Target](book-2-bash-target/README.md) | Stream compilation, templates, data sources |
-| **3** | [C# Target](book-3-csharp-target/README.md) | .NET compilation, LINQ, **fixed-point approaches** |
-| **4** | [Workflows](book-4-workflows/README.md) | AI agent playbooks, strategic planning |
+| **1** | [Foundations](book-01-foundations/README.md) | Architecture, Prolog basics, preference system |
+| **2** | [Bash Target](book-02-bash-target/README.md) | Stream compilation, templates, data sources |
+| **3** | [C# Target](book-03-csharp-target/README.md) | .NET compilation, LINQ, **fixed-point approaches** |
+| **4** | [Workflows](book-04-workflows/README.md) | AI agent playbooks, strategic planning |
 
 ### Portable Targets (Books 5-6)
 
 | Book | Title | Focus |
 |------|-------|-------|
-| **5** | [Python Target](book-5-python-target/README.md) | Python code generation, widely portable |
-| **6** | [Go Target](book-6-go-target/README.md) | Native binaries, cross-platform, no runtime deps |
+| **5** | [Python Target](book-05-python-target/README.md) | Python code generation, widely portable |
+| **6** | [Go Target](book-06-go-target/README.md) | Native binaries, cross-platform, no runtime deps |
 
 ### Integration & Security (Books 7-8)
 
 | Book | Title | Focus |
 |------|-------|-------|
-| **7** | [Cross-Target Glue](book-7-cross-target-glue/README.md) | Multi-language pipelines, Phases 1-7, cloud deployment |
-| **8** | [Security & Firewall](book-8-security-firewall/README.md) | Cross-target security policies, production hardening |
+| **7** | [Cross-Target Glue](book-07-cross-target-glue/README.md) | Multi-language pipelines, Phases 1-7, cloud deployment |
+| **8** | [Security & Firewall](book-08-security-firewall/README.md) | Cross-target security policies, production hardening |
 
 ### Specialized Targets (Books 9-12)
 
 | Book | Title | Focus |
 |------|-------|-------|
-| **9** | [Rust Target](book-9-rust-target/README.md) | Memory-safe compilation, performance-critical |
+| **9** | [Rust Target](book-09-rust-target/README.md) | Memory-safe compilation, performance-critical |
 | **10** | [SQL Target](book-10-sql-target/README.md) | Database query generation |
 | **11** | [Prolog Target](book-11-prolog-target/README.md) | Prolog-to-Prolog, dialect support |
 | **12** | [PowerShell Target](book-12-powershell-target/README.md) | Windows automation, .NET scripting |
@@ -138,15 +138,15 @@ cd UnifyWeaver
 
 | Book | Status | Directory |
 |------|--------|-----------|
-| 1 - Foundations | Planned (extract from book-1-core-bash) | `book-1-foundations/` |
-| 2 - Bash Target | Complete | `book-2-bash-target/` |
-| 3 - C# Target | Complete | `book-3-csharp-target/` |
-| 4 - Workflows | Complete | `book-4-workflows/` |
-| 5 - Python Target | Planned | `book-5-python-target/` |
-| 6 - Go Target | Complete | `book-6-go-target/` |
-| 7 - Cross-Target Glue | Complete | `book-7-cross-target-glue/` |
-| 8 - Security & Firewall | Planned (extract from Prolog book) | `book-8-security-firewall/` |
-| 9 - Rust Target | Complete | `book-9-rust-target/` |
+| 1 - Foundations | Complete (chapters 1-3) | `book-01-foundations/` |
+| 2 - Bash Target | Complete | `book-02-bash-target/` |
+| 3 - C# Target | Complete | `book-03-csharp-target/` |
+| 4 - Workflows | Complete | `book-04-workflows/` |
+| 5 - Python Target | Planned | `book-05-python-target/` |
+| 6 - Go Target | Complete | `book-06-go-target/` |
+| 7 - Cross-Target Glue | Complete | `book-07-cross-target-glue/` |
+| 8 - Security & Firewall | Planned (extract from Prolog book) | `book-08-security-firewall/` |
+| 9 - Rust Target | Complete | `book-09-rust-target/` |
 | 10 - SQL Target | Complete | `book-10-sql-target/` |
 | 11 - Prolog Target | Complete | `book-11-prolog-target/` |
 | 12 - PowerShell Target | Planned | `book-12-powershell-target/` |
@@ -239,4 +239,4 @@ UnifyWeaver educational materials created by John William Creighton (@s243a) wit
 
 ---
 
-**Ready to begin?** Start with [Book 1: Foundations](book-1-foundations/README.md)
+**Ready to begin?** Start with [Book 1: Foundations](book-01-foundations/README.md)

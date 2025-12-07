@@ -16,8 +16,8 @@ This book covers UnifyWeaver's cross-target glue system, which enables predicate
 ## Prerequisites
 
 **Required:**
-- [Book 1: Foundations](../book-1-foundations/README.md)
-- At least one target book ([Book 2](../book-2-bash-target/README.md), [3](../book-3-csharp-target/README.md), [5](../book-5-python-target/README.md), or [6](../book-6-go-target/README.md))
+- [Book 1: Foundations](../book-01-foundations/README.md)
+- At least one target book ([Book 2](../book-02-bash-target/README.md), [3](../book-03-csharp-target/README.md), [5](../book-05-python-target/README.md), or [6](../book-06-go-target/README.md))
 
 **Recommended:**
 - Multiple target books - the more targets you know, the more you can compose

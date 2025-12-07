@@ -16,10 +16,10 @@ This book covers how to use UnifyWeaver to compile Prolog predicates into safe, 
 ## Prerequisites
 
 **Required:**
-- [Book 1: Foundations](../book-1-foundations/README.md)
+- [Book 1: Foundations](../book-01-foundations/README.md)
 
 **Recommended:**
-- [Book 6: Go Target](../book-6-go-target/README.md) - similar native compilation concepts
+- [Book 6: Go Target](../book-06-go-target/README.md) - similar native compilation concepts
 
 **Technical:**
 - Rust and Cargo installed (`rustc`, `cargo`)

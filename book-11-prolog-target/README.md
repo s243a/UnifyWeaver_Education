@@ -6,15 +6,15 @@
 
 Welcome to the comprehensive guide to UnifyWeaver's Prolog target system!
 
-> **Note**: Firewall and security content from this book has been extracted to [Book 8: Security & Firewall](../book-8-security-firewall/README.md).
+> **Note**: Firewall and security content from this book has been extracted to [Book 8: Security & Firewall](../book-08-security-firewall/README.md).
 
 ## Prerequisites
 
 **Required:**
-- [Book 1: Foundations](../book-1-foundations/README.md)
+- [Book 1: Foundations](../book-01-foundations/README.md)
 
 **Recommended:**
-- [Book 9: Rust Target](../book-9-rust-target/README.md) - first book in the Specialized Targets section
+- [Book 9: Rust Target](../book-09-rust-target/README.md) - first book in the Specialized Targets section
 
 **Technical:**
 - SWI-Prolog 8.0+ installed

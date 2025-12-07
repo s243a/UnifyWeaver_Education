@@ -82,8 +82,8 @@ The core concepts (classification, constraint analysis) apply across all variant
 ## What's Next?
 
 After completing Book 1, continue to:
-- [Book 2: Bash Target](../book-2-bash-target/README.md) - Stream compilation in depth
-- [Book 3: C# Target](../book-3-csharp-target/README.md) - Fixed-point and query engine approaches
+- [Book 2: Bash Target](../book-02-bash-target/README.md) - Stream compilation in depth
+- [Book 3: C# Target](../book-03-csharp-target/README.md) - Fixed-point and query engine approaches
 
 ## License
 
