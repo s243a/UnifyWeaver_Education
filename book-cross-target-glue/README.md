@@ -125,7 +125,16 @@ By completing this book, you will be able to:
 - Local + remote step mixing
 - Error handling strategies
 
-### Part 7: Advanced Topics (Chapters 13-14)
+### Part 7: Production Ready (Chapter 15)
+
+**15. Production Deployment** (`15_deployment_production.md`)
+- Service declarations and deployment
+- Security enforcement (encryption for remote)
+- Lifecycle management (start, stop, graceful shutdown)
+- Error resilience (retry, fallback, circuit breaker)
+- Monitoring (health checks, metrics, logging, alerting)
+
+### Part 8: Reference (Chapters 13-14)
 
 **13. API Reference** (`13_api_reference.md`)
 - Complete predicate documentation
@@ -157,10 +166,11 @@ By completing this book, you will be able to:
 | 12 | Distributed | Clients, sockets, mixed pipelines |
 | 13 | API Reference | Complete documentation |
 | 14 | Case Studies | Real-world examples |
+| 15 | Production | Deployment, security, monitoring |
 
 ## Implementation Status
 
-The cross-target glue system is functionally complete:
+The cross-target glue system is fully complete:
 
 | Phase | Description | Status |
 |-------|-------------|--------|
@@ -169,7 +179,7 @@ The cross-target glue system is functionally complete:
 | 3 | .NET Integration (C#, PowerShell, IronPython) | Complete |
 | 4 | Native Targets (Go, Rust) | Complete |
 | 5 | Network Layer (HTTP, sockets) | Complete |
-| 6 | Advanced Features (monitoring, optimization) | Planned |
+| 6 | Production Ready (deployment, monitoring) | Complete |
 
 ## Code Examples
 
