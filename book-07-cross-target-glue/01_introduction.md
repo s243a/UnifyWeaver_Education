@@ -478,3 +478,9 @@ bob is ancestor of alice
 - Unix Philosophy: https://en.wikipedia.org/wiki/Unix_philosophy
 - Pipes and Filters Pattern: https://www.enterpriseintegrationpatterns.com/patterns/messaging/PipesAndFilters.html
 - Design documentation: `docs/design/cross-target-glue/01-philosophy.md`
+
+---
+
+## Navigation
+
+[📖 Book 7: Cross-Target Glue](./) | [Next: Chapter 2: Philosophy and Design Principles →](02_philosophy)

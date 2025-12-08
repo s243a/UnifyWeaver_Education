@@ -57,3 +57,9 @@ high_value(Val) :-
     Val > 1000,
     Val =< 5000.
 ```
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 3: Project Generation](03_project_generation) | [📖 Book 9: Rust Target](./) | [Next: Book 10: SQL Target →](../book-10-sql-target/)

@@ -94,3 +94,9 @@ The new `src/unifyweaver/targets/powershell_target.pl` orchestrates this:
 3.  **`compile_predicate_to_powershell/3`**: Wraps it all in a PowerShell script (ps1).
 
 This ensures that UnifyWeaver logic can run natively on corporate Windows servers without needing Python installed.
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 5: Semantic Crawling and Vector Search](05_semantic_crawling) | [📖 Book 3: C# Target](./) | [Next: Book 4: Workflows →](../book-04-workflows/)

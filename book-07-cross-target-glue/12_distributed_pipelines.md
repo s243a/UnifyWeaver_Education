@@ -621,3 +621,9 @@ See `examples/05-distributed/` for:
 - `socket_client.py` - Python client
 - `network_pipeline.py` - Mixed pipeline
 - `resilient_pipeline.py` - With error handling
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 11: HTTP Services](11_http_services) | [📖 Book 7: Cross-Target Glue](./) | [Next: Chapter 13: API Reference →](13_api_reference)

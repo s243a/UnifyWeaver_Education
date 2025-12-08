@@ -102,3 +102,9 @@ This creates a highly focused dataset without downloading the entire internet.
 ## 5.6 Summary
 
 The Semantic Runtime transforms UnifyWeaver from a simple logic-to-script compiler into a tool for building intelligent agents. By leveraging local ONNX models and vector storage, your generated C# programs can understand and organize information at a semantic level.
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 4: Runtime Libraries and Deployment](04_runtime_libraries_deployment) | [📖 Book 3: C# Target](./) | [Next: Chapter 3: PowerShell Semantic Target (XML & Vecto... →](06_powershell_semantic)

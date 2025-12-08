@@ -596,3 +596,9 @@ From a can reach f in 3 steps
 - Location Transparency: https://en.wikipedia.org/wiki/Location_transparency
 - Pipes and Filters: https://www.enterpriseintegrationpatterns.com/patterns/messaging/PipesAndFilters.html
 - Backpressure: https://mechanical-sympathy.blogspot.com/
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 1: Introduction to Cross-Target Communicat...](01_introduction) | [📖 Book 7: Cross-Target Glue](./) | [Next: Chapter 3: Target Registry and Mapping →](03_target_registry)

@@ -796,3 +796,9 @@ Document your results (e.g., include command transcripts in release notes) so fu
 **Congratulations!** You've completed Book 2: C# Target Language.
 
 Return to Book 1 for Bash-specific topics or explore the appendices for advanced patterns.
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 3: C# Query Runtime - Deep Dive](03_query_engine_deep_dive) | [📖 Book 3: C# Target](./) | [Next: Chapter 5: Semantic Crawling and Vector Search →](05_semantic_crawling)

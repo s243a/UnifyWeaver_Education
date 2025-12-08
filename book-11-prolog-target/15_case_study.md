@@ -509,3 +509,9 @@ This case study demonstrated the complete workflow for using the Prolog target t
 - Generated code is production-ready
 - Native compilation provides performance benefits
 - UnifyWeaver handles dialect differences automatically
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 8: Dialect Fallback Mechanisms](08_fallback_mechanisms) | [📖 Book 11: Prolog Target](./) | [Next: Book 12: PowerShell Target →](../book-12-powershell-target/)

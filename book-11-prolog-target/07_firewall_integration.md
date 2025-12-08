@@ -459,3 +459,9 @@ Chapter 8 explores fallback mechanisms, showing how the system gracefully handle
 - Supports complex policy composition
 - Essential for production deployments
 - Can be customized for specific security requirements
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 3: Understanding Prolog Dialects](03_dialects) | [📖 Book 11: Prolog Target](./) | [Next: Chapter 8: Dialect Fallback Mechanisms →](08_fallback_mechanisms)

@@ -514,3 +514,9 @@ See `examples/03-dotnet-bridge/` for:
 - `IronPythonExample.cs` - IronPython integration
 - `CPythonExample.cs` - CPython fallback
 - `MixedPipeline.cs` - Combined example
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 6: Shell Pipeline Orchestration](06_shell_pipelines) | [📖 Book 7: Cross-Target Glue](./) | [Next: Chapter 8: IronPython Compatibility →](08_ironpython_compat)

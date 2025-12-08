@@ -136,3 +136,9 @@ By compiling to these optimized structures, UnifyWeaver produces Bash code that 
 ## Next Steps
 
 With an understanding of the architecture, we are now ready to get our hands dirty. In the next chapter, we will write our first UnifyWeaver program, defining a set of facts and rules, compiling them, and executing the resulting Bash script to see it all in action.
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 2: Prolog Fundamentals for UnifyWeaver](02_prolog_fundamentals) | [📖 Book 1: Foundations](./) | [Next: Book 2: Bash Target →](../book-02-bash-target/)

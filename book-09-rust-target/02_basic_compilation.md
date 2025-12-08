@@ -76,3 +76,9 @@ echo -e "alice:25\nbob:10" | ./adult
 # Output:
 # alice:25
 ```
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 1: Introduction to the Rust Target](01_introduction) | [📖 Book 9: Rust Target](./) | [Next: Chapter 3: Project Generation →](03_project_generation)

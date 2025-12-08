@@ -391,3 +391,9 @@ In Chapter 3, we'll explore Prolog dialects in detail, understanding the capabil
 - Code generation is separated from dialect-specific logic
 - Safe wrappers provide error handling and fallback
 - The architecture is designed for extensibility and robustness
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 1: Introduction to the Prolog Target](01_introduction) | [📖 Book 11: Prolog Target](./) | [Next: Chapter 3: Understanding Prolog Dialects →](03_dialects)

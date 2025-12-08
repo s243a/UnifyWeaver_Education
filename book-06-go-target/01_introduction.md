@@ -42,3 +42,9 @@ To use the Go target, you need:
 2.  **Go Compiler** installed (check with `go version`).
 
 In the next chapter, we will write our first Prolog predicate and compile it to Go.
+
+---
+
+## Navigation
+
+[📖 Book 6: Go Target](./) | [Next: Chapter 2: Basic Compilation →](02_basic_compilation)

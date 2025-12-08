@@ -74,3 +74,9 @@ index_my_data :-
 ```
 
 The compiler generates Python code that initializes the `PtCrawler` and executes the pipeline efficiently using streams.
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 2: Graph Retrieval-Augmented Generation (G...](02_graph_rag) | [📖 Book 13: Semantic Search](./) | [Next: Chapter 4: Logic and Recursion in Python →](04_logic_and_recursion)

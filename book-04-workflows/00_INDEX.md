@@ -328,3 +328,9 @@ This index is updated when:
 **Happy Learning!** 🚀
 
 Start with the [Factorial Playbook](playbooks/factorial_compilation.md) and work your way through the examples. Remember: workflows are about **strategic thinking**, playbooks are about **reliable execution**, and examples provide **concrete patterns** to build on.
+
+---
+
+## Navigation
+
+[📖 Book 4: Workflows](./) | [Next: Book 5: Python Target →](../book-05-python-target/)

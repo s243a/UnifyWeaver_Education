@@ -689,3 +689,9 @@ After this book, continue to **Book: Workflow** for:
 4. **Serverless Pipeline**: Create an event processing pipeline: S3 trigger -> Lambda -> DynamoDB. Generate all configurations.
 
 5. **Hybrid Deployment**: Design a system where the API runs on Kubernetes but background jobs run on Lambda. How do they share secrets?
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 15: Production Deployment (Phase 6)](15_deployment_production) | [📖 Book 7: Cross-Target Glue](./) | [Next: Book 8: Security & Firewall →](../book-08-security-firewall/)

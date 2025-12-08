@@ -660,3 +660,9 @@ generate_multiplatform_build(
 ## Next Steps
 
 In Chapter 14, we'll explore real-world case studies demonstrating these APIs in action.
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 12: Distributed Pipelines](12_distributed_pipelines) | [📖 Book 7: Cross-Target Glue](./) | [Next: Chapter 14: Case Studies →](14_case_studies)

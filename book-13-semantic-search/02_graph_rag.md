@@ -83,3 +83,9 @@ The runtime (`PtSearcher`) executes the following SQL logic:
 2.  `SELECT target_id FROM links WHERE source_id IN (ids)` (Parents)
 3.  `SELECT source_id FROM links WHERE target_id IN (ids)` (Children)
 4.  Returns a JSON object with `focus`, `parents`, and `children`.
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 1: The Python Semantic Target](01_introduction) | [📖 Book 13: Semantic Search](./) | [Next: Chapter 3: The Semantic Data Pipeline →](03_semantic_data_pipeline)

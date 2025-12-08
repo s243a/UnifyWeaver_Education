@@ -743,3 +743,9 @@ ERROR: Variable 's' has conflicting types: str vs int
 ## API Reference
 
 See `docs/design/cross-target-glue/04-api-reference.md` for complete predicate documentation.
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 2: Philosophy and Design Principles](02_philosophy) | [📖 Book 7: Cross-Target Glue](./) | [Next: Chapter 4: Pipe Protocols and Data Formats →](04_pipe_protocols)

@@ -597,3 +597,9 @@ The C# Stream Target:
 4. Benchmark C# vs Bash for your use case
 
 Next: **Chapter 3 - C# Query Runtime and Engine** →
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 1: Introduction to Multi-Target Compilatio...](01_introduction_multi_target) | [📖 Book 3: C# Target](./) | [Next: Chapter 3: C# Query Runtime - Deep Dive →](03_query_engine_deep_dive)

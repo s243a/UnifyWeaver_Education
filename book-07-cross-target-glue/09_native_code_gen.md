@@ -548,3 +548,9 @@ See `examples/04-native-parallel/` for:
 - `transform.rs` - Rust transformation
 - `parallel.go` - Parallel processing
 - `build.sh` - Build automation
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 8: IronPython Compatibility](08_ironpython_compat) | [📖 Book 7: Cross-Target Glue](./) | [Next: Chapter 10: Native Binary Orchestration →](10_native_orchestration)

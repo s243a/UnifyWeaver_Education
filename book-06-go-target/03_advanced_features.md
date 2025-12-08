@@ -81,3 +81,9 @@ Compile and run:
 go build slow_request.go
 cat access.log | ./slow_request
 ```
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 2: Basic Compilation](02_basic_compilation) | [📖 Book 6: Go Target](./) | [Next: Chapter 4: JSON Processing →](04_json_processing)

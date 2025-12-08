@@ -451,3 +451,9 @@ Chapter 9 explores validation and compatibility checking in depth, showing how t
 - Firewall integration enables security-driven fallback
 - Proper logging aids debugging and diagnostics
 - Balance between automatic fallback and strict validation
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 7: The Firewall System](07_firewall_integration) | [📖 Book 11: Prolog Target](./) | [Next: Chapter 15: Case Study - Factorial Compilation →](15_case_study)

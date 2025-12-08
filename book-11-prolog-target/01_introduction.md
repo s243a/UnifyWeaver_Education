@@ -166,3 +166,9 @@ In the next chapter, we'll dive into the architecture of the Prolog target, expl
 - It supports both interpreted scripts and native binaries
 - Integration with the firewall provides security and validation
 - The target simplifies deployment and cross-platform compatibility
+
+---
+
+## Navigation
+
+**←** [Previous: The Prolog Target: Implementation and Usage Guide](00_index) | [📖 Book 11: Prolog Target](./) | [Next: Chapter 2: Architecture Overview →](02_architecture)

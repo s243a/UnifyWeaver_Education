@@ -123,3 +123,9 @@ Each chapter includes:
 
 **Version**: UnifyWeaver v0.1
 **Last Updated**: 2025-11-17
+
+---
+
+## Navigation
+
+[📖 Book 11: Prolog Target](./) | [Next: Chapter 1: Introduction to the Prolog Target →](01_introduction)

@@ -758,3 +758,9 @@ See `examples/02-shell-formats/` for working examples of:
 - JSON Lines processing
 - Format conversion
 - Header-based typing
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 3: Target Registry and Mapping](03_target_registry) | [📖 Book 7: Cross-Target Glue](./) | [Next: Chapter 5: Shell Script Generation →](05_shell_glue)

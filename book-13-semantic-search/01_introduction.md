@@ -53,3 +53,9 @@ python3 ask.py
 ```
 
 In the next chapters, we will explore **Graph RAG**, where we combine Vector Search with Graph Traversal to give the AI "memory" of your data.
+
+---
+
+## Navigation
+
+[📖 Book 13: Semantic Search](./) | [Next: Chapter 2: Graph Retrieval-Augmented Generation (G... →](02_graph_rag)

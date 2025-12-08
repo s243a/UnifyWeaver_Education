@@ -311,3 +311,9 @@ If counter is 0, you have a scope issue!
 ## Next Steps
 
 Now that you understand variable scope, the next chapter will explore the **template system** that UnifyWeaver uses to generate this bash code cleanly and maintainably.
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 6: Advanced Topic: The Constraint System](03_advanced_constraints) | [📖 Book 2: Bash Target](./) | [Next: Chapter 8: The Modern Template System →](05_template_system)

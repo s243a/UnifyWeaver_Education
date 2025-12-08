@@ -89,3 +89,9 @@ To run generated semantic programs, you need:
 1.  **ONNX Runtime**: The Go runtime uses `github.com/owulveryck/onnx-go`.
 2.  **Model File**: An ONNX model file (e.g., `model.onnx`) in the `models/` directory.
 3.  **Internet Access**: For the crawler to fetch URLs.
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 4: JSON Processing](04_json_processing) | [📖 Book 6: Go Target](./) | [Next: Chapter 6: Generator Mode - Fixpoint Datalog Evalu... →](06_generator_mode)

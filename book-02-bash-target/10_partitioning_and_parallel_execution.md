@@ -971,3 +971,9 @@ partitioner_init(my_strategy(custom_config), [], Handle).
 **License**: CC BY 4.0 (same as other UnifyWeaver education materials)
 **Last Updated**: 2025-10-27
 **Version**: 1.0
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 10: Seamless Compilation with the Compiler...](09_recursive_compilation) | [📖 Book 2: Bash Target](./) | [Next: Chapter 14: XML Source Plugin →](11_xml_source_plugin)

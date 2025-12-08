@@ -41,3 +41,9 @@ cargo build --release
 ```
 
 UnifyWeaver automatically detects the need for the `regex` crate and adds it to `Cargo.toml`.
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 2: Basic Compilation](02_basic_compilation) | [📖 Book 9: Rust Target](./) | [Next: Chapter 4: Advanced Features →](04_advanced_features)

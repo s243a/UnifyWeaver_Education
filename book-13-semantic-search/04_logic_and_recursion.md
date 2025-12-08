@@ -65,3 +65,9 @@ def _fib_worker(n):
 ```
 
 The compiler automatically identifies the "worker" logic and wraps it in `functools.cache` (or a custom dictionary), ensuring $O(N)$ performance instead of exponential $O(2^N)$.
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 3: The Semantic Data Pipeline](03_semantic_data_pipeline) | [📖 Book 13: Semantic Search](./) | [Next: Chapter 5: The Semantic Playbook →](05_semantic_playbook)

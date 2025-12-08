@@ -487,3 +487,9 @@ See `examples/01-hello-pipeline/` for:
 - `filter.awk` - Filtering step
 - `transform.py` - Transformation step
 - `aggregate.awk` - Aggregation step
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 5: Shell Script Generation](05_shell_glue) | [📖 Book 7: Cross-Target Glue](./) | [Next: Chapter 7: .NET Bridge Generation →](07_dotnet_bridges)

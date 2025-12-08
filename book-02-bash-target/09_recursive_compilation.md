@@ -101,3 +101,9 @@ $ bash education/output/recursive/test_ancestor.sh
 ## Conclusion
 
 The compiler driver represents a significant step forward in the usability of UnifyWeaver. By automatically handling dependencies, it makes the compilation process more robust, less error-prone, and much more seamless, truly living up to the goal of one-click compilation from a declarative source.
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 11: Test Runner Inference](08_test_runner_inference) | [📖 Book 2: Bash Target](./) | [Next: Chapter 13: Partitioning and Parallel Execution →](10_partitioning_and_parallel_execution)

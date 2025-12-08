@@ -110,3 +110,9 @@ go build etl.go
 echo '{"id":1, "name":"alice", "active":true}' | ./etl
 # Output: {"arg1":1, "arg2":"alice"}
 ```
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 3: Advanced Features](03_advanced_features) | [📖 Book 6: Go Target](./) | [Next: Chapter 5: Semantic Crawling & RDF Processing →](05_semantic_crawling)

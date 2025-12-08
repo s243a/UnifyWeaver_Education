@@ -837,3 +837,9 @@ examples/
     ├── docker-compose.yml
     └── README.md
 ```
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 13: API Reference](13_api_reference) | [📖 Book 7: Cross-Target Glue](./) | [Next: Chapter 15: Production Deployment (Phase 6) →](15_deployment_production)
