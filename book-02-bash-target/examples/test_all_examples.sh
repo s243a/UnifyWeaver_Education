@@ -65,7 +65,7 @@ fi
 
 # Copy necessary files (family_tree.pl, etc.) to a temp location for loading
 TEMP_FILES_DIR=$(mktemp -d)
-cp education/*.pl "$TEMP_FILES_DIR/"
+cp education/book-02-bash-target/examples/*.pl "$TEMP_FILES_DIR/"
 trap 'rm -rf -- "$TEMP_FILES_DIR" $([[ "$USE_TEMP" == true ]] && echo "$OUTPUT_DIR")' EXIT
 
 # DON'T change to temp directory - stay in project root for module resolution
@@ -78,7 +78,7 @@ run_prolog_test() {
     local code="$2"
     echo -n "  Testing: $description ... "
     # Run from project root - this allows module resolution to work correctly
-    if swipl -q -s "education/init.pl" -g "$code, halt." <<< ""; then
+    if swipl -q -s "init.pl" -g "$code, halt." <<< ""; then
         echo "✅ PASS"
     else
         echo "❌ FAIL"
@@ -110,7 +110,7 @@ run_prolog_test "Initialize Environment" "true"
 run_prolog_test "Full Chapter 4 Workflow" "
     use_module(unifyweaver(core/recursive_compiler)), 
     use_module(unifyweaver(core/stream_compiler)), 
-    ['education/family_tree'],
+    ['education/book-02-bash-target/examples/family_tree'],
     stream_compiler:compile_facts(parent, 2, [], _),
     compile_recursive(ancestor/2, [], _),
     stream_compiler:compile_facts(parent, 2, [], ParentCode), 
@@ -130,7 +130,7 @@ echo "
 --- Chapter 12: Seamless Compilation with the Compiler Driver ---"
 run_prolog_test "Chapter 12 Workflow" "
     use_module(unifyweaver(core/compiler_driver)),
-    ['education/family_tree'],
+    ['education/book-02-bash-target/examples/family_tree'],
     compiler_driver:compile(ancestor/2, [output_dir('$OUTPUT_DIR')], _)"
 run_bash_test "Run Generated Scripts" "source '$OUTPUT_DIR/parent.sh' && source '$OUTPUT_DIR/ancestor.sh' && ancestor abraham jacob | grep -q 'abraham:jacob'"
 

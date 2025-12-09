@@ -9,8 +9,9 @@
 # Test runner for the family_tree example
 
 # Source the necessary scripts
-source /mnt/c/Users/johnc/Dropbox/projects/UnifyWeaver/education/parent.sh
-source /mnt/c/Users/johnc/Dropbox/projects/UnifyWeaver/education/family_tree.sh
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "$SCRIPT_DIR/parent.sh"
+source "$SCRIPT_DIR/family_tree.sh"
 
 echo "--- Running family_tree tests ---"
 
