@@ -58,7 +58,7 @@ dotnet run
 
 **Expected Output:**
 ```
-alice,bob,bob,charlie
+alice,charlie
 ```
 
 This represents the join result: `test_link(alice, charlie)` - Alice is linked to Charlie via Bob.
