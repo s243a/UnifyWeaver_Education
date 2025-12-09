@@ -1,0 +1,5 @@
+Laptop	Electronics	1200
+Chair	Furniture	150
+Mouse	Electronics	25
+Desk	Furniture	300
+Phone	Electronics	800

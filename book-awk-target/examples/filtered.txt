@@ -1,0 +1,2 @@
+Laptop	Electronics	1200
+Phone	Electronics	800
