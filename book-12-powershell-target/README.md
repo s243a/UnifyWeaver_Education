@@ -36,23 +36,43 @@ By completing this book, you will be able to:
 - Build Windows automation pipelines
 - Integrate with Active Directory and Windows services
 
+## Implementation Status
+
+This table shows the current implementation status of features described in each chapter.
+
+| Chapter | Feature | Status | Notes |
+|---------|---------|--------|-------|
+| [Ch 1](01_introduction.md) | Basic compilation | **Implemented** | `compile_to_powershell/3` works |
+| [Ch 1](01_introduction.md) | Module loading | **Implemented** | `use_module(unifyweaver(core/powershell_compiler))` |
+| [Ch 2](02_facts_rules.md) | Facts to arrays | **Implemented** | Facts compile to `PSCustomObject` arrays |
+| [Ch 2](02_facts_rules.md) | Rules to joins | Partial | Rules generate join code, but don't auto-include dependent facts |
+| [Ch 3](03_cmdlet_generation.md) | CmdletBinding | Not yet | Advanced function attributes not generated |
+| [Ch 3](03_cmdlet_generation.md) | Parameter validation | Not yet | `[ValidateSet()]`, `[Mandatory]` not generated |
+| [Ch 3](03_cmdlet_generation.md) | Begin/Process/End | Partial | Only in `.NET` mode via `dotnet_source` |
+| [Ch 4](04_dotnet_integration.md) | dotnet_source | **Implemented** | Inline C# compilation works |
+| [Ch 4](04_dotnet_integration.md) | DLL caching | **Implemented** | `pre_compile(true)` generates caching |
+| [Ch 4](04_dotnet_integration.md) | NuGet references | **Implemented** | `references(['LiteDB'])` works |
+| [Ch 5](05_windows_automation.md) | Windows automation | Design only | Examples show patterns, not auto-generated |
+
+**Legend:** **Implemented** = tested and working, Partial = works with limitations, Not yet = documented but not implemented, Design only = conceptual/aspirational
+
 ## Chapters
 
 ### Part 1: Basic Compilation
 
-**[Chapter 1: Introduction](01_introduction.md)**
+**[Chapter 1: Introduction](01_introduction.md)** - *Implemented*
 - Why use the PowerShell target?
 - PowerShell vs Bash for automation
 - Compilation modes (BaaS, Pure, Inline .NET)
 - Your first PowerShell compilation
 
-**[Chapter 2: Facts and Rules](02_facts_rules.md)**
+**[Chapter 2: Facts and Rules](02_facts_rules.md)** - *Mostly Implemented*
 - Compiling facts to PowerShell arrays
 - PSCustomObject for binary facts
 - Translating rules to functions with joins
 - Pipeline integration
 
-**[Chapter 3: Cmdlet Generation](03_cmdlet_generation.md)**
+**[Chapter 3: Cmdlet Generation](03_cmdlet_generation.md)** - *Design Document*
 - Creating advanced functions with CmdletBinding
 - Parameter attributes and validation
 - Begin/Process/End blocks
@@ -60,13 +80,13 @@ By completing this book, you will be able to:
 
 ### Part 2: .NET Integration
 
-**[Chapter 4: .NET Integration](04_dotnet_integration.md)**
+**[Chapter 4: .NET Integration](04_dotnet_integration.md)** - *Fully Implemented*
 - Inline C# with Add-Type
 - The dotnet_source plugin
 - DLL caching for 138x speedup
 - NuGet package integration
 
-**[Chapter 5: Windows Automation](05_windows_automation.md)**
+**[Chapter 5: Windows Automation](05_windows_automation.md)** - *Design Document*
 - File system operations
 - Windows services management
 - Registry access
@@ -88,18 +108,6 @@ By completing this book, you will be able to:
 - Remote execution (PSRemoting)
 - Scheduled tasks
 - Credential management
-
-## Content Status
-
-**Completed:**
-- Chapter 1: Introduction
-- Chapter 2: Facts and Rules
-- Chapter 3: Cmdlet Generation
-- Chapter 4: .NET Integration
-- Chapter 5: Windows Automation
-
-**Planned:**
-- Chapter 6-8: Advanced enterprise topics
 
 ## Quick Example
 
