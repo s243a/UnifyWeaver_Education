@@ -104,21 +104,63 @@ Targets are grouped into runtime families. Targets in the same family can commun
 
 **Key insight**: C# calling PowerShell can pass objects directly (in-process). AWK calling Python must serialize data (pipes).
 
-## Quick Start Example
+## Three Ways to Define Pipelines
 
-Let's build a simple log analysis pipeline:
+UnifyWeaver provides multiple levels of abstraction for defining cross-target pipelines. Understanding all three helps you choose the right approach for your needs.
+
+### 1. High-Level Declarative Approach (Recommended)
+
+Start with pure business logic—what your pipeline *does*, not *how* it's implemented:
 
 ```prolog
-% log_pipeline.pl
+% process_data.pl - Pure declarative logic
+:- module(process_data, [process_data/2]).
+
+% Define the data flow: Input → Raw → Processed → Output
+process_data(Input, Output) :-
+    fetch(Input, Raw),           % Stage 1: Get data
+    transform(Raw, Processed),   % Stage 2: Transform it
+    store(Processed, Output).    % Stage 3: Save results
+```
+
+Now declare which target implements each predicate:
+
+```prolog
+% Target declarations: map predicates to implementations
+:- declare_target(fetch/2, bash, [
+    file('fetch.sh'),
+    name('fetch_stage')
+]).
+:- declare_target(transform/2, python, [
+    file('transform.py'),
+    name('transform_stage')
+]).
+:- declare_target(store/2, awk, [
+    file('store.awk'),
+    name('store_stage')
+]).
+```
+
+Notice how:
+- **Variable names flow naturally**: `Input → Raw → Processed → Output`
+- **Logic is separated from implementation**: You can change targets without changing the logic
+- **Declarations define the mapping**: Each predicate gets a target, file, and step name
+
+### 2. Low-Level Example (Explicit Step Construction)
+
+Under the hood, `generate_pipeline/3` works with explicit `step/4` terms. Here's what the low-level assembly looks like:
+
+```prolog
+% log_pipeline.pl - Explicit step construction
 :- use_module('src/unifyweaver/glue/shell_glue').
 
-% Generate a 3-stage pipeline
+% Manually construct the pipeline steps
 example_pipeline(Script) :-
     generate_pipeline(
         [
-            step(filter, awk, 'filter.awk', []),
-            step(analyze, python, 'analyze.py', []),
-            step(report, awk, 'report.awk', [])
+            step(fetch_stage, bash, 'fetch.sh', []),
+            step(transform_stage, python, 'transform.py', []),
+            step(store_stage, awk, 'store.awk', [])
         ],
         [input('access.log')],
         Script
@@ -138,15 +180,75 @@ Generated output:
 set -euo pipefail
 
 cat "access.log" \
-    | awk -f "filter.awk" \
-    | python3 "analyze.py" \
-    | awk -f "report.awk"
+    | bash "fetch.sh" \
+    | python3 "transform.py" \
+    | awk -f "store.awk"
 ```
 
 The glue system:
 1. Generated the orchestration script
 2. Connected stages with pipes
 3. Set up proper error handling (`set -euo pipefail`)
+
+**Why is this "low-level"?** You had to manually construct the `step/4` terms, duplicating information that was already declared with `declare_target/3`. The next section shows how to avoid this.
+
+### 3. Meta-Interpreter Inference (Automatic Step Derivation)
+
+Instead of manually constructing steps, let UnifyWeaver *infer* them from your high-level goal:
+
+```prolog
+% Infer steps from the process_data/2 goal
+generate_pipeline_inferred(Script) :-
+    % Analyze the goal and derive steps from target declarations
+    infer_steps_from_goal(process_data(_, _), Steps),
+    
+    % Pass inferred steps to generate_pipeline/3
+    generate_pipeline(
+        Steps,
+        [input('access.log'), output('result.txt')],
+        Script
+    ).
+```
+
+The `infer_steps_from_goal/2` predicate:
+1. Introspects the body of `process_data/2`
+2. Finds: `fetch/2`, `transform/2`, `store/2`
+3. Looks up each predicate's `declare_target/3` declaration
+4. Constructs the equivalent `step/4` list automatically
+
+> [!TIP]
+> A working proof-of-concept is available in:  
+> [`examples/glue/my_pipeline_example.pl`](file:///home/s243a/Projects/UnifyWeaver/examples/glue/my_pipeline_example.pl)
+
+### 4. Compiler Integration (Planned)
+
+The ultimate goal is for the UnifyWeaver compiler to invoke meta-interpreters automatically during code generation:
+
+```prolog
+% Future API: Compile directly from high-level goal
+compile_goal_to_pipeline(
+    process_data(Input, Output),
+    [input('data.csv')],
+    Script
+).
+```
+
+This would:
+1. Analyze the goal structure
+2. Consult target declarations
+3. Infer pipeline steps
+4. Generate the orchestration script
+
+See the [Meta-Interpreter Proposal](file:///home/s243a/Projects/UnifyWeaver/docs/proposals/meta_interpreter_inference.md) for the full design.
+
+### Choosing Your Approach
+
+| Approach | When to Use |
+|----------|-------------|
+| **High-Level Declarative** | Always start here—define your logic cleanly |
+| **Low-Level (Explicit)** | When you need fine-grained control over step construction |
+| **Meta-Interpreter** | When you want automatic step inference from declarations |
+| **Compiler Integration** | Future: one-step compilation from logic to script |
 
 ## What Cross-Target Glue Provides
 
