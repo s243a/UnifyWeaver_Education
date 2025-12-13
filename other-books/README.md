@@ -4,10 +4,20 @@ This folder contains educational materials for less developed or experimental ta
 
 ## Available Books
 
+### Native Targets
 | Book | Target | Status |
 |------|--------|--------|
 | [book-c-target](book-c-target/) | C | 🚧 Initial |
 | [book-cpp-target](book-cpp-target/) | C++ | 🚧 Initial |
+
+### JVM Targets
+| Book | Target | Status |
+|------|--------|--------|
+| [book-java-target](book-java-target/) | Java | 🚧 Initial |
+| [book-jython-target](book-jython-target/) | Jython | 🚧 Initial |
+| [book-kotlin-target](book-kotlin-target/) | Kotlin | 🚧 Initial |
+| [book-scala-target](book-scala-target/) | Scala | 🚧 Initial |
+| [book-clojure-target](book-clojure-target/) | Clojure | 🚧 Initial |
 
 ## Contributing
 
