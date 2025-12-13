@@ -2,7 +2,31 @@
 
 Pipeline mode generates Kotlin code using sequences and lambda expressions.
 
-## Generated Code Structure
+## Source Prolog
+
+```prolog
+% filter.pl - Define your filter predicate
+:- module(filter, [filter/2]).
+
+% Keep records where value > 50
+filter(Input, Output) :-
+    get_field(Input, "value", Value),
+    Value > 50,
+    Output = Input.
+```
+
+## Generating Kotlin Code
+
+```prolog
+?- use_module('src/unifyweaver/targets/kotlin_target').
+?- use_module('filter').
+
+% Generate pipeline Kotlin code
+?- compile_predicate_to_kotlin(filter/2, [pipeline_input(true)], Code),
+   write_to_file('FilterPipeline.kt', Code).
+```
+
+## Generated Kotlin Code
 
 ```kotlin
 import com.google.gson.Gson
@@ -11,12 +35,11 @@ import java.io.InputStreamReader
 
 object FilterPipeline {
     private val gson = Gson()
-    private val mapType = object : TypeToken<MutableMap<String, Any?>>() {}.type
 
     fun process(record: MutableMap<String, Any?>): MutableMap<String, Any?>? {
-        // Your predicate logic here
-        // Return null to filter out
-        return record
+        // Generated from: filter(Input, Output) :- get_field(Input, "value", Value), Value > 50, Output = Input.
+        val value = record["value"] as? Number
+        return if (value != null && value.toDouble() > 50) record else null
     }
 
     fun runPipeline() {
@@ -24,13 +47,8 @@ object FilterPipeline {
             .lineSequence()
             .filter { it.isNotBlank() }
             .mapNotNull { line ->
-                try {
-                    val record: MutableMap<String, Any?> = gson.fromJson(line, mapType)
-                    process(record)
-                } catch (e: Exception) {
-                    System.err.println("JSON parse error: ${e.message}")
-                    null
-                }
+                val record: MutableMap<String, Any?> = gson.fromJson(line, mapType)
+                process(record)
             }
             .forEach { result ->
                 println(gson.toJson(result))
@@ -41,30 +59,14 @@ object FilterPipeline {
 fun main() = FilterPipeline.runPipeline()
 ```
 
-## Kotlin Features Used
-
-| Feature | Purpose |
-|---------|---------|
-| `lineSequence()` | Lazy line reading |
-| `mapNotNull` | Filter + transform |
-| `?.` | Safe null access |
-| `?:` | Elvis operator for defaults |
-
-## Generating Pipeline Code
-
-```prolog
-?- compile_predicate_to_kotlin(filter/2, [pipeline_input(true)], Code).
-```
-
 ## Running the Pipeline
 
 ```bash
-# With Gradle
+# Compile and run with Gradle
 ./gradlew run < input.jsonl
 
-# Direct
-kotlinc -include-runtime -d pipeline.jar FilterPipeline.kt
-java -jar pipeline.jar < input.jsonl
+# Or direct
+echo '{"value": 75}' | kotlin FilterPipeline.kt
 ```
 
 ## Next Steps

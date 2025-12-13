@@ -2,80 +2,90 @@
 
 Generator mode uses Scala's `LazyList` with the `#::` cons operator.
 
-## Generated Code Structure
+## Source Prolog
+
+```prolog
+% expand.pl - Expand items into separate records
+:- module(expand, [expand/2]).
+
+expand(Input, Output) :-
+    get_field(Input, "items", Items),
+    member(Item, Items),
+    set_field(Input, "item", Item, Temp),
+    remove_field(Temp, "items", Output).
+```
+
+## Generating Scala Code
+
+```prolog
+?- use_module('src/unifyweaver/targets/scala_target').
+?- use_module('expand').
+
+?- compile_predicate_to_scala(expand/2, [generator_mode(true)], Code),
+   write_to_file('ExpandGenerator.scala', Code).
+```
+
+## Generated Scala Code
 
 ```scala
-object Generator {
+object ExpandGenerator {
   type Record = Map[String, Any]
 
   def process(record: Record): LazyList[Record] = {
-    // Return LazyList for multiple results
-    record #:: LazyList.empty
+    // Generated from: expand(Input, Output) :- member(Item, Items), ...
+    record.get("items") match {
+      case Some(items: List[_]) =>
+        items.to(LazyList).map { item =>
+          record - "items" + ("item" -> item)
+        }
+      case _ => LazyList.empty
+    }
   }
 
   def processAll(records: Iterator[Record]): LazyList[Record] = {
     records.to(LazyList).flatMap(process)
   }
-
-  def runPipeline(): Unit = {
-    processAll(readJsonl())
-      .foreach(result => println(toJson(result)))
-  }
 }
 ```
 
-## LazyList
+## Running the Generator
 
-`LazyList` provides lazy, potentially infinite sequences:
+```bash
+echo '{"id": 1, "items": ["a", "b", "c"]}' | scala ExpandGenerator.scala
 
-```scala
-// Finite
-val finite = 1 #:: 2 #:: 3 #:: LazyList.empty
-
-// Infinite (evaluated lazily)
-val infinite = LazyList.from(1)
-```
-
-## Example: Expanding Records
-
-```scala
-def process(record: Record): LazyList[Record] = {
-  record.get("items") match {
-    case Some(items: List[_]) =>
-      items.to(LazyList).map { item =>
-        record - "items" + ("item" -> item)
-      }
-    case _ => LazyList.empty
-  }
-}
-```
-
-Input:
-```json
-{"id": 1, "items": ["a", "b", "c"]}
-```
-
-Output:
-```json
+# Output:
 {"id": 1, "item": "a"}
 {"id": 1, "item": "b"}
 {"id": 1, "item": "c"}
 ```
 
-## Recursive Generators with @tailrec
+## More Prolog Examples
 
-For tail-recursive predicates, Scala uses `@tailrec`:
-
-```scala
-@tailrec
-def generate(current: Record, acc: LazyList[Record]): LazyList[Record] = {
-  if (isBaseCase(current)) current #:: acc
-  else generate(transform(current), current #:: acc)
-}
+### Recursive countdown
+```prolog
+countdown(Input, Output) :-
+    get_field(Input, "n", N),
+    N > 0,
+    Output = Input.
+countdown(Input, Output) :-
+    get_field(Input, "n", N),
+    N > 0,
+    N1 is N - 1,
+    set_field(Input, "n", N1, Next),
+    countdown(Next, Output).
 ```
 
-## Generating Generator Code
+Generated Scala with @tailrec:
+```scala
+import scala.annotation.tailrec
 
-```prolog
-?- compile_predicate_to_scala(expand/2, [generator_mode(true)], Code).
+def process(record: Record): LazyList[Record] = {
+  @tailrec
+  def loop(current: Record, acc: LazyList[Record]): LazyList[Record] = {
+    val n = current.getOrElse("n", 0).asInstanceOf[Int]
+    if (n <= 0) current #:: acc
+    else loop(current + ("n" -> (n - 1)), current #:: acc)
+  }
+  loop(record, LazyList.empty)
+}
 ```

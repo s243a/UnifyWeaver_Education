@@ -2,7 +2,29 @@
 
 Pipeline mode generates Clojure code using `keep` for filtering.
 
-## Generated Code Structure
+## Source Prolog
+
+```prolog
+% filter.pl - Define your filter predicate
+:- module(filter, [filter/2]).
+
+filter(Input, Output) :-
+    get_field(Input, "value", Value),
+    Value > 50,
+    Output = Input.
+```
+
+## Generating Clojure Code
+
+```prolog
+?- use_module('src/unifyweaver/targets/clojure_target').
+?- use_module('filter').
+
+?- compile_predicate_to_clojure(filter/2, [pipeline_input(true)], Code),
+   write_to_file('filter_pipeline.clj', Code).
+```
+
+## Generated Clojure Code
 
 ```clojure
 (ns filter-pipeline
@@ -10,9 +32,9 @@ Pipeline mode generates Clojure code using `keep` for filtering.
             [clojure.java.io :as io]))
 
 (defn process [record]
-  "Process a single record. Return record or nil to filter."
-  ;; Your predicate logic here
-  record)
+  ;; Generated from: filter(Input, Output) :- get_field(Input, "value", Value), Value > 50, ...
+  (when (> (:value record 0) 50)
+    record))
 
 (defn run-pipeline []
   (doseq [result (->> (line-seq (io/reader *in*))
@@ -25,38 +47,11 @@ Pipeline mode generates Clojure code using `keep` for filtering.
   (run-pipeline))
 ```
 
-## Threading Macros
-
-Clojure's threading macros make pipelines readable:
-
-```clojure
-;; ->> threads through last position
-(->> input
-     (filter pred?)
-     (map transform)
-     (keep process))
-```
-
-| Macro | Threading |
-|-------|-----------|
-| `->` | First position |
-| `->>` | Last position |
-| `as->` | Named position |
-
-## Generating Pipeline Code
-
-```prolog
-?- compile_predicate_to_clojure(filter/2, [pipeline_input(true)], Code).
-```
-
 ## Running the Pipeline
 
 ```bash
-# With deps.edn
-clojure -M -m filter-pipeline < input.jsonl
-
-# Direct
-clojure filter_pipeline.clj < input.jsonl
+echo '{"value": 75}' | clojure -M -m filter-pipeline
+# Output: {"value":75}
 ```
 
 ## Next Steps

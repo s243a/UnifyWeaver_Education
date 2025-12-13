@@ -2,19 +2,43 @@
 
 Pipeline mode generates Scala code using `Option[T]` and `flatMap` for filtering.
 
-## Generated Code Structure
+## Source Prolog
+
+```prolog
+% filter.pl - Define your filter predicate
+:- module(filter, [filter/2]).
+
+filter(Input, Output) :-
+    get_field(Input, "value", Value),
+    Value > 50,
+    Output = Input.
+```
+
+## Generating Scala Code
+
+```prolog
+?- use_module('src/unifyweaver/targets/scala_target').
+?- use_module('filter').
+
+?- compile_predicate_to_scala(filter/2, [pipeline_input(true)], Code),
+   write_to_file('FilterPipeline.scala', Code).
+```
+
+## Generated Scala Code
 
 ```scala
 import scala.io.Source
-import scala.util.parsing.json.JSON
 
 object FilterPipeline {
   type Record = Map[String, Any]
 
   def process(record: Record): Option[Record] = {
-    // Return Some(record) to keep
-    // Return None to filter out
-    Some(record)
+    // Generated from: filter(Input, Output) :- get_field(Input, "value", Value), Value > 50, ...
+    record.get("value") match {
+      case Some(v: Double) if v > 50 => Some(record)
+      case Some(v: Int) if v > 50 => Some(record)
+      case _ => None
+    }
   }
 
   def runPipeline(): Unit = {
@@ -28,41 +52,11 @@ object FilterPipeline {
 }
 ```
 
-## Option[T] for Filtering
-
-| Prolog | Scala |
-|--------|-------|
-| Success | `Some(value)` |
-| Failure | `None` |
-| Filter | `flatMap` |
-
-## Pattern Matching
-
-Scala's pattern matching excels at JSON processing:
-
-```scala
-def process(record: Record): Option[Record] = {
-  record.get("value") match {
-    case Some(v: Double) if v > 50 => Some(record)
-    case _ => None
-  }
-}
-```
-
-## Generating Pipeline Code
-
-```prolog
-?- compile_predicate_to_scala(filter/2, [pipeline_input(true)], Code).
-```
-
 ## Running the Pipeline
 
 ```bash
-# With SBT
-sbt run < input.jsonl
-
-# Direct
-scala FilterPipeline.scala < input.jsonl
+echo '{"value": 75}' | scala FilterPipeline.scala
+# Output: {"value": 75}
 ```
 
 ## Next Steps

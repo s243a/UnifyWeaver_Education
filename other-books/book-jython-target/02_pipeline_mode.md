@@ -2,7 +2,29 @@
 
 Pipeline mode generates Jython code using Python-style loops with Java I/O integration.
 
-## Generated Code Structure
+## Source Prolog
+
+```prolog
+% filter.pl - Define your filter predicate
+:- module(filter, [filter/2]).
+
+filter(Input, Output) :-
+    get_field(Input, "value", Value),
+    Value > 50,
+    Output = Input.
+```
+
+## Generating Jython Code
+
+```prolog
+?- use_module('src/unifyweaver/targets/jython_target').
+?- use_module('filter').
+
+?- compile_predicate_to_jython(filter/2, [pipeline_input(true)], Code),
+   write_to_file('filter_pipeline.py', Code).
+```
+
+## Generated Jython Code
 
 ```python
 #!/usr/bin/env jython
@@ -13,60 +35,32 @@ from java.io import BufferedReader, InputStreamReader
 from java.lang import System as JavaSystem
 
 def process(record):
-    """Process a single record. Return record or None to filter."""
-    # Your predicate logic here
-    return record
+    # Generated from: filter(Input, Output) :- get_field(Input, "value", Value), Value > 50, ...
+    value = record.get('value')
+    if value is not None and value > 50:
+        return record
+    return None
 
 def run_pipeline():
     reader = BufferedReader(InputStreamReader(JavaSystem.in))
     line = reader.readLine()
     while line is not None:
         if line.strip():
-            try:
-                record = json.loads(line)
-                result = process(record)
-                if result is not None:
-                    print(json.dumps(result))
-            except ValueError as e:
-                print >> sys.stderr, 'JSON parse error:', e
+            record = json.loads(line)
+            result = process(record)
+            if result is not None:
+                print(json.dumps(result))
         line = reader.readLine()
 
 if __name__ == '__main__':
     run_pipeline()
 ```
 
-## Generating Pipeline Code
-
-```prolog
-% Define your predicate
-filter(Input, Output) :-
-    Input = record(Name, Value),
-    Value > 50,
-    Output = record(Name, Value).
-
-% Generate Jython code
-?- compile_predicate_to_jython(filter/2, [pipeline_input(true)], Code).
-```
-
 ## Running the Pipeline
 
 ```bash
-echo '{"name": "alice", "value": 75}' | jython filter_pipeline.py
-# Output: {"name": "alice", "value": 75}
-```
-
-## Java Interoperability
-
-Jython can call Java directly:
-
-```python
-from java.util import ArrayList, HashMap
-
-def process(record):
-    # Use Java collections
-    jmap = HashMap()
-    jmap.put("name", record["name"])
-    return dict(jmap)
+echo '{"value": 75}' | jython filter_pipeline.py
+# Output: {"value": 75}
 ```
 
 ## Next Steps

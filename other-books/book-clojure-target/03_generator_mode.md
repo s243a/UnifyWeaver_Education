@@ -2,19 +2,45 @@
 
 Generator mode uses Clojure's `lazy-seq` and `cons` for lazy evaluation.
 
-## Generated Code Structure
+## Source Prolog
+
+```prolog
+% expand.pl - Expand items into separate records
+:- module(expand, [expand/2]).
+
+expand(Input, Output) :-
+    get_field(Input, "items", Items),
+    member(Item, Items),
+    set_field(Input, "item", Item, Temp),
+    remove_field(Temp, "items", Output).
+```
+
+## Generating Clojure Code
+
+```prolog
+?- use_module('src/unifyweaver/targets/clojure_target').
+?- use_module('expand').
+
+?- compile_predicate_to_clojure(expand/2, [generator_mode(true)], Code),
+   write_to_file('expand_generator.clj', Code).
+```
+
+## Generated Clojure Code
 
 ```clojure
-(ns generator
+(ns expand-generator
   (:require [clojure.data.json :as json]))
 
 (defn process [record]
-  "Generator: returns lazy sequence of results."
-  (lazy-seq
-    (cons record nil)))
+  ;; Generated from: expand(Input, Output) :- member(Item, Items), ...
+  (let [items (:items record)]
+    (map (fn [item]
+           (-> record
+               (dissoc :items)
+               (assoc :item item)))
+         items)))
 
 (defn process-all [records]
-  "Flatten all generator results."
   (mapcat process records))
 
 (defn run-pipeline []
@@ -22,62 +48,42 @@ Generator mode uses Clojure's `lazy-seq` and `cons` for lazy evaluation.
     (println (json/write-str result))))
 ```
 
-## Lazy Sequences
+## Running the Generator
 
-Clojure sequences are lazy by default:
+```bash
+echo '{"id": 1, "items": ["a", "b", "c"]}' | clojure expand_generator.clj
 
-```clojure
-;; lazy-seq + cons for building
-(defn generate [n]
-  (lazy-seq
-    (when (pos? n)
-      (cons n (generate (dec n))))))
-
-;; Infinite sequences
-(def naturals (iterate inc 1))
-```
-
-## Example: Expanding Records
-
-```clojure
-(defn process [record]
-  (let [items (:items record)]
-    (map (fn [item]
-           (-> record
-               (dissoc :items)
-               (assoc :item item)))
-         items)))
-```
-
-Input:
-```json
-{"id": 1, "items": ["a", "b", "c"]}
-```
-
-Output:
-```json
+# Output:
 {"id": 1, "item": "a"}
 {"id": 1, "item": "b"}
 {"id": 1, "item": "c"}
 ```
 
-## Recursive Generators with loop/recur
+## More Prolog Examples
 
-Tail recursion uses `loop/recur`:
+### Recursive countdown
+```prolog
+countdown(Input, Output) :-
+    get_field(Input, "n", N),
+    N > 0,
+    Output = Input.
+countdown(Input, Output) :-
+    get_field(Input, "n", N),
+    N > 0,
+    N1 is N - 1,
+    set_field(Input, "n", N1, Next),
+    countdown(Next, Output).
+```
 
+Generated Clojure with loop/recur:
 ```clojure
-(defn generate [record]
+(defn process [record]
   (lazy-seq
     (loop [current record
            results []]
-      (if (base-case? current)
-        (cons current results)
-        (recur (transform current)
-               (cons current results))))))
-```
-
-## Generating Generator Code
-
-```prolog
-?- compile_predicate_to_clojure(expand/2, [generator_mode(true)], Code).
+      (let [n (:n current 0)]
+        (if (<= n 0)
+          (cons current results)
+          (recur (assoc current :n (dec n))
+                 (cons current results)))))))
 ```
