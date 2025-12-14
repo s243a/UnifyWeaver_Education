@@ -1,42 +1,50 @@
 # Chapter 1: Introduction to the Scala Target
 
-The Scala target generates functional Scala code with Option, pattern matching, and LazyList.
+The Scala target generates idiomatic Scala code with LazyList, pattern matching, and case classes.
+
+## Features
+
+| Feature | Status | Details |
+|---------|--------|---------|
+| Pipeline mode | ✅ | `Option[Record]` for filtering |
+| Generator mode | ✅ | `LazyList` for lazy evaluation |
+| Recursive queries | ✅ | BFS transitive closure |
+| Fact export | ✅ | `compile_facts_to_scala/3` |
 
 ## Why Scala?
 
-- **Functional**: First-class functions, immutability
-- **Pattern matching**: Powerful type-safe destructuring
-- **Option[T]**: Safe null handling
-- **LazyList**: Infinite lazy sequences
+- **Functional**: First-class functions, immutable data
+- **LazyList**: Memory-efficient stream processing
+- **Pattern matching**: Expressive case analysis
+- **JVM**: Access to Java libraries
 
 ## Architecture
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌──────────────────┐
-│ Prolog Predicate│───▶│scala_target.pl  │───▶│ Generated Scala  │
+│ Prolog Predicate│───▶│ scala_target.pl │───▶│ Generated Scala  │
 └─────────────────┘    └─────────────────┘    └──────────────────┘
                                                       │
                                                       ▼
                                              ┌──────────────────┐
-                                             │ scalac + SBT     │
+                                             │   scalac + sbt   │
                                              └──────────────────┘
 ```
-
-## Modes
-
-| Mode | Use Case | Pattern |
-|------|----------|---------|
-| Simple | Basic predicates | println() |
-| Pipeline | Stream processing | Option[T].flatMap |
-| Generator | Multiple outputs | LazyList #:: |
 
 ## Quick Start
 
 ```prolog
-?- use_module('src/unifyweaver/targets/scala_target').
+% Pipeline mode
 ?- compile_predicate_to_scala(filter/2, [pipeline_input(true)], Code).
+
+% Recursive query (transitive closure)
+?- compile_recursive(ancestor/2, [target(scala)], Code).
+
+% Export facts
+?- compile_facts_to_scala(parent, 2, Code).
 ```
 
 ## Next Steps
 
 - [Chapter 2: Pipeline Mode](02_pipeline_mode.md)
+- [Chapter 4: Recursive Queries](04_recursive_queries.md)

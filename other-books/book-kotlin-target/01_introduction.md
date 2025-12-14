@@ -2,6 +2,15 @@
 
 The Kotlin target generates modern Kotlin code with sequences, null safety, and lambda expressions.
 
+## Features
+
+| Feature | Status | Details |
+|---------|--------|---------|
+| Pipeline mode | ✅ | `.mapNotNull {}` for streaming |
+| Generator mode | ✅ | `sequence { yield() }` |
+| Recursive queries | ✅ | BFS transitive closure |
+| Fact export | ✅ | `compile_facts_to_kotlin/3` |
+
 ## Why Kotlin?
 
 - **Concise**: Less boilerplate than Java
@@ -22,21 +31,20 @@ The Kotlin target generates modern Kotlin code with sequences, null safety, and 
                                              └──────────────────┘
 ```
 
-## Modes
-
-| Mode | Use Case | Pattern |
-|------|----------|---------|
-| Simple | Basic predicates | println() |
-| Pipeline | Stream processing | .mapNotNull {} |
-| Generator | Multiple outputs | sequence { yield() } |
-
 ## Quick Start
 
 ```prolog
-?- use_module('src/unifyweaver/targets/kotlin_target').
+% Pipeline mode
 ?- compile_predicate_to_kotlin(filter/2, [pipeline_input(true)], Code).
+
+% Recursive query (transitive closure)
+?- compile_recursive(ancestor/2, [target(kotlin)], Code).
+
+% Export facts
+?- compile_facts_to_kotlin(parent, 2, Code).
 ```
 
 ## Next Steps
 
 - [Chapter 2: Pipeline Mode](02_pipeline_mode.md)
+- [Chapter 4: Recursive Queries](04_recursive_queries.md)

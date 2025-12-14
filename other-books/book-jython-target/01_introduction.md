@@ -1,42 +1,50 @@
 # Chapter 1: Introduction to the Jython Target
 
-The Jython target generates Python code that runs on the JVM, combining Python's simplicity with Java's libraries.
+The Jython target generates Python 2.7-compatible code that runs on the JVM with Java interop.
+
+## Features
+
+| Feature | Status | Details |
+|---------|--------|---------|
+| Pipeline mode | ✅ | Generator functions |
+| Generator mode | ✅ | `yield` statements |
+| Recursive queries | ✅ | BFS with `deque` |
+| Fact export | ✅ | `compile_facts_to_jython/3` |
 
 ## Why Jython?
 
-- **Python syntax**: Familiar, readable code
-- **Java interop**: Access to all Java libraries
-- **Generators**: Native `yield` support
-- **Scripting**: Easy to modify and extend
+- **Python syntax**: Familiar to many developers
+- **JVM integration**: Access Java libraries
+- **Generators**: Memory-efficient iteration
+- **Scripting**: Easy prototyping
 
 ## Architecture
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌──────────────────┐
-│ Prolog Predicate│───▶│jython_target.pl │───▶│ Generated Jython │
-└─────────────────┘    └─────────────────┘    └──────────────────┘
-                                                      │
-                                                      ▼
-                                             ┌──────────────────┐
-                                             │ Jython Runtime   │
-                                             └──────────────────┘
+┌─────────────────┐    ┌──────────────────┐    ┌──────────────────┐
+│ Prolog Predicate│───▶│ jython_target.pl │───▶│ Generated Python │
+└─────────────────┘    └──────────────────┘    └──────────────────┘
+                                                       │
+                                                       ▼
+                                              ┌──────────────────┐
+                                              │     jython       │
+                                              └──────────────────┘
 ```
-
-## Modes
-
-| Mode | Use Case | Pattern |
-|------|----------|---------|
-| Simple | Basic predicates | print() |
-| Pipeline | Stream processing | for/yield |
-| Generator | Multiple outputs | def process(): yield |
 
 ## Quick Start
 
 ```prolog
-?- use_module('src/unifyweaver/targets/jython_target').
+% Pipeline mode
 ?- compile_predicate_to_jython(filter/2, [pipeline_input(true)], Code).
+
+% Recursive query (transitive closure)
+?- compile_recursive(ancestor/2, [target(jython)], Code).
+
+% Export facts
+?- compile_facts_to_jython(parent, 2, Code).
 ```
 
 ## Next Steps
 
 - [Chapter 2: Pipeline Mode](02_pipeline_mode.md)
+- [Chapter 4: Recursive Queries](04_recursive_queries.md)
