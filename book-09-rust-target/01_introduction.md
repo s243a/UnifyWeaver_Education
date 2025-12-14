@@ -30,6 +30,31 @@ The generated code leverages the rich Rust ecosystem, including `serde` for JSON
 | **Binaries** | Single Binary | Single Binary |
 | **Use Case** | General Purpose, ETL | High Performance, System Tools |
 
+## Supported Features
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| **Fact Export** | ✅ | `compile_facts_to_rust/3` - Export facts as Rust struct Vecs |
+| **Recursive Queries** | ✅ | `compile_recursive/3` - BFS transitive closure with HashMap/VecDeque |
+| **Pipeline Mode** | ✅ | JSONL streaming with fixpoint evaluation |
+| **JSON Processing** | ✅ | Native serde_json integration |
+| **Project Generation** | ✅ | `write_rust_project/2` - Full Cargo.toml generation |
+
+### Quick Start: Fact Export
+
+```prolog
+?- ['examples/family_tree'].
+?- use_module('src/unifyweaver/targets/rust_target').
+?- rust_target:compile_facts_to_rust(parent, 2, Code).
+```
+
+### Quick Start: Transitive Closure
+
+```prolog
+?- use_module('src/unifyweaver/core/recursive_compiler').
+?- compile_recursive(ancestor/2, [target(rust)], Code).
+```
+
 ## Getting Started
 
 To use the Rust target, you need:

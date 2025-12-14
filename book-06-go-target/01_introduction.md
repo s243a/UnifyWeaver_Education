@@ -35,6 +35,31 @@ Go provides excellent performance for string processing and I/O operations. The 
 | **Dependencies** | System tools (grep, awk) | None |
 | **Use Case** | Shell scripting, Pipelines | ETL, High-performance tools |
 
+## Supported Features
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| **Fact Export** | ✅ | `compile_facts_to_go/3` - Export facts as Go struct slices |
+| **Recursive Queries** | ✅ | `compile_recursive/3` - BFS transitive closure with map/slice |
+| **Pipeline Mode** | ✅ | JSONL streaming with generator mode |
+| **JSON Processing** | ✅ | Native JSON handling with struct marshaling |
+| **Binding System** | ✅ | Go stdlib bindings (strings, math, etc.) |
+
+### Quick Start: Fact Export
+
+```prolog
+?- ['examples/family_tree'].
+?- use_module('src/unifyweaver/targets/go_target').
+?- go_target:compile_facts_to_go(parent, 2, Code).
+```
+
+### Quick Start: Transitive Closure
+
+```prolog
+?- use_module('src/unifyweaver/core/recursive_compiler').
+?- compile_recursive(ancestor/2, [target(go)], Code).
+```
+
 ## Getting Started
 
 To use the Go target, you need:
