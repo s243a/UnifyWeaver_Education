@@ -178,6 +178,79 @@ Use `compile_recursive/3` when:
 
 For simple non-recursive rules, use `compile_predicate_to_go/3` instead.
 
+## Tail Recursion Optimization
+
+For predicates with accumulator patterns, use `compile_tail_recursion_go/3`:
+
+```prolog
+% Define tail recursive sum
+assertz((sum_list([], Acc, Acc))).
+assertz((sum_list([H|T], Acc, S) :- Acc1 is Acc + H, sum_list(T, Acc1, S))).
+
+% Compile
+?- go_target:compile_tail_recursion_go(sum_list/3, [], Code).
+```
+
+**Generated Go (O(1) stack space):**
+```go
+func sum_list(items []int, acc int) int {
+    for _, item := range items {
+        acc += item
+    }
+    return acc
+}
+```
+
+**Benefits:**
+- O(1) stack space (no recursion)
+- Automatically detects step operation (+, *, etc.)
+- Supports arity 2 and 3 predicates
+
+## Linear Recursion with Memoization
+
+For predicates with overlapping subproblems, use `compile_linear_recursion_go/3`:
+
+```prolog
+% Define linear recursive triangular numbers
+assertz((triangular(0, 0))).
+assertz((triangular(1, 1))).
+assertz((triangular(N, F) :- N > 1, N1 is N - 1, triangular(N1, F1), F is F1 + N)).
+
+% Compile
+?- go_target:compile_linear_recursion_go(triangular/2, [], Code).
+```
+
+**Generated Go (with memoization):**
+```go
+var triangularMemo = make(map[int]int)
+
+func triangular(n int) int {
+    if result, ok := triangularMemo[n]; ok {
+        return result
+    }
+    
+    if n <= 0 { return 0 }
+    if n == 1 { return 1 }
+    
+    result := triangular(n-1) + n
+    triangularMemo[n] = result
+    return result
+}
+```
+
+**Benefits:**
+- O(n) time via memoization
+- `map[int]int` for efficient lookup
+- Base case detection
+
+## Recursion Pattern Summary
+
+| Pattern | API | Generated Code | Use Case |
+|---------|-----|----------------|----------|
+| Transitive Closure | `compile_recursive/3` | BFS with queue | Graph reachability |
+| Tail Recursion | `compile_tail_recursion_go/3` | for loop | Accumulators |
+| Linear Recursion | `compile_linear_recursion_go/3` | Memoized function | Overlapping subproblems |
+
 ---
 
 ## Navigation

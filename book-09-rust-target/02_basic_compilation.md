@@ -125,6 +125,61 @@ echo -e "alice:25\nbob:10" | ./adult
 # alice:25
 ```
 
+## Tail Recursion Optimization
+
+For accumulator patterns, use `compile_tail_recursion_rust/3`:
+
+```prolog
+assertz((sum_list([], Acc, Acc))).
+assertz((sum_list([H|T], Acc, S) :- Acc1 is Acc + H, sum_list(T, Acc1, S))).
+
+?- rust_target:compile_tail_recursion_rust(sum_list/3, [], Code).
+```
+
+**Generated Rust (O(1) stack):**
+```rust
+fn sum_list(items: &[i32], acc: i32) -> i32 {
+    let mut result = acc;
+    for &item in items {
+        result += item;
+    }
+    result
+}
+```
+
+## Linear Recursion with Memoization
+
+For overlapping subproblems, use `compile_linear_recursion_rust/3`:
+
+```prolog
+assertz((triangular(0, 0))).
+assertz((triangular(1, 1))).
+assertz((triangular(N, F) :- N > 1, N1 is N - 1, triangular(N1, F1), F is F1 + N)).
+
+?- rust_target:compile_linear_recursion_rust(triangular/2, [], Code).
+```
+
+**Generated Rust (HashMap memo):**
+```rust
+thread_local! {
+    static TRIANGULAR_MEMO: RefCell<HashMap<i32, i32>> = RefCell::new(HashMap::new());
+}
+
+fn triangular(n: i32) -> i32 {
+    if let Some(&result) = TRIANGULAR_MEMO.with(|m| m.borrow().get(&n).copied()) {
+        return result;
+    }
+    // ... base cases and memoization
+}
+```
+
+## Recursion Pattern Summary
+
+| Pattern | API | Generated Rust |
+|---------|-----|----------------|
+| Tail Recursion | `compile_tail_recursion_rust/3` | for loop |
+| Linear Recursion | `compile_linear_recursion_rust/3` | HashMap memo |
+
 ---
 
 ## Navigation
