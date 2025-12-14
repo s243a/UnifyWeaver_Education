@@ -1,0 +1,185 @@
+<!--
+SPDX-License-Identifier: MIT AND CC-BY-4.0
+Copyright (c) 2025 John William Creighton (s243a)
+-->
+
+# Chapter 7: Recursive Queries
+
+This chapter covers compiling recursive predicates like `ancestor/2` to Go using BFS-based transitive closure.
+
+## The Ancestor Problem
+
+The classic transitive closure example demonstrates recursive query compilation:
+
+```prolog
+% family_tree.pl
+parent(abraham, isaac).
+parent(isaac, jacob).
+parent(jacob, joseph).
+
+ancestor(A, D) :- parent(A, D).
+ancestor(A, D) :- parent(A, P), ancestor(P, D).
+```
+
+## Compiling to Go
+
+Use `compile_recursive/3` from the recursive compiler module:
+
+```prolog
+?- ['education/book-02-bash-target/examples/family_tree'].
+?- use_module('src/unifyweaver/core/recursive_compiler').
+
+?- compile_recursive(ancestor/2, [target(go)], Code),
+   open('ancestor.go', write, S),
+   write(S, Code),
+   close(S).
+```
+
+## Generated Go Code
+
+The compiler generates BFS-based Go code using maps and slices:
+
+```go
+package main
+
+import (
+    "bufio"
+    "fmt"
+    "os"
+    "strings"
+)
+
+// ANCESTORQuery manages transitive closure for ancestor/2
+type ANCESTORQuery struct {
+    baseRelation map[string][]string
+}
+
+// NewANCESTORQuery creates a new query instance
+func NewANCESTORQuery() *ANCESTORQuery {
+    return &ANCESTORQuery{baseRelation: make(map[string][]string)}
+}
+
+// AddFact adds a base relation fact
+func (q *ANCESTORQuery) AddFact(from, to string) {
+    q.baseRelation[from] = append(q.baseRelation[from], to)
+}
+
+// FindAll finds all reachable nodes from start using BFS
+func (q *ANCESTORQuery) FindAll(start string) []string {
+    visited := make(map[string]bool)
+    queue := []string{start}
+    visited[start] = true
+    var results []string
+
+    for len(queue) > 0 {
+        current := queue[0]
+        queue = queue[1:]
+
+        for _, next := range q.baseRelation[current] {
+            if !visited[next] {
+                visited[next] = true
+                queue = append(queue, next)
+                results = append(results, next)
+            }
+        }
+    }
+    return results
+}
+
+// Check checks if target is reachable from start
+func (q *ANCESTORQuery) Check(start, target string) bool {
+    for _, r := range q.FindAll(start) {
+        if r == target {
+            return true
+        }
+    }
+    return false
+}
+
+func main() {
+    q := NewANCESTORQuery()
+
+    // Load facts from stdin
+    scanner := bufio.NewScanner(os.Stdin)
+    for scanner.Scan() {
+        line := scanner.Text()
+        parts := strings.Split(line, ":")
+        if len(parts) >= 2 {
+            q.AddFact(strings.TrimSpace(parts[0]), strings.TrimSpace(parts[1]))
+        }
+    }
+
+    // Query mode (if args provided)
+    if len(os.Args) >= 2 {
+        start := os.Args[1]
+        if len(os.Args) >= 3 {
+            // Check mode
+            target := os.Args[2]
+            if q.Check(start, target) {
+                fmt.Printf("%s:%s\n", start, target)
+            }
+        } else {
+            // FindAll mode
+            for _, result := range q.FindAll(start) {
+                fmt.Printf("%s:%s\n", start, result)
+            }
+        }
+    }
+}
+```
+
+## Running the Go Code
+
+```bash
+# Compile
+go build ancestor.go
+
+# Run with facts from stdin
+cat << 'EOF' | ./ancestor abraham
+abraham:isaac
+isaac:jacob
+jacob:joseph
+EOF
+
+# Output:
+# abraham:isaac
+# abraham:jacob
+# abraham:joseph
+```
+
+## Go-Specific Features
+
+The generated code leverages Go idioms:
+
+| Feature | Go Construct |
+|---------|--------------|
+| **Adjacency List** | `map[string][]string` |
+| **BFS Queue** | `[]string` slice |
+| **Visited Set** | `map[string]bool` |
+| **Stream Input** | `bufio.Scanner` |
+| **String Split** | `strings.Split` |
+
+## Options
+
+The `compile_recursive/3` predicate accepts these options for Go:
+
+| Option | Description |
+|--------|-------------|
+| `target(go)` | Generate Go code |
+| `format(struct)` | Use struct-based output (default) |
+| `delimiter(colon)` | Field delimiter for output |
+
+## When to Use Recursive Compilation
+
+Use `compile_recursive/3` when:
+- You have transitive closure queries (ancestor, path finding)
+- The recursion depth is unknown
+- You need efficient BFS-based evaluation
+
+For simple non-recursive rules, use `compile_predicate_to_go/3` instead.
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 6: Generator Mode](06_generator_mode) | [📖 Book 6: Go Target](./)
