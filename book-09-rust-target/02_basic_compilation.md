@@ -179,6 +179,45 @@ fn triangular(n: i32) -> i32 {
 |---------|-----|----------------|
 | Tail Recursion | `compile_tail_recursion_rust/3` | for loop |
 | Linear Recursion | `compile_linear_recursion_rust/3` | HashMap memo |
+| Mutual Recursion | `compile_mutual_recursion_rust/3` | thread_local! HashMap |
+
+## Mutual Recursion
+
+For predicates that call each other (like `is_even`/`is_odd`), use `compile_mutual_recursion_rust/3`:
+
+```prolog
+assertz((is_even(0))).
+assertz((is_even(N) :- N > 0, N1 is N - 1, is_odd(N1))).
+assertz((is_odd(1))).
+assertz((is_odd(N) :- N > 1, N1 is N - 1, is_even(N1))).
+
+?- rust_target:compile_mutual_recursion_rust([is_even/1, is_odd/1], [], Code).
+```
+
+**Generated Rust (thread_local memo):**
+```rust
+thread_local! {
+    static IS_EVEN_IS_ODD_MEMO: RefCell<HashMap<String, bool>> = RefCell::new(HashMap::new());
+}
+
+fn is_even(n: i32) -> bool {
+    let key = format!("is_even:{}", n);
+    if let Some(&result) = IS_EVEN_IS_ODD_MEMO.with(|m| m.borrow().get(&key).copied()) {
+        return result;
+    }
+    
+    if n == 0 {
+        IS_EVEN_IS_ODD_MEMO.with(|m| m.borrow_mut().insert(key.clone(), true));
+        return true;
+    }
+    if n > 0 {
+        let result = is_odd(n - 1);
+        IS_EVEN_IS_ODD_MEMO.with(|m| m.borrow_mut().insert(key, result));
+        return result;
+    }
+    false
+}
+```
 
 ---
 

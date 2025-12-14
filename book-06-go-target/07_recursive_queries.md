@@ -243,6 +243,46 @@ func triangular(n int) int {
 - `map[int]int` for efficient lookup
 - Base case detection
 
+## Mutual Recursion
+
+For predicates that call each other (like `is_even`/`is_odd`), use `compile_mutual_recursion_go/3`:
+
+```prolog
+assertz((is_even(0))).
+assertz((is_even(N) :- N > 0, N1 is N - 1, is_odd(N1))).
+assertz((is_odd(1))).
+assertz((is_odd(N) :- N > 1, N1 is N - 1, is_even(N1))).
+
+?- go_target:compile_mutual_recursion_go([is_even/1, is_odd/1], [], Code).
+```
+
+**Generated Go (shared memo):**
+```go
+var is_even_is_odd_Memo = make(map[string]bool)
+
+func is_even(n int) bool {
+    key := fmt.Sprintf("is_even:%d", n)
+    if result, ok := is_even_is_odd_Memo[key]; ok {
+        return result
+    }
+    
+    if n == 0 {
+        is_even_is_odd_Memo[key] = true
+        return true
+    }
+    if n > 0 {
+        result := is_odd(n - 1)
+        is_even_is_odd_Memo[key] = result
+        return result
+    }
+    return false
+}
+
+func is_odd(n int) bool {
+    // Similar pattern...
+}
+```
+
 ## Recursion Pattern Summary
 
 | Pattern | API | Generated Code | Use Case |
@@ -250,6 +290,7 @@ func triangular(n int) int {
 | Transitive Closure | `compile_recursive/3` | BFS with queue | Graph reachability |
 | Tail Recursion | `compile_tail_recursion_go/3` | for loop | Accumulators |
 | Linear Recursion | `compile_linear_recursion_go/3` | Memoized function | Overlapping subproblems |
+| Mutual Recursion | `compile_mutual_recursion_go/3` | Shared memo map | is_even/is_odd, state machines |
 
 ---
 

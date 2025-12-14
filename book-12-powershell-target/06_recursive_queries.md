@@ -201,6 +201,52 @@ Use `compile_recursive/3` when:
 
 For simple non-recursive rules, use `compile_predicate_to_powershell/3` instead.
 
+## Linear Recursion with Memoization
+
+For predicates with overlapping subproblems, use `compile_linear_recursion_powershell/3`:
+
+```prolog
+assertz((triangular(0, 0))).
+assertz((triangular(1, 1))).
+assertz((triangular(N, F) :- N > 1, N1 is N - 1, triangular(N1, F1), F is F1 + N)).
+
+?- powershell_compiler:compile_linear_recursion_powershell(triangular/2, [], Code).
+```
+
+**Generated PowerShell (hashtable memo):**
+```powershell
+$script:triangularMemo = @{}
+
+function triangular {
+    param([int]$N)
+    
+    if ($script:triangularMemo.ContainsKey($N)) {
+        return $script:triangularMemo[$N]
+    }
+    
+    if ($N -le 0) { return 0 }
+    if ($N -eq 1) { return 1 }
+    
+    $result = (triangular ($N - 1)) + $N
+    $script:triangularMemo[$N] = $result
+    return $result
+}
+```
+
+**Benefits:**
+- O(n) performance via `[hashtable]` memoization
+- Script-scoped memo persists across calls
+- Includes `Clear-*Memo` function for cache control
+
+## Recursion Pattern Summary
+
+| Pattern | API | PowerShell Construct |
+|---------|-----|---------------------|
+| Transitive Closure | `compile_recursive/3` | BFS with `[Queue]` |
+| Tail Recursion | `compile_tail_recursion_powershell/3` | `foreach` loop |
+| Linear Recursion | `compile_linear_recursion_powershell/3` | `[hashtable]` memo |
+| Mutual Recursion | `compile_mutual_recursion_powershell/3` | Shared `$script:memo` |
+
 ---
 
 ## Navigation
