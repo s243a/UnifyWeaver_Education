@@ -108,6 +108,57 @@ def process_stream(records: Iterator[Dict]) -> Iterator[Dict]:
                     yield result
 ```
 
+### Using `compile_facts_to_python/3` (Class-Based Export)
+
+For standalone fact export without stream processing, use `compile_facts_to_python/3`:
+
+```prolog
+?- ['facts.pl'].
+?- python_target:compile_facts_to_python(color, 1, Code).
+```
+
+**Generated Python:**
+
+```python
+#!/usr/bin/env python3
+from typing import List, Iterator, Any
+
+class COLOR:
+    """Exported Prolog facts for color/1"""
+    
+    FACTS: List[List[str]] = [
+        ["red"],
+        ["green"],
+        ["blue"]
+    ]
+    
+    @classmethod
+    def get_all(cls) -> List[List[str]]:
+        """Return all facts as list of lists."""
+        return cls.FACTS
+    
+    @classmethod
+    def stream(cls) -> Iterator[List[str]]:
+        """Stream facts as an iterator."""
+        yield from cls.FACTS
+    
+    @classmethod
+    def contains(cls, *args) -> bool:
+        """Check if a fact exists with the given arguments."""
+        target = list(args)
+        return target in cls.FACTS
+
+if __name__ == "__main__":
+    for fact in COLOR.stream():
+        print(":".join(fact))
+```
+
+**Benefits of Class-Based Export:**
+- Self-contained Python class with typed annotations
+- `get_all()`, `stream()`, and `contains()` methods
+- Works as standalone script or importable module
+- Type hints for IDE autocompletion
+
 ## Compiling Rules with Constraints
 
 Rules with arithmetic and comparison constraints:

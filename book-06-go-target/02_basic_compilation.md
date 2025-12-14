@@ -57,6 +57,70 @@ go build user.go
 # bob:28
 ```
 
+### Using `compile_facts_to_go/3` (Struct-Based Export)
+
+For a more structured approach, use the `compile_facts_to_go/3` API which generates a Go struct with helper functions:
+
+```prolog
+?- ['facts.pl'].
+?- go_target:compile_facts_to_go(user, 2, Code).
+```
+
+**Generated Go Code:**
+
+```go
+package main
+
+import (
+    "fmt"
+    "strings"
+)
+
+type USER struct {
+    Arg1 string
+    Arg2 string
+}
+
+// GetAllUSER returns all facts as a slice
+func GetAllUSER() []USER {
+    return []USER{
+        {Arg1: "john", Arg2: "25"},
+        {Arg1: "jane", Arg2: "30"},
+        {Arg1: "bob", Arg2: "28"},
+    }
+}
+
+// StreamUSER iterates over facts with a callback
+func StreamUSER(fn func(USER)) {
+    for _, fact := range GetAllUSER() {
+        fn(fact)
+    }
+}
+
+// ContainsUSER checks if a fact exists
+func ContainsUSER(target USER) bool {
+    for _, fact := range GetAllUSER() {
+        if fact == target {
+            return true
+        }
+    }
+    return false
+}
+
+func main() {
+    for _, fact := range GetAllUSER() {
+        parts := []string{fact.Arg1, fact.Arg2}
+        fmt.Println(strings.Join(parts, ":"))
+    }
+}
+```
+
+**Benefits of Struct-Based Export:**
+- Type-safe access via struct fields
+- Reusable `GetAll`, `Stream`, and `Contains` functions
+- Easy to integrate into larger Go programs
+- Works with Go's type system for IDE autocompletion
+
 ## Compiling Rules
 
 For rules, the Go target generates a stream processor that reads from standard input (stdin) and writes to standard output (stdout).
