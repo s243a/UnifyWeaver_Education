@@ -70,9 +70,11 @@ sum(N, Acc, Result) :-
 After running the compile predicate:
 
 ```prolog
-?- compile_recursion_to_haskell(sum/2, [], Code),
+?- compile_recursion_to_haskell(sum/3, [], Code),
    write(Code).
 ```
+
+Note: The generated function is named `sumTo` to avoid conflict with `Prelude.sum`.
 
 The generated Haskell:
 
