@@ -36,7 +36,14 @@ parent(tom, bob).
 parent(bob, jim).
 ```
 
-Becomes:
+After running the compile predicate:
+
+```prolog
+?- compile_facts_to_haskell(parent, 2, Code),
+   write(Code).
+```
+
+The generated Haskell:
 
 ```haskell
 data Person = Tom | Bob | Jim
@@ -60,7 +67,14 @@ sum(N, Acc, Result) :-
     sum(N1, Acc1, Result).
 ```
 
-Becomes:
+After running the compile predicate:
+
+```prolog
+?- compile_recursion_to_haskell(sum/2, [], Code),
+   write(Code).
+```
+
+The generated Haskell:
 
 ```haskell
 {-# LANGUAGE BangPatterns #-}

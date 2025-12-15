@@ -9,7 +9,17 @@ sum(0, Acc, Acc).
 sum(N, Acc, Result) :- N > 0, N1 is N - 1, Acc1 is Acc + N, sum(N1, Acc1, Result).
 ```
 
-→
+After running:
+
+```prolog
+?- compile_module_to_haskell(
+       [pred(sumTo, 2, tail_recursion)],
+       [module_name('Sum')],
+       Code),
+   write(Code).
+```
+
+The generated Haskell:
 
 ```haskell
 {-# LANGUAGE BangPatterns #-}
