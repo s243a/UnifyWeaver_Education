@@ -49,6 +49,9 @@ How AI agents choose strategies based on cost, speed, and quality trade-offs. He
 ### [Chapter 5: Example Libraries](05_example_libraries.md)
 Create, organize, and use reusable code patterns. Naming conventions, cross-references, and maintenance.
 
+### [Chapter 6: Enhanced Pipeline Stages](06_enhanced_pipeline_stages.md)
+Within-target pipeline composition using enhanced stages. Stream combination (`interleave`, `concat`, `zip`), flow control, filtering, aggregation, error handling, and throughput control.
+
 ## Additional Resources
 
 ### Example Libraries
