@@ -50,7 +50,7 @@ After running:
 
 ```prolog
 ?- compile_module_to_haskell(
-       [pred(sumAcc, 3, tail_recursion)],
+       [pred(sumAcc, 3, list_tail_recursion)],
        [module_name('SumAcc')], Code).
 ```
 
@@ -143,6 +143,21 @@ All functions compile and run correctly with GHC:
 [PASS] fib 10 = 55
 [PASS] fib 15 = 610
 ```
+
+---
+
+## Alternative: Generic Predicate
+
+The `compile_predicate_to_haskell/3` dispatches based on a `type` option:
+
+```prolog
+% Dispatch by type option
+?- compile_predicate_to_haskell(parent/2, [type(facts)], Code1).
+?- compile_predicate_to_haskell(ancestor/2, [type(rules)], Code2).
+?- compile_predicate_to_haskell(sum/3, [type(recursion)], Code3).
+```
+
+For direct pattern control, use `compile_module_to_haskell/3` with explicit `pred(Name, Arity, Type)` specifications.
 
 ---
 
