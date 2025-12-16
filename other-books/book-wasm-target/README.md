@@ -7,6 +7,9 @@ Compile Prolog predicates to WebAssembly for browser and Node.js execution.
 1. **[Introduction](01_introduction.md)** - What is WebAssembly and why use it
 2. **[Compilation](02_compilation.md)** - How to compile Prolog to WASM
 3. **[JavaScript Integration](03_javascript.md)** - Using from Node.js and browser
+4. **[String Support](04_string_support.md)** - Handling strings in WASM
+5. **[Graph Visualization](05_graph_visualization.md)** - Cytoscape.js demo
+6. **[Cross-Target Integration](06_cross_target.md)** - Component system
 
 ## Prerequisites
 
