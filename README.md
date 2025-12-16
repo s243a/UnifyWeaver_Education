@@ -47,11 +47,12 @@ The books are designed to be read in sequence, with each building on concepts fr
 | **11** | [Prolog Target](book-11-prolog-target/README.md) | Prolog-to-Prolog, dialect support |
 | **12** | [PowerShell Target](book-12-powershell-target/README.md) | Windows automation, .NET scripting |
 
-### Advanced Applications (Book 13)
+### Advanced Applications (Books 13-14)
 
 | Book | Title | Focus |
 |------|-------|-------|
 | **13** | [Semantic Search](book-13-semantic-search/README.md) | Graph RAG, embeddings, vector databases |
+| **14** | [AI Training](book-14-ai-training/README.md) | LDA projections, multi-head routing, transformer distillation |
 
 ### Supplementary Material
 
@@ -98,6 +99,7 @@ The books are designed to be read in sequence, with each building on concepts fr
 2. Book 5: Python Target
 3. Book 4: Workflows
 4. Book 13: Semantic Search
+5. Book 14: AI Training
 
 ## Prerequisites
 
@@ -151,6 +153,7 @@ cd UnifyWeaver
 | 11 - Prolog Target | Complete | `book-11-prolog-target/` |
 | 12 - PowerShell Target | Planned | `book-12-powershell-target/` |
 | 13 - Semantic Search | Complete | `book-13-semantic-search/` |
+| 14 - AI Training | Complete | `book-14-ai-training/` |
 | AWK Target | Complete (supplementary) | `book-awk-target/` |
 
 ## Progress Tracking
@@ -179,6 +182,7 @@ Track your progress through the series:
 
 **Advanced:**
 - [ ] Book 13: Semantic Search
+- [ ] Book 14: AI Training
 
 ## Additional Resources
 
