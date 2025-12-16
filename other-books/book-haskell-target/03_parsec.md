@@ -87,13 +87,52 @@ factor = string "x"
 
 ## DCG Pattern Mapping
 
-| Prolog DCG | Haskell Parsec |
-|------------|----------------|
-| `[char]` | `string "char"` |
-| `a, b` | `a *> b` |
-| `a ; b` | `try a <|> b` |
-| `{goal}` | `pure ()` |
-| Non-terminal | Recursive call |
+| Prolog DCG | Haskell Parsec | Description |
+|------------|----------------|-------------|
+| `[char]` | `string "char"` | Terminal |
+| `a, b` | `a *> b` | Sequence |
+| `a ; b` | `try a <|> b` | Alternative |
+| `{goal}` | `pure ()` | Prolog goal |
+| Non-terminal | Recursive call | Rule reference |
+| `*(A)` | `many A` | Zero or more |
+| `+(A)` | `some A` | One or more |
+| `?(A)` | `optional A` | Optional |
+| `letter` | `letter` | Any letter |
+| `digit` | `digit` | Any digit |
+| `alpha_num` | `alphaNum` | Letter or digit |
+| `space` | `space` | Whitespace |
+| `not(A)` | `notFollowedBy` | Negation |
+| `lookahead(A)` | `lookAhead` | Positive lookahead |
+
+## Kleene Operators
+
+```prolog
+% Zero or more digits
+digits --> *(digit).
+
+% One or more letters (identifier body)
+word --> +(letter).
+
+% Optional sign
+signed --> ?(['-']), +(digit).
+```
+
+Generated Haskell:
+```haskell
+digits = many digit
+word = some letter
+signed = optional (string "-") *> some digit
+```
+
+## Character Classes
+
+Use built-in character classes directly:
+
+```prolog
+identifier --> letter, *(alpha_num).
+number --> +(digit).
+whitespace --> +(space).
+```
 
 ## Running the Parser
 
