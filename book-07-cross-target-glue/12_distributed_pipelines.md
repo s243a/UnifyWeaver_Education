@@ -597,6 +597,62 @@ def step_fetch(data):
 - **Monitoring** with logging and metrics
 - **Multiple targets** (Python, Bash, Go)
 
+## Advanced: Production-Grade Service Architecture
+
+This chapter covered basic distributed pipeline patterns. For production-grade service architectures, see the following advanced chapters:
+
+### Chapter 12a: Service Mesh Patterns
+
+Advanced resilience patterns including:
+- **Load Balancing** - Round-robin, random, least connections, weighted, IP hash
+- **Circuit Breaker** - State machine with CLOSED, OPEN, HALF_OPEN states
+- **Retry with Backoff** - Fixed, linear, exponential strategies
+- **Combined Patterns** - Chaining load balancing, circuit breaker, and retry
+
+### Chapter 12b: Polyglot and Distributed Services
+
+Cross-language and scaling patterns:
+- **Polyglot Services** - Call services across Python, Go, Rust, JavaScript, C#
+- **Service Dependencies** - Declare dependencies with `depends_on/1`
+- **Sharding Strategies** - Hash, range, consistent hash, geographic
+- **Replication** - Configurable replication factors with quorum consistency
+- **Consistency Levels** - Eventual, strong, quorum, causal, read-your-writes
+
+### Chapter 12c: Service Discovery and Tracing
+
+Operational excellence patterns:
+- **Service Discovery** - Consul, etcd, DNS, Kubernetes backends
+- **Health Checks** - HTTP and TCP probes with TTL
+- **Distributed Tracing** - OpenTelemetry, Jaeger, Zipkin integration
+- **Context Propagation** - W3C, B3, Jaeger formats
+
+Example of a complete production service:
+
+```prolog
+service(order_service, [
+    % Mesh patterns
+    load_balancing(round_robin),
+    circuit_breaker(true),
+    retry_strategy(exponential),
+
+    % Distributed
+    sharding(consistent_hash),
+    replication(3),
+    consistency(quorum),
+
+    % Discovery & Tracing
+    discovery_backend(consul),
+    tracing(true),
+    trace_exporter(otlp),
+
+    transport(http(8080))
+], [
+    receive(OrderRequest),
+    process_order(Order),
+    respond(Order)
+]).
+```
+
 ## Next Steps
 
 In Chapter 13, we'll provide a complete API reference:

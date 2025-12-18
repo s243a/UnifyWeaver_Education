@@ -540,6 +540,30 @@ service__data() {
 - **Consistent API** enables interoperability
 - **Client generation** for Go, Python, Bash
 
+## Advanced: Unified Service Architecture
+
+For more advanced service patterns using the `service/3` predicate, see **Chapter 11a: Service Architecture** which covers:
+
+- **In-Process Services** - Direct function calls within the same process
+- **Unix Socket Services** - IPC for local inter-process communication
+- **Network Services (TCP/HTTP)** - Full network transport support
+- **Transport Independence** - Write once, deploy anywhere
+
+Chapter 11a introduces the unified `service/3` predicate:
+
+```prolog
+% Define a service with transport independence
+service(user_api, [
+    transport(http(8080))
+], [
+    receive(Request),
+    state_get(users, Users),
+    respond(Response)
+]).
+```
+
+This approach separates service logic from transport concerns, enabling the same service definition to be compiled for different deployment scenarios.
+
 ## Next Steps
 
 In Chapter 12, we'll explore distributed pipelines:
