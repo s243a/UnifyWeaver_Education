@@ -87,6 +87,13 @@ This book covers training AI models for semantic search using UnifyWeaver. While
 - Asymmetric embedding models (query vs document)
 - Future directions
 
+### [Chapter 9: Knowledge Graph Topology](09_kg_topology.md)
+- 11 relation types (foundational, preliminary, compositional, etc.)
+- Seed level tracking for provenance
+- Learning path generation
+- Knowledge gap detection
+- Integration with distributed search
+
 ## Key Concepts
 
 ### The Core Insight: LDA as Attention
@@ -183,6 +190,9 @@ After completing this book, you'll be able to:
 - Choose optimal architectures for your scale
 - Deploy trained models across Python, Go, and Rust
 - Extend the system with new embedding providers
+- Build knowledge graphs with typed relationships
+- Generate learning paths from KG topology
+- Integrate with distributed semantic search
 
 ## License
 

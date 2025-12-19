@@ -117,7 +117,7 @@ By completing this book, you will be able to:
 - Mixed pipelines (shell + native)
 - Performance optimization
 
-### Part 6: Network Communication (Chapters 11-12)
+### Part 6: Network Communication (Chapters 11-12d)
 
 **11. HTTP Services** (`11_http_services.md`)
 - Service registry
@@ -126,12 +126,40 @@ By completing this book, you will be able to:
 - Rust Actix-web servers
 - Consistent API format
 
+**11a. Service Architecture** (`11a_service_architecture.md`)
+- Client-server Phases 1-3
+- In-process, external, network services
+- Session management and state
+
 **12. Distributed Pipelines** (`12_distributed_pipelines.md`)
 - HTTP client generation
 - Socket communication
 - Network pipeline orchestration
 - Local + remote step mixing
 - Error handling strategies
+
+**12a. Service Mesh** (`12a_service_mesh.md`)
+- Service mesh patterns
+- Load balancing strategies
+- Circuit breakers
+
+**12b. Polyglot Distributed** (`12b_polyglot_distributed.md`)
+- Cross-language distributed systems
+- Protocol negotiation
+- Sharding (Phases 4-6)
+
+**12c. Discovery and Tracing** (`12c_discovery_tracing.md`)
+- Service discovery (Phase 7)
+- Distributed tracing (Phase 8)
+- Consul, etcd, DNS backends
+- W3C/B3 trace propagation
+
+**12d. Knowledge Graph Topology** (`12d_kg_topology.md`)
+- Multi-interface semantic nodes
+- Kleinberg small-world routing
+- Path folding and shortcuts
+- Federated query algebra
+- Diversity-weighted aggregation
 
 ### Part 7: Production Ready (Chapters 15-16)
 
@@ -178,7 +206,12 @@ By completing this book, you will be able to:
 | 9 | Native Code | Go/Rust wrappers, parallel processing |
 | 10 | Native Orchestration | Compilation, cross-platform |
 | 11 | HTTP Services | Server generation, API design |
+| 11a | Service Architecture | Phases 1-3, in-process/external/network |
 | 12 | Distributed | Clients, sockets, mixed pipelines |
+| 12a | Service Mesh | Load balancing, circuit breakers |
+| 12b | Polyglot Distributed | Cross-language, sharding (Phases 4-6) |
+| 12c | Discovery & Tracing | Consul/etcd, W3C trace (Phases 7-8) |
+| 12d | KG Topology | Kleinberg routing, federated queries |
 | 13 | API Reference | Complete documentation |
 | 14 | Case Studies | Real-world examples |
 | 15 | Production | Deployment, security, monitoring |

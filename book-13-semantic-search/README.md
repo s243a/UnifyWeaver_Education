@@ -66,6 +66,13 @@ This book covers building intelligent semantic agents using UnifyWeaver's Python
 - Error handling and fallbacks
 - Integration with other targets
 
+### [Chapter 6: Distributed Search](06_distributed_search.md)
+- Multi-interface semantic nodes
+- Kleinberg small-world routing
+- Path folding and shortcuts
+- Federated queries with diversity-weighted aggregation
+- Prolog service definitions
+
 ## The Semantic Runtime
 
 The Python semantic runtime provides:
@@ -124,6 +131,8 @@ After completing this book, you'll be able to:
 - ✅ Create intelligent crawlers
 - ✅ Integrate LLMs with declarative logic
 - ✅ Deploy production semantic pipelines
+- ✅ Distribute search across multiple specialized nodes
+- ✅ Use Kleinberg routing for efficient query forwarding
 
 ## License
 
