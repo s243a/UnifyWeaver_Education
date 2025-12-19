@@ -33,6 +33,7 @@ This book covers building intelligent semantic agents using UnifyWeaver's Python
 - Web crawling and content extraction
 - LLM integration (Gemini, GPT, Claude)
 - Semantic data pipelines
+- Density-based scoring for result ranking (flux-softmax)
 
 ## Chapter Overview
 
@@ -72,6 +73,12 @@ This book covers building intelligent semantic agents using UnifyWeaver's Python
 - Path folding and shortcuts
 - Federated queries with diversity-weighted aggregation
 - Prolog service definitions
+
+### [Chapter 7: Density-Based Confidence Scoring](07_density_scoring.md)
+- Kernel Density Estimation (KDE) for semantic clustering
+- Flux-softmax: density-weighted probability normalization
+- Two-stage pipeline: cluster first, then compute density
+- Integrating density scoring with federated queries
 
 ## The Semantic Runtime
 
@@ -133,6 +140,7 @@ After completing this book, you'll be able to:
 - ✅ Deploy production semantic pipelines
 - ✅ Distribute search across multiple specialized nodes
 - ✅ Use Kleinberg routing for efficient query forwarding
+- ✅ Rank results using density-based confidence scoring
 
 ## License
 
