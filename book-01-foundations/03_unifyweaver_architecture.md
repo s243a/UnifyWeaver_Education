@@ -133,9 +133,71 @@ Prolog rules are compiled into Bash functions.
 
 By compiling to these optimized structures, UnifyWeaver produces Bash code that is often far more efficient than a naive, direct translation of the Prolog logic would be.
 
+## Try It Yourself: Compiling a Predicate
+
+Let's see the compiler in action. Start SWI-Prolog with UnifyWeaver:
+
+```bash
+cd UnifyWeaver
+swipl -f init.pl
+```
+
+Load the compiler and define some facts:
+
+```prolog
+?- use_module(unifyweaver(core/compiler_driver)).
+true.
+
+?- assertz(edge(a, b)).
+?- assertz(edge(b, c)).
+?- assertz(edge(c, d)).
+true.
+```
+
+Now compile the `edge/2` predicate to Bash:
+
+```prolog
+?- compile(edge/2, [target(bash)], Scripts).
+=== Compiling edge/2 ===
+  Constraints: [unique(true),unordered(true)]
+Type: facts (3 clauses)
+Scripts = ['education/output/advanced/edge.sh'].
+```
+
+The generated file `edge.sh` contains:
+
+```bash
+#!/bin/bash
+# edge - fact lookup
+declare -A edge_data=(
+    [a:b]=1
+    [b:c]=1
+    [c:d]=1
+)
+edge() {
+  local key="$1:$2"
+  [[ -n "${edge_data[$key]}" ]] && echo "$key"
+}
+edge_stream() {
+  for key in "${!edge_data[@]}"; do
+    echo "$key"
+  done
+}
+```
+
+You can test it:
+
+```bash
+source education/output/advanced/edge.sh
+edge_stream
+# Output: a:b  b:c  c:d
+```
+
+For more comprehensive examples including recursive predicates and different targets, see [Book 2: Bash Target](../book-02-bash-target/).
+
 ## Next Steps
 
-With an understanding of the architecture, we are now ready to get our hands dirty. In the next chapter, we will write our first UnifyWeaver program, defining a set of facts and rules, compiling them, and executing the resulting Bash script to see it all in action.
+With an understanding of the architecture and having seen compilation in action, you are ready to explore specific targets in depth. Book 2 covers the Bash target with complete examples, while later books cover Python, Go, Rust, and C# targets.
 
 ---
 
