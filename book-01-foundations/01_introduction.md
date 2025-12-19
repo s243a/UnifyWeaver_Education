@@ -46,9 +46,26 @@ swipl --version
 
 At its heart, **UnifyWeaver is a Prolog-based code generator** that compiles declarative specifications into multiple target languages.
 
-While Bash was the original target (and remains a key focus), UnifyWeaver now supports compilation to **Bash, Python, Go, Rust, and C#**. This allows you to define your data relationships once in Prolog and generate optimized code for whichever runtime best fits your needs.
+While Bash was the original target (and remains a key focus), UnifyWeaver now supports a wide variety of compilation targets:
 
-UnifyWeaver uses the logic programming language Prolog as a high-level, declarative language to define data relationships, rules, and queries. It then compiles these definitions into highly efficient code, using stream-based pipelines where possible and specialized recursion patterns otherwise.
+| Category | Targets |
+|----------|---------|
+| **Shell/Scripting** | Bash, PowerShell, AWK |
+| **Systems Languages** | Go, Rust, LLVM, WASM |
+| **.NET Ecosystem** | C# (Stream & Query), F#, VB.NET |
+| **JVM Languages** | Java, Kotlin, Jython |
+| **Dynamic Languages** | Python, TypeScript |
+| **Functional** | Haskell, Prolog |
+| **Data** | SQL |
+
+This allows you to define your data relationships once in Prolog and generate optimized code for whichever runtime best fits your needs.
+
+UnifyWeaver uses the logic programming language Prolog as a high-level, declarative language to define data relationships, rules, and queries. It then compiles these definitions into highly efficient code using the approach best suited to the target:
+
+*   **Stream-based pipelines** for shell and systems languages (Bash, Go, Rust)
+*   **Generators** with lazy evaluation for Python
+*   **Query runtimes** with semi-naive evaluation for complex recursion (C# Query)
+*   **Declarative SQL** for database execution
 
 Think of it as a bridge between two very different worlds:
 *   **The Declarative World of Prolog:** Where you describe *what* you want to achieve and the logical rules that govern your data.
@@ -87,7 +104,7 @@ Prolog is the most well-known logic programming language. It is based on a few s
 The Prolog engine uses these facts and rules to automatically deduce the answers to your queries.
 
 ### Code Generation
-Code generation is the process of using a program to create other programs. UnifyWeaver is a code generator that takes Prolog as input and produces code in your chosen target language (Bash, Python, Go, Rust, or C#). This is the mechanism it uses to translate the declarative logic into executable programs.
+Code generation is the process of using a program to create other programs. UnifyWeaver is a code generator that takes Prolog as input and produces code in your chosen target language. This is the mechanism it uses to translate the declarative logic into executable programs.
 
 ## An Analogy: The Smart Loom
 
@@ -96,7 +113,7 @@ The name "UnifyWeaver" is a good metaphor for what it does. Imagine your project
 UnifyWeaver acts as a **smart loom**.
 *   The **Prolog code** is the pattern you design for the tapestry. It defines how all the threads should interconnect.
 *   The **compiler** is the loom itself, automatically weaving the threads together according to your pattern.
-*   The resulting **generated code** (in Bash, Python, Go, etc.) represents the finished sections of the tapestry, perfectly woven and ready to be used.
+*   The resulting **generated code** (in any of the supported target languages) represents the finished sections of the tapestry, perfectly woven and ready to be used.
 
 If you want to change the design, you don't re-weave it by hand. You adjust the pattern (the Prolog code), and the loom re-weaves it for you, ensuring the entire tapestry remains consistent.
 
@@ -114,21 +131,26 @@ Over the next chapters, we will explore:
 To work with UnifyWeaver, you need to clone the repository and initialize the Prolog environment:
 
 ```bash
-# Clone the repository
+# Clone the main repository
 git clone https://github.com/s243a/UnifyWeaver.git
 cd UnifyWeaver
+
+# Clone the education repository into the education subfolder
+git clone https://github.com/s243a/UnifyWeaver_Education.git education/UnifyWeaver_Education
 
 # Start an interactive Prolog session with UnifyWeaver
 swipl -f init.pl
 ```
 
-The `init.pl` file sets up the module search paths so that UnifyWeaver modules can be loaded. After loading it, you can import UnifyWeaver modules:
+The `init.pl` file in the project root sets up the module search paths so that UnifyWeaver modules can be loaded. After loading it, you can import UnifyWeaver modules:
 
 ```prolog
 % In the SWI-Prolog REPL after loading init.pl:
 ?- use_module(unifyweaver(targets/bash_target)).
 ?- use_module(unifyweaver(core/compiler_driver)).
 ```
+
+> **Note:** The education repository includes its own `init.pl` (in `book-02-bash-target/examples/`) which assumes the education project is cloned into the `education/UnifyWeaver_Education` subfolder of the main project. This allows the education examples to access the main UnifyWeaver modules.
 
 You'll learn more about using these modules in Chapter 3 and Book 2.
 
