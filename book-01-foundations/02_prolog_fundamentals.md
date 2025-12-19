@@ -9,6 +9,52 @@ This documentation is dual-licensed under MIT and CC-BY-4.0.
 
 To effectively use UnifyWeaver, you don't need to be a Prolog guru, but you do need a solid grasp of its fundamental concepts. This chapter introduces the core building blocks of the Prolog language, with a focus on how they are used in the context of UnifyWeaver.
 
+## Running the Examples
+
+To try the examples in this chapter, you have two options:
+
+**Option 1: Interactive REPL**
+```bash
+# Start SWI-Prolog
+swipl
+
+# At the ?- prompt, you can enter facts and queries directly
+?- assertz(parent(alice, bob)).
+?- parent(alice, X).
+```
+
+**Option 2: Load from a file (recommended)**
+
+Create a file called `examples.pl` with your facts and rules:
+```prolog
+% examples.pl
+file_dependency('main.o', 'main.c').
+file_dependency('main.o', 'utils.h').
+file_dependency('main.c', 'utils.c').
+file_dependency('utils.o', 'utils.c').
+file_dependency('utils.o', 'utils.h').
+
+transitive_dependency(F, D) :- file_dependency(F, D).
+transitive_dependency(F, D) :-
+    file_dependency(F, I),
+    transitive_dependency(I, D).
+```
+
+Then load and query it:
+```bash
+swipl examples.pl
+```
+```prolog
+?- file_dependency('main.o', X).
+X = 'main.c' ;
+X = 'utils.h'.
+
+?- transitive_dependency('main.o', 'utils.c').
+true.
+```
+
+Press `;` after a result to see more solutions, or press Enter to stop.
+
 ## The Building Blocks: Terms
 
 In Prolog, everything is built from **terms**. There are a few basic types of terms.
@@ -63,10 +109,11 @@ In a UnifyWeaver context, facts are often used to represent data from your proje
 % file_dependency(dependent_file, dependency).
 file_dependency('main.o', 'main.c').
 file_dependency('main.o', 'utils.h').
+file_dependency('main.c', 'utils.c').   % main.c includes utils.c
 file_dependency('utils.o', 'utils.c').
 file_dependency('utils.o', 'utils.h').
 ```
-These facts state that `main.o` depends on `main.c` and `utils.h`, and so on.
+These facts state that `main.o` depends on `main.c` and `utils.h`, `main.c` depends on `utils.c`, and so on.
 
 ## Rules: Defining New Knowledge
 

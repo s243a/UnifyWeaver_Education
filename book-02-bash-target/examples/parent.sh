@@ -21,7 +21,7 @@ declare -A parent_data=(
 )
 parent() {
   local key="$1:$2"
-  [[ -n "$parent_data[$key]}" ]] && echo "$key"
+  [[ -n "${parent_data[$key]}" ]] && echo "$key"
 }
 parent_stream() {
   for key in "${!parent_data[@]}"; do

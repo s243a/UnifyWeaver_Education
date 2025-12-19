@@ -9,17 +9,52 @@ This documentation is dual-licensed under MIT and CC-BY-4.0.
 
 Welcome to the study of UnifyWeaver! This document series will guide you through the theory, architecture, and practical application of this unique and powerful tool.
 
+## Prerequisites
+
+Before starting this course, you need:
+
+1. **SWI-Prolog** installed on your system
+2. Basic familiarity with the command line
+3. A text editor for writing Prolog files
+
+### Installing SWI-Prolog
+
+```bash
+# Ubuntu/Debian
+sudo apt-get update && sudo apt-get install swi-prolog
+
+# Arch Linux
+sudo pacman -S swi-prolog
+
+# macOS (Homebrew)
+brew install swi-prolog
+
+# Windows (winget)
+winget install SWI-Prolog.SWI-Prolog
+
+# Termux (Android)
+pkg install swi-prolog
+```
+
+Verify your installation:
+```bash
+swipl --version
+# Should output: SWI-Prolog version X.X.X ...
+```
+
 ## What is UnifyWeaver?
 
-At its heart, **UnifyWeaver is a Prolog-to-Bash compiler.**
+At its heart, **UnifyWeaver is a Prolog-based code generator** that compiles declarative specifications into multiple target languages.
 
-That statement, while accurate, requires some unpacking. UnifyWeaver uses the logic programming language Prolog as a high-level, declarative language to define data relationships, rules, and queries. It then compiles these definitions into highly efficient, stream-based Bash scripts, where possible and otherwise uses specialized recursion patterns.
+While Bash was the original target (and remains a key focus), UnifyWeaver now supports compilation to **Bash, Python, Go, Rust, and C#**. This allows you to define your data relationships once in Prolog and generate optimized code for whichever runtime best fits your needs.
+
+UnifyWeaver uses the logic programming language Prolog as a high-level, declarative language to define data relationships, rules, and queries. It then compiles these definitions into highly efficient code, using stream-based pipelines where possible and specialized recursion patterns otherwise.
 
 Think of it as a bridge between two very different worlds:
 *   **The Declarative World of Prolog:** Where you describe *what* you want to achieve and the logical rules that govern your data.
-*   **The Imperative World of Bash:** Where you write scripts to execute a sequence of commands to get things done in a Unix-like environment.
+*   **The Imperative World of Target Languages:** Where you execute sequences of commands to get things done.
 
-UnifyWeaver's specialty is compiling complex data relationships, especially recursive ones (like finding all ancestors in a family tree or all reachable nodes in a network), into Bash code that is both correct and performant.
+UnifyWeaver's specialty is compiling complex data relationships, especially recursive ones (like finding all ancestors in a family tree or all reachable nodes in a network), into target code that is both correct and performant.
 
 ## The Problem It Solves
 
@@ -52,7 +87,7 @@ Prolog is the most well-known logic programming language. It is based on a few s
 The Prolog engine uses these facts and rules to automatically deduce the answers to your queries.
 
 ### Code Generation
-Code generation is the process of using a program to create other programs. UnifyWeaver is a code generator that takes Prolog as input and produces Bash as output. This is the mechanism it uses to translate the declarative logic into executable scripts.
+Code generation is the process of using a program to create other programs. UnifyWeaver is a code generator that takes Prolog as input and produces code in your chosen target language (Bash, Python, Go, Rust, or C#). This is the mechanism it uses to translate the declarative logic into executable programs.
 
 ## An Analogy: The Smart Loom
 
@@ -61,7 +96,7 @@ The name "UnifyWeaver" is a good metaphor for what it does. Imagine your project
 UnifyWeaver acts as a **smart loom**.
 *   The **Prolog code** is the pattern you design for the tapestry. It defines how all the threads should interconnect.
 *   The **compiler** is the loom itself, automatically weaving the threads together according to your pattern.
-*   The resulting **Bash scripts** are the finished sections of the tapestry, perfectly woven and ready to be used.
+*   The resulting **generated code** (in Bash, Python, Go, etc.) represents the finished sections of the tapestry, perfectly woven and ready to be used.
 
 If you want to change the design, you don't re-weave it by hand. You adjust the pattern (the Prolog code), and the loom re-weaves it for you, ensuring the entire tapestry remains consistent.
 
@@ -71,8 +106,31 @@ Over the next chapters, we will explore:
 1.  **Prolog Fundamentals:** The core concepts of Prolog needed to use UnifyWeaver effectively.
 2.  **UnifyWeaver Architecture:** How the compiler is structured, from the template system to the recursion analyzer.
 3.  **Writing Your First Predicates:** Hands-on examples of defining facts and rules.
-4.  **Compiling and Running:** How to use the compiler and execute the generated Bash scripts.
+4.  **Compiling and Running:** How to use the compiler and execute the generated code.
 5.  **Advanced Topics:** A deep dive into how UnifyWeaver handles complex recursion, constraints, and optimizations.
+
+## Setting Up UnifyWeaver
+
+To work with UnifyWeaver, you need to clone the repository and initialize the Prolog environment:
+
+```bash
+# Clone the repository
+git clone https://github.com/s243a/UnifyWeaver.git
+cd UnifyWeaver
+
+# Start an interactive Prolog session with UnifyWeaver
+swipl -f init.pl
+```
+
+The `init.pl` file sets up the module search paths so that UnifyWeaver modules can be loaded. After loading it, you can import UnifyWeaver modules:
+
+```prolog
+% In the SWI-Prolog REPL after loading init.pl:
+?- use_module(unifyweaver(targets/bash_target)).
+?- use_module(unifyweaver(core/compiler_driver)).
+```
+
+You'll learn more about using these modules in Chapter 3 and Book 2.
 
 Let's begin our journey by diving into the fundamentals of Prolog.
 
