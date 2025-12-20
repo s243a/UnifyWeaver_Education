@@ -173,7 +173,7 @@ namespace UnifyWeaver.Generated {
 
 ## Example Projects
 
-Throughout Book 2, you'll build:
+Throughout Book 3, you'll build:
 - Simple fact query console app
 - Family tree query with recursion
 - Data analysis pipeline in C#

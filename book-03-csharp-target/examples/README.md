@@ -5,7 +5,7 @@ Copyright (c) 2025 John William Creighton (s243a)
 This documentation is dual-licensed under MIT and CC-BY-4.0.
 -->
 
-# Book 2 C# Examples
+# Book 3 C# Examples
 
 This directory contains working examples of UnifyWeaver-generated C# code.
 

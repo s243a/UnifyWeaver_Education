@@ -1,4 +1,4 @@
-# Chapter 3: PowerShell Semantic Target (XML & Vector)
+# Chapter 6: PowerShell Semantic Target (XML & Vector)
 
 UnifyWeaver's **PowerShell Semantic Target** bridges the gap between declarative Prolog logic and the .NET ecosystem on Windows (and Linux via PowerShell Core). 
 

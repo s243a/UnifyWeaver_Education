@@ -793,7 +793,7 @@ Document your results (e.g., include command transcripts in release notes) so fu
 
 ---
 
-**Congratulations!** You've completed Book 2: C# Target Language.
+**Congratulations!** You've completed Book 3: C# Target Language.
 
 Return to Book 1 for Bash-specific topics or explore the appendices for advanced patterns.
 

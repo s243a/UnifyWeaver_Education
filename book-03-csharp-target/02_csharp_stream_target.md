@@ -417,6 +417,62 @@ namespace UnifyWeaver.Generated {
 **Cause:** Unsupported Prolog construct
 **Solution:** Simplify predicate or check limitations section
 
+### Error: "CS0246: The type or namespace 'IEnumerable' could not be found"
+**Cause:** Missing `using System.Collections.Generic;`
+**Solution:** Add the using directive at the top of your file:
+```csharp
+using System;
+using System.Linq;
+using System.Collections.Generic;
+```
+
+### Error: "dotnet: command not found"
+**Cause:** .NET SDK not installed or not in PATH
+**Solution:**
+```bash
+# On Linux/WSL:
+wget https://dot.net/v1/dotnet-install.sh
+./dotnet-install.sh --channel 6.0
+export PATH="$HOME/.dotnet:$PATH"
+
+# On Termux (use proot-distro debian):
+proot-distro login debian
+apt install dotnet-sdk-6.0
+```
+
+### Error: "error CS1061: 'ValueTuple' does not contain a definition for 'Item1'"
+**Cause:** .NET version too old (needs .NET 6.0+)
+**Solution:** Update to .NET 6.0 or higher:
+```bash
+dotnet --version  # Check current version
+```
+
+### Empty output when running generated code
+**Cause:** Facts not loaded or predicate returns no results
+**Solution:**
+1. Verify the generated `Facts` array is populated
+2. Check if filtering conditions are too restrictive
+3. Add debug output to trace execution:
+```csharp
+foreach (var fact in Facts) {
+    Console.WriteLine($"Fact: {fact}");
+}
+```
+
+### Build succeeds but runtime exception occurs
+**Cause:** Null reference or invalid data
+**Solution:**
+1. Check for null values in your facts
+2. Verify join keys match correctly
+3. Use try-catch to identify the failing line:
+```csharp
+try {
+    var results = Stream().ToList();
+} catch (Exception ex) {
+    Console.WriteLine($"Error: {ex.Message}");
+}
+```
+
 ## Real-World Example: Employee Analysis
 
 Let's build a complete employee database query system using the Stream Target.
@@ -602,4 +658,4 @@ Next: **Chapter 3 - C# Query Runtime and Engine** →
 
 ## Navigation
 
-**←** [Previous: Chapter 1: Introduction to Multi-Target Compilatio...](01_introduction_multi_target) | [📖 Book 3: C# Target](./) | [Next: Chapter 3: C# Query Runtime - Deep Dive →](03_query_engine_deep_dive)
+**←** [Previous: Chapter 1: Introduction to Multi-Target Compilation](01_introduction_multi_target) | [📖 Book 3: C# Target](./) | [Next: Chapter 3: C# Query Runtime →](03_query_engine_deep_dive)
