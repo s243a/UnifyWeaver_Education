@@ -368,4 +368,4 @@ For cross-target pipelines (AWK → Python → Go), see [Chapter 3: Pipeline Orc
 
 ## Navigation
 
-**←** [Previous: Chapter 5: Example Libraries](05_example_libraries) | [Book 4: Workflows](./) | [Next: Chapter 1 →](ch1_introduction/)
+**←** [Previous: Chapter 5: Example Libraries](05_example_libraries) | [📖 Book 4: Workflows](./) | [Next: Book 5: Python Target →](../book-05-python-target/)

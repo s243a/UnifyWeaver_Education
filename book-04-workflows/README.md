@@ -317,28 +317,24 @@ Tags reusable examples in libraries.
 ## Current Status
 
 ### Complete ✅
-- Chapter 1: Thinking in Workflows
-- Playbook format specification
-- Core example libraries:
-  - Compilation examples (factorial, ancestor)
-  - Recursion examples (ancestor)
-  - Data source principles
+All 6 chapters are complete:
+- Chapter 1: Introduction (Thinking in Workflows)
+- Chapter 2: Playbook Format
+- Chapter 3: Pipeline Orchestration
+- Chapter 4: Economic Decision Making
+- Chapter 5: Example Libraries
+- Chapter 6: Enhanced Pipeline Stages
 
-### In Progress 🚧
+Core example libraries:
+- Compilation examples (factorial, ancestor)
+- Recursion examples (ancestor)
+- Data source principles
+
+### Future Enhancements 📝
 - Additional playbook examples
 - More compilation patterns
 - Multi-target workflows
-- Partitioning playbooks
-
-### Planned 📝
-- Chapter 2: Designing Workflows
-- Chapter 3: Economic Decision-Making
-- Chapter 4: Tool Orchestration
-- Chapter 5: Testing and Verification
-- Complete factorial playbook (standalone)
-- CSV data source playbook (detailed)
 - Parallel execution playbooks
-- Firewall policy playbooks
 
 ## Best Practices
 

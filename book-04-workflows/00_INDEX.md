@@ -8,8 +8,8 @@ Welcome to the complete guide for designing AI-driven workflows and executable p
 
 | I want to... | Go to... |
 |--------------|----------|
-| Understand the workflow paradigm | [Chapter 1: Thinking in Workflows](ch1_introduction/ch1_introduction.md) |
-| Learn playbook format | [Playbook Format Specification](playbook_format.md) |
+| Understand the workflow paradigm | [Chapter 1: Thinking in Workflows](01_introduction.md) |
+| Learn playbook format | [Chapter 2: Playbook Format](02_playbook_format.md) |
 | See working examples | [Playbooks Directory](playbooks/) |
 | Find reusable patterns | [Examples Library](examples_library/) |
 | Create my first playbook | [Factorial Playbook](playbooks/factorial_compilation.md) |
@@ -18,14 +18,16 @@ Welcome to the complete guide for designing AI-driven workflows and executable p
 ## Directory Structure
 
 ```
-book-workflow/
+book-04-workflows/
 │
 ├── README.md                          # Start here! Overview and navigation
 ├── 00_INDEX.md                        # This file - complete directory index
-├── playbook_format.md                 # Format specification for playbooks
-│
-├── ch1_introduction/                  # Chapter 1: Core concepts
-│   └── ch1_introduction.md            # Workflows vs scripts, strategic thinking
+├── 01_introduction.md                 # Chapter 1: Thinking in Workflows
+├── 02_playbook_format.md              # Chapter 2: Playbook Format
+├── 03_pipeline_orchestration.md       # Chapter 3: Pipeline Orchestration
+├── 04_economic_decisions.md           # Chapter 4: Economic Decision Making
+├── 05_example_libraries.md            # Chapter 5: Example Libraries
+├── 06_enhanced_pipeline_stages.md     # Chapter 6: Enhanced Pipeline Stages
 │
 ├── playbooks/                         # Concrete executable playbooks
 │   ├── README.md                      # Playbooks overview
@@ -36,9 +38,6 @@ book-workflow/
     ├── compilation_examples.md        # Factorial, ancestor compilation patterns
     ├── recursion_examples.md          # Common recursive Prolog patterns
     ├── testing_examples.md            # Test runner patterns
-    ├── tool_usage_examples.md         # UnifyWeaver tool usage
-    ├── log_examples.md                # Logging patterns
-    ├── data_source_playbooks.md       # Data source integration principles
     └── partitioning_examples.md       # ⭐ Parallel processing with partitioning
 ```
 
@@ -46,7 +45,7 @@ book-workflow/
 
 ### Conceptual Foundation
 
-**[Chapter 1: Thinking in Workflows](ch1_introduction/ch1_introduction.md)**
+**[Chapter 1: Thinking in Workflows](01_introduction.md)**
 - From scripts to strategies
 - Workflows vs playbooks distinction
 - Economic decision-making for AI agents
@@ -60,13 +59,11 @@ book-workflow/
 
 ### Specifications & Standards
 
-**[Playbook Format Specification](playbook_format.md)**
-- Complete playbook structure (8 sections)
+**[Chapter 2: Playbook Format](02_playbook_format.md)**
+- Complete playbook structure
 - Callout types reference (`[!output]`, `[!example-record]`, `[!note]`, etc.)
 - Prolog generation guidance
-- Complete playbook template
 - Best practices for authors and AI agents
-- Quality checklist
 
 ### Executable Playbooks
 
@@ -131,7 +128,7 @@ For someone who wants to get productive quickly:
 
 1. [README](README.md) - 5 min
 2. [Factorial Playbook](playbooks/factorial_compilation.md) - Execute it! - 10 min
-3. [Playbook Format](playbook_format.md) - Skim structure - 5 min
+3. [Chapter 2: Playbook Format](02_playbook_format.md) - Skim structure - 5 min
 4. [Compilation Examples](examples_library/compilation_examples.md) - Browse - 5 min
 5. Try modifying the factorial example - 5 min
 
@@ -141,8 +138,8 @@ For someone who wants to get productive quickly:
 
 For someone who wants to create playbooks:
 
-1. [Chapter 1: Thinking in Workflows](ch1_introduction/ch1_introduction.md) - 15 min
-2. [Playbook Format Specification](playbook_format.md) - 30 min
+1. [Chapter 1: Thinking in Workflows](01_introduction.md) - 15 min
+2. [Chapter 2: Playbook Format](02_playbook_format.md) - 30 min
 3. [Factorial Playbook](playbooks/factorial_compilation.md) - Study structure - 20 min
 4. [GNU Prolog Playbook](playbooks/gnu_prolog_compilation.md) - Compare approaches - 20 min
 5. [Examples Library](examples_library/) - Browse all - 20 min
@@ -154,10 +151,10 @@ For someone who wants to create playbooks:
 
 For someone designing AI agent workflows:
 
-1. [Chapter 1: Thinking in Workflows](ch1_introduction/ch1_introduction.md) - 20 min
+1. [Chapter 1: Thinking in Workflows](01_introduction.md) - 20 min
 2. [README](README.md) - Complete read - 15 min
 3. All playbooks - Understand strategy vs tactics - 30 min
-4. [Playbook Format](playbook_format.md) - Economic data, heuristics - 30 min
+4. [Chapter 2: Playbook Format](02_playbook_format.md) - Economic data, heuristics - 30 min
 5. [Partitioning Examples](examples_library/partitioning_examples.md) - Strategy selection - 30 min
 6. Design a multi-strategy workflow - 30 min
 7. Implement strategies as playbooks - 25 min
@@ -199,7 +196,7 @@ Start with these if you're new to UnifyWeaver:
 - ⭐ [Factorial Compilation Playbook](playbooks/factorial_compilation.md)
 - [Compilation Examples](examples_library/compilation_examples.md) - Factorial section
 - [Recursion Examples](examples_library/recursion_examples.md)
-- [Chapter 1: Thinking in Workflows](ch1_introduction/ch1_introduction.md)
+- [Chapter 1: Thinking in Workflows](01_introduction.md)
 
 ### Intermediate
 
@@ -215,7 +212,7 @@ Once you're comfortable with basics:
 For experienced users:
 
 - [Partitioning Examples](examples_library/partitioning_examples.md) - Complete ETL
-- [Playbook Format](playbook_format.md) - Creating templates
+- [Chapter 2: Playbook Format](02_playbook_format.md) - Creating templates
 - Design multi-strategy workflows
 - Extend example libraries
 
@@ -238,28 +235,27 @@ For experienced users:
 → CSV compilation examples
 
 ### I want to create my own playbook
-→ [Playbook Format Specification](playbook_format.md)
-→ [Playbook Template](playbook_format.md#complete-playbook-template)
+→ [Chapter 2: Playbook Format](02_playbook_format.md)
 
 ### I want to understand AI agent workflows
-→ [Chapter 1: Thinking in Workflows](ch1_introduction/ch1_introduction.md)
+→ [Chapter 1: Thinking in Workflows](01_introduction.md)
 → [README: The Paradigm Shift](README.md#the-paradigm-shift)
 
 ## Key Concepts Reference
 
 ### Workflows
 **Definition**: High-level strategic guides for AI agents
-**Location**: [Chapter 1](ch1_introduction/ch1_introduction.md#workflows-vs-playbooks-a-clarification)
+**Location**: [Chapter 1](01_introduction.md)
 **Contains**: Goals, strategies, economic data, heuristics
 
 ### Playbooks
 **Definition**: Specific execution plans for concrete tasks
-**Location**: [Playbook Format](playbook_format.md#what-is-a-playbook)
+**Location**: [Chapter 2: Playbook Format](02_playbook_format.md)
 **Contains**: Steps, commands, verification, troubleshooting
 
 ### Economic Data
 **Definition**: Cost, speed, quality metrics for decision-making
-**Location**: [Playbook Format](playbook_format.md#4-strategies-when-multiple-approaches-exist)
+**Location**: [Chapter 4: Economic Decisions](04_economic_decisions.md)
 **Usage**: AI agents use this to choose strategies
 
 ### Example Libraries
@@ -269,7 +265,7 @@ For experienced users:
 
 ### Callouts
 **Definition**: Structured information blocks in playbooks
-**Location**: [Playbook Format: Callouts](playbook_format.md#callout-types-reference)
+**Location**: [Chapter 2: Playbook Format](02_playbook_format.md)
 **Types**: `[!output]`, `[!example-record]`, `[!note]`, `[!warning]`, `[!tip]`
 
 ## Related Books
@@ -289,25 +285,20 @@ This book is part of the UnifyWeaver Educational Series:
 
 ## Statistics
 
-**Content Status** (as of 2025-11-17):
+**Content Status** (as of 2025-12-20):
 
 | Category | Count | Status |
 |----------|-------|--------|
-| Chapters | 1 | ✅ Complete |
+| Chapters | 6 | ✅ Complete |
 | Playbooks | 2 | ✅ Published |
-| Example Libraries | 7 | ✅ Complete |
+| Example Libraries | 4 | ✅ Complete |
 | Code Examples | 20+ | ✅ Working |
 | Callout Types | 5 | ✅ Documented |
-
-**Upcoming**:
-- 6 more playbooks (planned)
-- Chapter 2-5 (workflow design, economics, testing)
-- Additional example libraries (C#, multi-target)
 
 ## Getting Help
 
 - **Questions**: See [README: Getting Help](README.md#getting-help)
-- **Format Questions**: [Playbook Format Specification](playbook_format.md)
+- **Format Questions**: [Chapter 2: Playbook Format](02_playbook_format.md)
 - **Examples**: [Examples Library](examples_library/)
 - **Issues**: File on GitHub
 - **Contribute**: See [README: Contributing](README.md#contributing)
@@ -320,7 +311,7 @@ This index is updated when:
 - New chapters published
 - Major content revisions
 
-**Last Updated**: 2025-11-17
+**Last Updated**: 2025-12-20
 **Maintainer**: UnifyWeaver Education Team
 
 ---

@@ -473,10 +473,8 @@ Key practices:
 5. Keep examples focused and complete
 6. Reference examples from playbooks instead of copying
 
-This concludes Book 4 on Workflows and Playbooks. Continue to [Book 5: Python Target](../book-05-python-target/) or [Book 6: Go Target](../book-06-go-target/) to explore specific compilation targets.
-
 ---
 
 ## Navigation
 
-**←** [Previous: Chapter 4: Economic Decision Making](04_economic_decisions) | [📖 Book 4: Workflows](./) | [Next: Book 5: Python Target →](../book-05-python-target/)
+**←** [Previous: Chapter 4: Economic Decision Making](04_economic_decisions) | [📖 Book 4: Workflows](./) | [Next: Chapter 6: Enhanced Pipeline Stages →](06_enhanced_pipeline_stages)
