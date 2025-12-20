@@ -83,6 +83,14 @@ This book covers building intelligent semantic agents using UnifyWeaver's Python
 - Efficiency optimizations: sketching, ANN, O(n log n) scaling
 - Integrating density scoring with federated queries
 
+### [Chapter 8: Advanced Federation Features](08_advanced_federation.md)
+- Adaptive Federation-K: dynamic node selection based on query entropy
+- Query Plan Optimization: SPECIFIC/EXPLORATORY/CONSENSUS strategies
+- Hierarchical Federation: regional nodes and topic-based grouping
+- Streaming Aggregation: AsyncGenerator-based incremental results
+- Server-Sent Events (SSE) for real-time browser updates
+- Combining features: hierarchical + adaptive + streaming
+
 ## The Semantic Runtime
 
 The Python semantic runtime provides:
@@ -144,6 +152,8 @@ After completing this book, you'll be able to:
 - ✅ Distribute search across multiple specialized nodes
 - ✅ Use Kleinberg routing for efficient query forwarding
 - ✅ Rank results using density-based confidence scoring
+- ✅ Adapt federation dynamically based on query characteristics
+- ✅ Stream partial results for responsive UIs
 
 ## License
 
