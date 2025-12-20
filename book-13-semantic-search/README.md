@@ -98,6 +98,13 @@ This book covers building intelligent semantic agents using UnifyWeaver's Python
 - Adaptive model weight learning from relevance feedback
 - Prolog configuration for multi-model deployments
 
+### [Chapter 10: Go and Rust Code Generation](10_go_rust_codegen.md)
+- Polyglot architecture: one Prolog spec, multiple target languages
+- Go code generation: goroutines, channels, sync primitives
+- Rust code generation: tokio async/await, mpsc channels
+- Phase 5 predicates for both targets (5a, 5b, 5c, 5d)
+- Deployment patterns: homogeneous, heterogeneous, edge+cloud hybrid
+
 ## The Semantic Runtime
 
 The Python semantic runtime provides:
@@ -163,6 +170,8 @@ After completing this book, you'll be able to:
 - ✅ Stream partial results for responsive UIs
 - ✅ Federate across heterogeneous embedding models
 - ✅ Learn optimal model weights from user feedback
+- ✅ Generate Go and Rust federation engines from Prolog specs
+- ✅ Deploy polyglot clusters with mixed-language nodes
 
 ## License
 
