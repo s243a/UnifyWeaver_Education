@@ -186,9 +186,104 @@ When you make the query `?- file_dependency('main.o', Dependency).`, Prolog trie
 
 Unification is the process that drives the search for answers in a Prolog program.
 
+## Modules: Organizing Code
+
+As programs grow, Prolog uses **modules** to organize code into namespaces.
+
+### Why Modules?
+
+Without modules, all predicates share a global namespace. If two files define `compile/3`, they conflict. Modules solve this by isolating predicates.
+
+### Using Modules
+
+```prolog
+% Load a standard library module
+?- use_module(library(lists)).
+
+% Load a UnifyWeaver module
+?- use_module(unifyweaver(core/recursive_compiler)).
+```
+
+The `unifyweaver(...)` syntax is a **library alias** set up by `init.pl`. It expands to the actual file path:
+```prolog
+unifyweaver(core/recursive_compiler)
+→ 'src/unifyweaver/core/recursive_compiler.pl'
+```
+
+### Module-Qualified Calls
+
+Sometimes you need to call a predicate from a specific module:
+```prolog
+% Call compile_facts from stream_compiler module
+?- stream_compiler:compile_facts(parent, 2, [], Code).
+```
+
+## Directives: Instructions to Prolog
+
+A **directive** (starting with `:-`) is an instruction that executes when a file loads, rather than a fact or rule.
+
+```prolog
+% Load a module (directive)
+:- use_module(library(lists)).
+
+% Declare a dynamic predicate (can be modified at runtime)
+:- dynamic(my_fact/2).
+
+% UnifyWeaver constraint pragma
+:- constraint(ancestor/2, [unique(true), unordered(true)]).
+```
+
+### Directives vs Queries
+
+| Syntax | Location | When Executed |
+|--------|----------|---------------|
+| `?- goal.` | Interactive prompt | Immediately |
+| `:- goal.` | In a file | When file loads |
+
+The UnifyWeaver `constraint` directive is intercepted during compilation to guide code generation.
+
+## File I/O: Reading and Writing
+
+UnifyWeaver generates code by writing to files. Here's the basic pattern:
+
+```prolog
+% Open a file for writing
+open('output/script.sh', write, Stream),
+
+% Write content to the stream
+write(Stream, BashCode),
+
+% Close the file
+close(Stream).
+```
+
+### Common File Operations
+
+```prolog
+% Read entire file to string
+read_file_to_string('input.txt', Content, []).
+
+% Create directory (including parents)
+make_directory_path('education/output').
+
+% Write with formatting
+format(Stream, '~w/~w~n', [Name, Arity]).
+```
+
+### Safe Pattern
+
+To ensure files are closed even on error:
+```prolog
+setup_call_cleanup(
+    open('file.txt', write, S),
+    write(S, Content),
+    close(S)
+).
+```
+
 ## Next Steps
 
-This chapter has covered the absolute essentials: facts, rules, queries, and the terms they are built from. With this foundation, you are ready to understand the architecture of UnifyWeaver and how it translates these Prolog constructs into executable Bash scripts.
+This chapter has covered the essentials: facts, rules, queries, terms, modules, directives, and file I/O. With this foundation, you are ready to understand the architecture of UnifyWeaver and how it translates these Prolog constructs into executable Bash scripts.
 
 In the next chapter, we will look at the high-level architecture of the UnifyWeaver compiler itself.
 

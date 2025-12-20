@@ -13,6 +13,77 @@ While the basic `recursive_compiler` can handle simple transitive closures, the 
 
 This chapter explores the main advanced recursion patterns that UnifyWeaver understands: **tail recursion**, **linear recursion**, **tree recursion**, and **mutual recursion**. All examples shown are from actual working implementations with real generated bash code.
 
+## Background: Understanding Recursion Types
+
+Before diving into the patterns, let's clarify some key concepts.
+
+### Quick Classification Guide
+
+| Pattern | Recursive Calls | Work After Call? | Compiles To |
+|---------|-----------------|------------------|-------------|
+| **Tail** | 1 | No | Iterative loop |
+| **Linear** | 1 | Yes | Fold with memoization |
+| **Tree** | 2+ | Yes | Recursive with parsing |
+| **Mutual** | Calls different predicate | Varies | Shared memoization |
+
+### How to Identify Your Pattern
+
+1. **Count recursive calls per clause** (0 = base case, 1 = tail/linear, 2+ = tree)
+2. **If 1 call:** Is it the last action? (Yes = tail, No = linear)
+3. **If calls different predicate:** Check for mutual recursion (A calls B, B calls A)
+
+### What is an Accumulator?
+
+An **accumulator** is an extra parameter that carries intermediate results forward:
+
+```prolog
+% WITHOUT accumulator: work builds on return path
+factorial(0, 1).
+factorial(N, F) :-
+    N1 is N - 1,
+    factorial(N1, F1),
+    F is N * F1.        % ← Multiplication AFTER return
+
+% WITH accumulator: work builds on forward path (tail-recursive)
+factorial_acc(0, Acc, Acc).
+factorial_acc(N, Acc, F) :-
+    Acc1 is Acc * N,
+    N1 is N - 1,
+    factorial_acc(N1, Acc1, F).  % ← Nothing after this call
+```
+
+Accumulators enable tail recursion because there's no work after the recursive call.
+
+### What is a Fold?
+
+A **fold** (also called reduce) accumulates a result by iterating over a sequence:
+
+```
+fold(operation, initial, [a, b, c])
+
+Step 1: acc = initial
+Step 2: acc = operation(a, acc)
+Step 3: acc = operation(b, acc)
+Step 4: acc = operation(c, acc)
+Result: acc
+```
+
+UnifyWeaver uses folds because they separate structure (the sequence) from computation (the operation).
+
+### Why Memoization?
+
+**Memoization** caches function results to avoid redundant computation:
+
+```
+Without memo: fib(5) computes fib(3) twice
+  fib(5) → fib(4) → fib(3) ← computed
+         → fib(3)          ← computed AGAIN!
+
+With memo: fib(3) computed once, cached
+  fib(5) → fib(4) → fib(3) ← computed, stored in cache
+         → fib(3)          ← cache hit!
+```
+
 ## 1. Tail Recursion Optimization
 
 Tail recursion is a special form of recursion where the recursive call is the very last action performed in a function. There is no other work to be done after the recursive call returns.
