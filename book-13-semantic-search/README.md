@@ -91,6 +91,13 @@ This book covers building intelligent semantic agents using UnifyWeaver's Python
 - Server-Sent Events (SSE) for real-time browser updates
 - Combining features: hierarchical + adaptive + streaming
 
+### [Chapter 9: Cross-Model Federation](09_cross_model_federation.md)
+- Federating across nodes with different embedding models
+- Two-phase architecture: density within pools, fusion across pools
+- Fusion methods: weighted_sum, RRF, consensus, geometric_mean, max
+- Adaptive model weight learning from relevance feedback
+- Prolog configuration for multi-model deployments
+
 ## The Semantic Runtime
 
 The Python semantic runtime provides:
@@ -154,6 +161,8 @@ After completing this book, you'll be able to:
 - ✅ Rank results using density-based confidence scoring
 - ✅ Adapt federation dynamically based on query characteristics
 - ✅ Stream partial results for responsive UIs
+- ✅ Federate across heterogeneous embedding models
+- ✅ Learn optimal model weights from user feedback
 
 ## License
 
