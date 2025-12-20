@@ -97,7 +97,7 @@ This book covers Prolog-to-Bash compilation, stream processing, data source plug
 
 ## Appendices
 
-**[A. Recursion Patterns](A_appendix_recursion_patterns.md)**
+**[A. Recursion Patterns](appendix_c_recursion_patterns.md)**
 - Comprehensive recursion pattern reference
 - Pattern matching flowchart
 - Code examples for each pattern
