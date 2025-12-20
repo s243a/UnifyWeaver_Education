@@ -78,6 +78,9 @@ This book covers building intelligent semantic agents using UnifyWeaver's Python
 - Kernel Density Estimation (KDE) for semantic clustering
 - Flux-softmax: density-weighted probability normalization
 - Two-stage pipeline: cluster first, then compute density
+- HDBSCAN hierarchical clustering with soft membership
+- Adaptive bandwidth selection (cross-validation, balloon estimator)
+- Efficiency optimizations: sketching, ANN, O(n log n) scaling
 - Integrating density scoring with federated queries
 
 ## The Semantic Runtime

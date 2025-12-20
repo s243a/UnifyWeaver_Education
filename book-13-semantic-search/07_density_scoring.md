@@ -5,7 +5,7 @@ Copyright (c) 2025 John William Creighton (s243a)
 This documentation is dual-licensed under MIT and CC-BY-4.0.
 -->
 
-# Chapter 6: Density-Based Confidence Scoring
+# Chapter 7: Density-Based Confidence Scoring
 
 **Flux-Softmax and Semantic Clustering for Result Ranking**
 
@@ -384,6 +384,211 @@ for result in response.results:
 - **Consensus-heavy**: Increase `density_weight` (0.5+)
 - **Score-focused**: Decrease `density_weight` (0.1-0.2)
 
+## Advanced Clustering: HDBSCAN
+
+The greedy clustering shown above works well for simple cases, but hierarchical density clustering provides more robust results. UnifyWeaver supports **HDBSCAN** (Hierarchical Density-Based Spatial Clustering of Applications with Noise):
+
+```python
+from density_scoring import ClusterMethod, DensityConfig
+
+config = DensityConfig(
+    cluster_method=ClusterMethod.HDBSCAN,
+    min_cluster_size=3,
+    hdbscan_min_samples=2,
+    hdbscan_cluster_selection_epsilon=0.0
+)
+```
+
+### Soft Cluster Membership
+
+Unlike hard clustering, HDBSCAN provides **probability scores** for cluster membership:
+
+```python
+def get_hdbscan_probabilities(clusterer, embeddings):
+    """Get soft cluster membership probabilities."""
+    return clusterer.probabilities_  # Array of [0, 1] values
+```
+
+This is valuable for borderline results that partially belong to multiple clusters.
+
+### Graceful Fallback
+
+If HDBSCAN isn't installed, the system automatically falls back to greedy clustering:
+
+```python
+try:
+    import hdbscan
+    HDBSCAN_AVAILABLE = True
+except ImportError:
+    HDBSCAN_AVAILABLE = False
+    # Falls back to cluster_by_similarity()
+```
+
+## Adaptive Bandwidth Selection
+
+Silverman's rule provides a reasonable default bandwidth, but optimal bandwidth varies by data distribution. UnifyWeaver implements two adaptive methods:
+
+### Cross-Validation Bandwidth
+
+Select bandwidth by maximizing leave-one-out likelihood:
+
+```python
+def cross_validation_bandwidth(embeddings, n_candidates=10):
+    """Find optimal bandwidth via cross-validation."""
+    # Log-spaced candidates from data-driven range
+    distances = pairwise_cosine_distances(embeddings)
+    h_min = np.percentile(distances[distances > 0], 5)
+    h_max = np.percentile(distances[distances > 0], 95)
+    candidates = np.logspace(np.log10(h_min), np.log10(h_max), n_candidates)
+
+    best_h, best_score = None, float('-inf')
+    for h in candidates:
+        score = leave_one_out_cv_score(embeddings, h)
+        if score > best_score:
+            best_h, best_score = h, score
+
+    return best_h
+```
+
+### Balloon Estimator (Local Bandwidth)
+
+Different regions may need different bandwidths. The balloon estimator adapts per-point:
+
+```python
+def adaptive_local_bandwidth(embeddings, pilot_densities, alpha=0.5):
+    """Compute per-point bandwidth using balloon estimator.
+
+    h(x) = h₀ × (p̂(x) / g)^(-α)
+
+    Where:
+    - h₀ is the global bandwidth
+    - p̂(x) is the pilot density at x
+    - g is the geometric mean of pilot densities
+    - α controls adaptation strength (0.5 = square root)
+    """
+    g = np.exp(np.mean(np.log(pilot_densities + 1e-10)))
+    local_factors = (pilot_densities / g) ** (-alpha)
+    return global_bandwidth * local_factors
+```
+
+Enable with:
+
+```python
+config = DensityConfig(
+    use_adaptive_bandwidth=True,
+    adaptive_alpha=0.5,  # Adaptation strength
+    cv_n_candidates=10   # Cross-validation grid size
+)
+```
+
+## Efficiency Optimizations
+
+For large result sets (100+ embeddings), naive KDE is O(n²). UnifyWeaver provides several optimizations:
+
+### Distance Caching
+
+LRU cache for pairwise distances:
+
+```python
+class DistanceCache:
+    """LRU cache for embedding distances."""
+    def __init__(self, max_size=10000):
+        self.cache = OrderedDict()
+        self.max_size = max_size
+
+    def get_or_compute(self, emb_i, emb_j, compute_fn):
+        key = (hash(emb_i.tobytes()), hash(emb_j.tobytes()))
+        if key in self.cache:
+            self.cache.move_to_end(key)
+            return self.cache[key]
+
+        value = compute_fn(emb_i, emb_j)
+        self.cache[key] = value
+        if len(self.cache) > self.max_size:
+            self.cache.popitem(last=False)
+        return value
+```
+
+### Random Projection Sketching
+
+Reduce dimensionality while preserving distances (Johnson-Lindenstrauss):
+
+```python
+def sketch_embeddings(embeddings, target_dim=64, seed=42):
+    """Reduce dimensionality via random projection."""
+    rng = np.random.RandomState(seed)
+    d = embeddings.shape[1]
+
+    # Random projection matrix
+    R = rng.randn(d, target_dim) / np.sqrt(target_dim)
+    return embeddings @ R
+```
+
+### Approximate Nearest Neighbors
+
+For density estimation, we only need neighbors within bandwidth. ANN provides O(n log n) lookup:
+
+```python
+def approximate_nearest_neighbors(embeddings, k=50, n_projections=5):
+    """Find approximate k-nearest neighbors."""
+    candidates = set()
+    for proj in range(n_projections):
+        sketched = sketch_embeddings(embeddings, seed=proj)
+        # Sort by first dimension, gather candidates
+        order = np.argsort(sketched[:, 0])
+        # Sliding window to find nearby points
+        for i, idx in enumerate(order):
+            window = order[max(0, i-k):min(len(order), i+k+1)]
+            candidates.update((idx, j) for j in window if j != idx)
+
+    # Refine with true distances
+    return refine_candidates(embeddings, candidates, k)
+```
+
+### Complete Efficient Pipeline
+
+```python
+def compute_efficient_density_scores(embeddings, config):
+    """O(n log n) density estimation for large datasets."""
+    n = len(embeddings)
+
+    if n < config.large_dataset_threshold:
+        return compute_density_scores(embeddings, config)
+
+    # Use sketching for initial estimates
+    if config.use_sketching:
+        sketched = sketch_embeddings(embeddings, config.sketch_dim)
+    else:
+        sketched = embeddings
+
+    # ANN for neighbor finding
+    neighbors = approximate_nearest_neighbors(
+        sketched, k=min(50, n-1)
+    )
+
+    # Compute density using only neighbors
+    densities = np.zeros(n)
+    for i in range(n):
+        neighbor_dists = [
+            cosine_distance(embeddings[i], embeddings[j])
+            for j in neighbors[i]
+        ]
+        densities[i] = kernel_density_at_point(neighbor_dists, config.bandwidth)
+
+    return normalize_densities(densities)
+```
+
+Enable with:
+
+```python
+config = DensityConfig(
+    use_sketching=True,
+    sketch_dim=64,
+    large_dataset_threshold=100,
+    cache_distances=True
+)
+```
+
 ## The Smoothness Assumption
 
 Density scoring rests on a **smoothness assumption**: semantically similar questions should have similar answer distributions. This is formalized as a Lipschitz continuity constraint:
@@ -408,13 +613,18 @@ The assumption can fail when:
 
 Density-based scoring extends federated search with semantic consensus signals:
 
-1. **Cluster** results by embedding similarity
+1. **Cluster** results by embedding similarity (greedy or HDBSCAN)
 2. **Compute density** within each cluster using KDE
 3. **Apply flux-softmax** to boost dense regions
+4. **Scale efficiently** with sketching and ANN for large result sets
+
+Advanced features:
+- **HDBSCAN clustering** for hierarchical density-based grouping with soft membership
+- **Adaptive bandwidth** via cross-validation and balloon estimator
+- **O(n log n) scaling** through random projections and approximate nearest neighbors
 
 This approach surfaces results that represent **consensus** across nodes, not just high individual scores.
 
 ## What's Next
 
-- [Chapter 7: Distributed Query Transactions](07_distributed_transactions.md) - Transaction management for multi-node queries
-- [Book 14: AI Training](../book-14-ai-training/README.md) - Learn the theory behind density estimation
+- [Book 14: AI Training](../book-14-ai-training/README.md) - Learn the theory behind density estimation and kernel methods
