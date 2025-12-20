@@ -5,7 +5,7 @@ Copyright (c) 2025 John William Creighton (s243a)
 This documentation is dual-licensed under MIT and CC-BY-4.0.
 -->
 
-# Chapter 10: Seamless Compilation with the Compiler Driver
+# Chapter 12: Seamless Compilation with the Compiler Driver
 
 In the previous chapters, we have seen how to compile Prolog predicates into Bash scripts. However, the process involved manually compiling each predicate and its dependencies. While the inference-based test runner helped in automating the testing, the compilation process itself was not as seamless as it could be.
 

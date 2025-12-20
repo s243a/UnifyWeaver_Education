@@ -229,9 +229,11 @@ A **directive** (starting with `:-`) is an instruction that executes when a file
 % Declare a dynamic predicate (can be modified at runtime)
 :- dynamic(my_fact/2).
 
-% UnifyWeaver constraint pragma
+% UnifyWeaver constraint pragma (see Book 2, Chapter 6 for details)
 :- constraint(ancestor/2, [unique(true), unordered(true)]).
 ```
+
+The `constraint` directive tells UnifyWeaver how to handle duplicates and ordering in generated code. See [Book 2: The Constraint System](../book-02-bash-target/03_advanced_constraints.md) for full documentation.
 
 ### Directives vs Queries
 

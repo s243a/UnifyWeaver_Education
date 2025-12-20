@@ -7,9 +7,26 @@ This documentation is dual-licensed under MIT and CC-BY-4.0.
 
 # Chapter 6: Advanced Topic: The Constraint System
 
-By default, UnifyWeaver makes certain assumptions about the desired output of your compiled predicates. Specifically, it assumes you want unique results in no particular order. While this is often true, it's not always the case. 
+By default, UnifyWeaver makes certain assumptions about the desired output of your compiled predicates. Specifically, it assumes you want unique results in no particular order. While this is often true, it's not always the case.
 
 This is where the **constraint system** comes in. It provides a way for you to give hints to the compiler, allowing you to control the behavior of the generated script to match your specific needs.
+
+## Quick Reference
+
+| Constraint | Values | Default | Effect |
+|------------|--------|---------|--------|
+| `unique` | `true`, `false` | `true` | Whether to eliminate duplicate results |
+| `unordered` | `true`, `false` | `true` | Whether result order can be changed |
+| `ordered` | (shorthand) | - | Same as `unordered(false)` |
+
+**Common Combinations:**
+
+| Use Case | Constraints | Generated Code |
+|----------|-------------|----------------|
+| Set-like queries (ancestors, dependencies) | `[unique, unordered]` | `... \| sort -u` |
+| Ordered timeline (first occurrence only) | `[unique, ordered]` | Hash deduplication |
+| Counting/aggregation | `[unique(false)]` | No deduplication |
+| Raw log processing | `[unique(false), ordered]` | Direct output |
 
 ## Why Constraints are Necessary
 

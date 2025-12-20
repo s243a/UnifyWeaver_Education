@@ -69,13 +69,18 @@ The `?-` is the Prolog prompt, waiting for your query.
 
 ## Step 2.5: Initialize the Environment
 
-Before we can use the UnifyWeaver compiler, we need to initialize the environment. We have provided an `init.pl` file in the `education` directory that sets up the necessary library paths.
+Before we can use the UnifyWeaver compiler, we need to initialize the environment. The `education/init.pl` file sets up the library search paths so Prolog knows where to find UnifyWeaver modules.
 
 At the Prolog prompt, enter the following query:
 ```prolog
 ?- ['education/init'].
+[UnifyWeaver] Educational environment initialized.
+true.
 ```
-You will see a message confirming that the environment has been initialized.
+
+> **What does init.pl do?** It registers the `unifyweaver(...)` library alias that maps to `src/unifyweaver/`. This allows you to write `use_module(unifyweaver(core/recursive_compiler))` instead of the full path. See [Book 1, Chapter 2](../book-01-foundations/02_prolog_fundamentals.md#modules-organizing-code) for details on modules.
+
+> **Troubleshooting:** If you see `ERROR: source_sink ... does not exist`, make sure you started `swipl` from the UnifyWeaver project root directory, not from inside `education/`.
 
 ## Step 3: Load the UnifyWeaver Compiler
 
@@ -274,6 +279,90 @@ $ cd education/output/advanced && bash test_runner.sh && cd ../..
 ```
 
 You will see the output of the test runner, executing the inferred test cases against your compiled scripts. This provides a powerful, declarative, and automated way to ensure your compiled logic is working correctly.
+
+## Troubleshooting Common Issues
+
+### "ERROR: Unknown procedure" when compiling
+
+```prolog
+?- compile_recursive(my_pred/2, [], Code).
+ERROR: Unknown procedure: my_pred/2
+```
+
+**Cause:** The predicate isn't loaded or has the wrong arity.
+
+**Fix:**
+```prolog
+% Check what's loaded
+?- listing(my_pred).
+
+% Load your file
+?- ['my_predicates.pl'].
+
+% Or assert directly
+?- assertz(my_pred(a, b)).
+```
+
+### "ERROR: source_sink does not exist"
+
+```prolog
+?- use_module(unifyweaver(core/recursive_compiler)).
+ERROR: source_sink `unifyweaver(core/recursive_compiler)' does not exist
+```
+
+**Cause:** The library path isn't set up.
+
+**Fix:** Make sure you loaded init.pl first:
+```prolog
+?- ['education/init'].
+```
+Also verify you started `swipl` from the UnifyWeaver project root.
+
+### Generated Bash gives wrong results
+
+**Step 1:** Verify Prolog logic first
+```prolog
+?- ancestor(abraham, X).
+% Check if results are what you expect
+```
+
+**Step 2:** Check the generated code
+```bash
+cat education/output/ancestor.sh
+# Look for:
+# - Correct key format (arg1:arg2)
+# - Proper array initialization
+# - Visited tracking for recursion
+```
+
+**Step 3:** Debug with bash tracing
+```bash
+source education/output/ancestor.sh
+set -x  # Enable tracing
+ancestor abraham
+set +x  # Disable tracing
+```
+
+### Empty output from compiled script
+
+**Possible causes:**
+1. Facts not loaded before compilation
+2. Wrong predicate arity
+3. Base fact script not sourced
+
+**Fix:**
+```bash
+# Make sure to source dependencies first
+source education/output/parent.sh
+source education/output/ancestor.sh
+
+# Then test
+ancestor abraham
+```
+
+### "Broken pipe" or script hangs
+
+This can happen with large recursive queries. See [Appendix B: SIGPIPE and Streaming Safety](appendix_a_sigpipe_streaming_safety.md) for details.
 
 ## Congratulations!
 
