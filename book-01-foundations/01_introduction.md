@@ -136,7 +136,7 @@ git clone https://github.com/s243a/UnifyWeaver.git
 cd UnifyWeaver
 
 # Clone the education repository into the education subfolder
-git clone https://github.com/s243a/UnifyWeaver_Education.git education/UnifyWeaver_Education
+git clone https://github.com/s243a/UnifyWeaver_Education.git education
 
 # Start an interactive Prolog session with UnifyWeaver
 swipl -f init.pl
@@ -150,7 +150,7 @@ The `init.pl` file in the project root sets up the module search paths so that U
 ?- use_module(unifyweaver(core/compiler_driver)).
 ```
 
-> **Note:** The education repository includes its own `init.pl` (in `book-02-bash-target/examples/`) which assumes the education project is cloned into the `education/UnifyWeaver_Education` subfolder of the main project. This allows the education examples to access the main UnifyWeaver modules.
+> **Note:** The education repository includes its own `init.pl` (in `book-02-bash-target/examples/`) which sets up paths for the education examples to access the main UnifyWeaver modules.
 
 You'll learn more about using these modules in Chapter 3 and Book 2.
 

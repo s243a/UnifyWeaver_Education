@@ -4,13 +4,13 @@
 % This file is part of UnifyWeaver.
 % Licensed under either MIT or Apache-2.0 at your option.
 
-:- ['/mnt/c/Users/johnc/Dropbox/projects/UnifyWeaver/education/init.pl'].
-:- ['/mnt/c/Users/johnc/Dropbox/projects/UnifyWeaver/education/family_tree.pl'].
+% Load from project root (run with: swipl -f init.pl)
+:- ['education/book-02-bash-target/examples/family_tree'].
 :- use_module(unifyweaver(core/stream_compiler)).
 
 generate_parent_script :-
     stream_compiler:compile_facts(parent, 2, [], BashCode),
-    open('/mnt/c/Users/johnc/Dropbox/projects/UnifyWeaver/education/parent.sh', write, Stream),
+    open('education/output/parent.sh', write, Stream),
     write(Stream, BashCode),
     close(Stream).
 
