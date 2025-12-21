@@ -1,3 +1,10 @@
+<!--
+SPDX-License-Identifier: MIT AND CC-BY-4.0
+Copyright (c) 2025 John William Creighton (s243a)
+
+This documentation is dual-licensed under MIT and CC-BY-4.0.
+-->
+
 # Chapter 12b: Polyglot and Distributed Services
 
 Building on the service mesh patterns from Chapter 12a, this chapter covers cross-language service communication (polyglot) and distributed service architectures with sharding and replication.
@@ -1203,3 +1210,9 @@ This chapter covered:
 ## Next Steps
 
 Chapter 12c covers Service Discovery (Phase 7) and Distributed Tracing (Phase 8), completing the client-server architecture with runtime discovery and observability.
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 12a: Service Mesh](12a_service_mesh) | [📖 Book 7: Cross-Target Glue](./) | [Next: Chapter 12c: Discovery and Tracing →](12c_discovery_tracing)

@@ -1,3 +1,10 @@
+<!--
+SPDX-License-Identifier: MIT AND CC-BY-4.0
+Copyright (c) 2025 John William Creighton (s243a)
+
+This documentation is dual-licensed under MIT and CC-BY-4.0.
+-->
+
 # Chapter 12d: Knowledge Graph Topology
 
 This chapter extends the client-server architecture with **Knowledge Graph (KG) Topology** - a distributed network for semantic search using Kleinberg small-world routing.
@@ -554,3 +561,9 @@ This chapter covered:
 - [SMALL_WORLD_ROUTING.md](../../docs/proposals/SMALL_WORLD_ROUTING.md) - Theoretical foundation
 - [FEDERATED_QUERY_ALGEBRA.md](../../docs/proposals/FEDERATED_QUERY_ALGEBRA.md) - Query algebra
 - [DENSITY_SCORING_PROPOSAL.md](../../docs/proposals/DENSITY_SCORING_PROPOSAL.md) - Confidence scoring
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 12c: Discovery and Tracing](12c_discovery_tracing) | [📖 Book 7: Cross-Target Glue](./) | [Next: Chapter 13: API Reference →](13_api_reference)

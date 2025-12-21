@@ -1,3 +1,10 @@
+<!--
+SPDX-License-Identifier: MIT AND CC-BY-4.0
+Copyright (c) 2025 John William Creighton (s243a)
+
+This documentation is dual-licensed under MIT and CC-BY-4.0.
+-->
+
 # Chapter 12c: Service Discovery and Distributed Tracing
 
 This chapter covers the final phases of the client-server architecture: runtime service discovery (Phase 7) and distributed tracing for observability (Phase 8).
@@ -1941,3 +1948,9 @@ This chapter covered:
 - Integration with OTLP, Jaeger, and Zipkin
 
 Together with Chapters 11a, 12a, and 12b, this completes the client-server architecture documentation, covering all 8 phases from basic in-process services to production-grade distributed systems with observability.
+
+---
+
+## Navigation
+
+**←** [Previous: Chapter 12b: Polyglot Distributed](12b_polyglot_distributed) | [📖 Book 7: Cross-Target Glue](./) | [Next: Chapter 12d: Knowledge Graph Topology →](12d_kg_topology)

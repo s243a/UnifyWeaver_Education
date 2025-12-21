@@ -286,9 +286,10 @@ pipeline(Input, Output) :-
 
 ```bash
 # Debug a pipeline by tapping between stages
+# tee sends output to stderr so you can see intermediate data
 cat input.tsv \
     | awk -f filter.awk \
-    | tee /dev/stderr \      # See intermediate data
+    | tee /dev/stderr \
     | python3 transform.py
 ```
 

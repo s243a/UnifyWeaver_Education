@@ -1,3 +1,10 @@
+<!--
+SPDX-License-Identifier: MIT AND CC-BY-4.0
+Copyright (c) 2025 John William Creighton (s243a)
+
+This documentation is dual-licensed under MIT and CC-BY-4.0.
+-->
+
 # Chapter 17: LLVM Foreign Function Interface
 
 Integrate LLVM-compiled Prolog predicates with Go and Rust via C ABI.
