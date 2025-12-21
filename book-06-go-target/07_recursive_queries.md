@@ -296,4 +296,4 @@ func is_odd(n int) bool {
 
 ## Navigation
 
-**←** [Previous: Chapter 6: Generator Mode](06_generator_mode) | [📖 Book 6: Go Target](./)
+**←** [Previous: Chapter 6: Generator Mode](06_generator_mode) | [📖 Book 6: Go Target](./) | [Next: Book 7: Cross-Target Glue →](../book-07-cross-target-glue/)

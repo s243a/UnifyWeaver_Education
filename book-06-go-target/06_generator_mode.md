@@ -337,4 +337,4 @@ Generator mode transforms UnifyWeaver's Go target from a simple record processor
 
 ## Navigation
 
-**←** [Previous: Chapter 5: Semantic Crawling & RDF Processing](05_semantic_crawling) | [📖 Book 6: Go Target](./) | [Next: Book 7: Cross-Target Glue →](../book-07-cross-target-glue/)
+**←** [Previous: Chapter 5: Semantic Crawling & RDF Processing](05_semantic_crawling) | [📖 Book 6: Go Target](./) | [Next: Chapter 7: Recursive Queries →](07_recursive_queries)

@@ -1,29 +1,43 @@
-# Go Target Example: Family Tree
+# Go Target Examples
 
-This example demonstrates how to compile Prolog predicates to a standalone Go program using the **Generator Mode** (Semi-Naive Evaluation).
+This directory contains runnable examples organized by chapter.
 
-## Files
+## Directory Structure
 
-- `family_tree.pl`: Prolog source file containing `parent/2` facts and `ancestor/2` rules.
-- `compile.pl`: Prolog script to compile the predicates.
-- `ancestor.go`: Generated Go source code.
+```
+examples/
+├── chapter-2-basic/      # Basic compilation (facts, rules)
+├── chapter-4-json/       # JSON processing examples
+├── chapter-6-generator/  # Generator mode with fixpoint
+└── chapter-7-recursion/  # Recursive query examples
+    ├── family_tree.pl    # Source predicates
+    ├── ancestor.go       # Generated Go code
+    └── run_test.sh       # Test script
+```
 
-## How to Run
+## Quick Start
 
-1. **Compile the Prolog code:**
-   ```bash
-   swipl -s ../../../init.pl -s compile.pl -g halt
-   ```
+### Chapter 7: Recursive Queries (Family Tree)
 
-2. **Build and Run the Go program:**
-   ```bash
-   go mod init example/ancestor  # Initialize module (once)
-   go build ancestor.go
-   ./ancestor
-   ```
+```bash
+cd chapter-7-recursion
 
-   *Note: The generator mode outputs all derived facts to stdout as JSON lines.*
+# Build the Go program
+go build ancestor.go
 
-## Expected Output
+# Run with test data
+./ancestor abraham
+```
 
-You should see a stream of JSON objects representing both parent and ancestor facts, including transitively derived ancestors (e.g., `ancestor(abraham, jacob)`).
+## Requirements
+
+- Go 1.16+ installed
+- SWI-Prolog (for recompiling from source)
+
+## Adding New Examples
+
+Each subdirectory should contain:
+1. Source `.pl` file with predicates
+2. `compile.pl` script to generate Go code
+3. Generated `.go` file
+4. `run_test.sh` to verify functionality

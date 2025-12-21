@@ -1,4 +1,13 @@
+<!--
+SPDX-License-Identifier: MIT AND CC-BY-4.0
+Copyright (c) 2025 John William Creighton (s243a)
+
+This documentation is dual-licensed under MIT and CC-BY-4.0.
+-->
+
 # Chapter 5: Semantic Crawling & RDF Processing
+
+> **Advanced Topic**: This chapter covers features that require external dependencies (ONNX Runtime, embedding models). If you're new to the Go target, consider completing Chapters 1-4 and 6-7 first, then return here for semantic features.
 
 The Go target includes a powerful semantic runtime that enables AI-driven crawling and processing of RDF/XML documents. This chapter explores how to use `semantic_search/3` and `crawler_run/2` to build intelligent data acquisition pipelines.
 

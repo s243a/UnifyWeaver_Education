@@ -35,6 +35,19 @@ Go provides excellent performance for string processing and I/O operations. The 
 | **Dependencies** | System tools (grep, awk) | None |
 | **Use Case** | Shell scripting, Pipelines | ETL, High-performance tools |
 
+## Compilation Modes
+
+The Go target supports two primary compilation modes:
+
+| Mode | API | Use Case | Complexity |
+|------|-----|----------|------------|
+| **Streaming** | `compile_predicate_to_go/3` | Simple transforms, ETL pipelines | O(n) single pass |
+| **Generator** | `compile_predicate_to_go/3` with `mode(generator)` | Full Datalog with recursion, joins, negation | Fixpoint iteration |
+
+**Streaming mode** (Chapters 2-5) generates stdin→stdout processors. Best for simple record transformations.
+
+**Generator mode** (Chapter 6) creates complete Datalog engines with fixpoint evaluation, indexed joins, and database persistence. Use when you need recursive queries, aggregation, or negation.
+
 ## Supported Features
 
 | Feature | Status | Description |
