@@ -181,6 +181,51 @@ for node in nodes:
 results = hnsw.search(query_embedding, k=5, ef=50)
 ```
 
+### Tunable M Parameter
+
+The M (max neighbors) parameter controls the recall vs memory/build-time tradeoff:
+
+| M Value | Recall@5 | Edge Count | Use Case |
+|---------|----------|------------|----------|
+| 4 | ~85% | Low | Memory-constrained |
+| 8 | ~90% | Moderate | Balanced |
+| 16 | ~95% | Higher | Default, good precision |
+| 32 | ~98% | High | Maximum recall needed |
+
+**Key insights from benchmarks:**
+- Higher M always increases edge count (monotonically)
+- Recall improvement has diminishing returns above M=16
+- Layer 0 can have more connections (M0 = 2*M) for finer local navigation
+
+```python
+from hnsw_layers import HNSWGraph, build_hnsw_index
+
+# Low-memory configuration
+graph_small = HNSWGraph(
+    max_neighbors=8,      # M=8
+    max_neighbors_layer0=16,  # M0=16
+    ef_construction=100
+)
+
+# High-recall configuration
+graph_precise = HNSWGraph(
+    max_neighbors=32,     # M=32
+    max_neighbors_layer0=64,  # M0=64
+    ef_construction=200
+)
+
+# Build from vector list
+graph = build_hnsw_index(vectors, max_neighbors=16, seed=42)
+
+# Search from any starting node (P2P mode)
+results, comparisons = graph.search_from_any_node(
+    query_embedding,
+    start_node_id="node_123",
+    k=5,
+    use_backtrack=True  # Enable backtracking for better recall
+)
+```
+
 ## Target Language Support
 
 ### Current Implementation Status

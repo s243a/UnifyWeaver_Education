@@ -123,6 +123,7 @@ This book covers building intelligent semantic agents using UnifyWeaver's Python
 - Greedy forwarding vs Kleinberg routing distinction
 - Proper small-world networks (k_local + k_long)
 - HNSW hierarchical routing for O(log n) paths
+- **Tunable M parameter**: Recall vs memory tradeoff configuration
 - Cosine-based angle ordering (not 2D projection)
 - Target language support status
 
@@ -203,6 +204,32 @@ After completing this book, you'll be able to:
 - ✅ Understand the distinction between greedy routing and Kleinberg routing
 - ✅ Build proper small-world networks for O(log²n) path length
 - ✅ Design scale-free networks with power-law interface distribution
+- ✅ Tune HNSW M parameter for recall vs memory tradeoffs
+- ✅ Protect against adversarial nodes (outlier rejection, collision detection, trust)
+- ✅ Run comprehensive integration tests for all federation features
+
+## Integration Tests
+
+The semantic search modules have comprehensive integration tests:
+
+```bash
+# Run all integration tests
+PYTHONPATH="src:src/unifyweaver/targets/python_runtime" \
+  python3 -m pytest tests/integration/test_*_integration.py -v
+
+# Individual test suites
+python3 -m unittest tests.integration.test_hnsw_integration -v        # HNSW with tunable M
+python3 -m unittest tests.integration.test_cross_model_federation -v  # Cross-model fusion
+python3 -m unittest tests.integration.test_multi_interface_integration -v  # Scale-free nodes
+python3 -m unittest tests.integration.test_adversarial_robustness -v  # Outlier/collision/trust
+```
+
+| Test Suite | Tests | Coverage |
+|------------|-------|----------|
+| HNSW Integration | 18 | Tunable M, layer distribution, P2P routing |
+| Cross-Model Federation | 29 | Fusion methods, adaptive weights, serialization |
+| Multi-Interface Nodes | 21 | Scale-free distribution, routing, statistics |
+| Adversarial Robustness | 27 | Outlier detection, collision, trust management |
 
 ## License
 
