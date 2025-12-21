@@ -105,6 +105,34 @@ This book covers building intelligent semantic agents using UnifyWeaver's Python
 - Phase 5 predicates for both targets (5a, 5b, 5c, 5d)
 - Deployment patterns: homogeneous, heterogeneous, edge+cloud hybrid
 
+### [Chapter 11: Adversarial Robustness](11_adversarial_robustness.md)
+- Soft collisions (outlier detection)
+- Hard collisions (KSK-style region locking)
+- Consensus voting with quorum
+- Trust management (direct and FMS two-dimensional)
+- Trust-weighted consensus
+
+### [Chapter 12: Performance Benchmarking](12_performance_benchmarking.md)
+- Synthetic network generation
+- Query workload patterns (SPECIFIC/EXPLORATORY/CONSENSUS)
+- Metrics collection and aggregation
+- Benchmark runner and CLI
+- Visualizations and HTML reports
+
+### [Chapter 13: Advanced Routing Algorithms](13_advanced_routing.md)
+- Greedy forwarding vs Kleinberg routing distinction
+- Proper small-world networks (k_local + k_long)
+- HNSW hierarchical routing for O(log n) paths
+- Cosine-based angle ordering (not 2D projection)
+- Target language support status
+
+### [Chapter 14: Scale-Free Networks](14_scale_free_networks.md)
+- Power-law interface distribution (P(k) ∝ k^(-γ))
+- Multi-interface nodes with unified binary search
+- Capacity-proportional sizing (hubs compress, leaves specialize)
+- Internal shortcuts between related interfaces
+- Web traffic analogy and design rationale
+
 ## The Semantic Runtime
 
 The Python semantic runtime provides:
@@ -172,6 +200,9 @@ After completing this book, you'll be able to:
 - ✅ Learn optimal model weights from user feedback
 - ✅ Generate Go and Rust federation engines from Prolog specs
 - ✅ Deploy polyglot clusters with mixed-language nodes
+- ✅ Understand the distinction between greedy routing and Kleinberg routing
+- ✅ Build proper small-world networks for O(log²n) path length
+- ✅ Design scale-free networks with power-law interface distribution
 
 ## License
 

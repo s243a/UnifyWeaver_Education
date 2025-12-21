@@ -66,7 +66,7 @@ interface_id, confidence = api.map_query_to_interface(query)
 # interface_id = csv_interface, confidence = 0.89
 ```
 
-## Kleinberg Routing
+## Greedy Routing
 
 ### The Small-World Insight
 
@@ -75,7 +75,9 @@ interface_id, confidence = api.map_query_to_interface(query)
 For semantic search:
 - **Distance** = cosine distance in embedding space
 - **α** = tuning parameter (typically 2.0 for high-dimensional embeddings)
-- **Greedy forwarding** = route to node with highest similarity to query
+- **Greedy routing** = route to node with highest similarity to query
+
+> **Note**: This chapter describes **greedy routing** - forwarding to the closest neighbor. To achieve Kleinberg's O(log²n) path length guarantee, you need proper small-world network structure (k_local nearest neighbors + k_long probability-weighted shortcuts). See [Chapter 13](13_advanced_routing.md) for the full implementation.
 
 ### Routing Protocol
 
@@ -411,6 +413,13 @@ This chapter covered:
 - **Path folding**: Dynamic shortcuts for improved latency
 - **Federated queries**: Parallel execution with diversity-weighted aggregation
 - **Prolog integration**: Declarative service definitions
+
+## What's Next
+
+For proper Kleinberg routing with guaranteed O(log²n) path length, see:
+
+- **[Chapter 13: Advanced Routing Algorithms](13_advanced_routing.md)** - Proper small-world networks (k_local + k_long) that enable true Kleinberg routing, HNSW layered routing, and O(log n) scaling
+- **[Chapter 14: Scale-Free Networks](14_scale_free_networks.md)** - Power-law interface distribution, capacity-proportional sizing, and hub optimization
 
 ## Related Documentation
 
