@@ -53,9 +53,11 @@ A typical deployment might use:
     └─────────────┘  └─────────────┘  └─────────────┘
 ```
 
-## Phase 5 Code Generation Predicates
+## Phase 5-8 Code Generation Predicates
 
-### Go Predicates
+### Phase 5: Advanced Federation
+
+#### Go Predicates
 
 | Predicate | Phase | Generated Code |
 |-----------|-------|----------------|
@@ -64,7 +66,7 @@ A typical deployment might use:
 | `compile_hierarchical_federation_go/2` | 5a | NodeHierarchy, HierarchicalFederatedEngine |
 | `compile_streaming_federation_go/2` | 5d | PartialResult, StreamingFederatedEngine |
 
-### Rust Predicates
+#### Rust Predicates
 
 | Predicate | Phase | Generated Code |
 |-----------|-------|----------------|
@@ -72,6 +74,39 @@ A typical deployment might use:
 | `compile_query_planner_rust/2` | 5c | QueryType, QueryPlan, QueryPlanner |
 | `compile_hierarchical_federation_rust/2` | 5a | RegionalNode, NodeHierarchy |
 | `compile_streaming_federation_rust/2` | 5d | PartialResult, StreamingFederatedEngine |
+
+### Phase 7: Proper Small-World Networks
+
+True Kleinberg routing requires proper small-world network structure. These predicates generate complete implementations with:
+- **k_local**: Nearest-neighbor connections for local connectivity
+- **k_long**: Probability-weighted long-range shortcuts (P ~ 1/distance^α)
+- **Cosine-based angles**: Full high-dimensional ordering for binary search
+
+| Predicate | Target | Key Options |
+|-----------|--------|-------------|
+| `compile_small_world_proper_python/2` | Python | `k_local(K)`, `k_long(K)`, `alpha(A)`, `angle_ordering(cosine_based)` |
+| `compile_small_world_proper_go/2` | Go | `k_local(K)`, `k_long(K)`, `alpha(A)` |
+| `compile_small_world_proper_rust/2` | Rust | `k_local(K)`, `k_long(K)`, `alpha(A)` |
+
+**Key insight**: Without proper k_local + k_long structure, you only have *greedy routing*. With proper structure, you get *Kleinberg routing* with O(log²n) expected path length.
+
+### Phase 8: Scale-Free Multi-Interface Nodes
+
+Power-law distribution of interfaces enables capacity-proportional node sizing:
+- **gamma**: Power-law exponent P(k) ~ k^(-γ) where k = interface count
+- **Unified binary search**: O(log n) lookup across all interfaces on a node
+
+| Predicate | Target | Key Options |
+|-----------|--------|-------------|
+| `compile_multi_interface_node_python/2` | Python | `gamma(G)`, `min_interfaces(N)`, `max_interfaces(N)`, `unified_search(Bool)` |
+| `compile_multi_interface_node_go/2` | Go | `gamma(G)`, `min_interfaces(N)`, `max_interfaces(N)` |
+| `compile_multi_interface_node_rust/2` | Rust | `gamma(G)`, `min_interfaces(N)`, `max_interfaces(N)` |
+
+**Distribution example** (gamma=2.5):
+- ~60% nodes: 1-2 interfaces (leaf specialists)
+- ~25% nodes: 3-5 interfaces (mid-tier)
+- ~12% nodes: 6-20 interfaces (regional hubs)
+- ~3% nodes: 20+ interfaces (major hubs)
 
 ## Generated Go Code Examples
 
@@ -570,6 +605,8 @@ impl StreamingFederatedEngine {
 
 Prolog options map directly to generated code defaults:
 
+### Phase 5 Options
+
 | Prolog Option | Go Field | Rust Field |
 |--------------|----------|------------|
 | `base_k(5)` | `BaseK: 5` | `base_k: 5` |
@@ -577,14 +614,25 @@ Prolog options map directly to generated code defaults:
 | `min_confidence(0.3)` | `MinConfidence: 0.3` | `min_confidence: 0.3` |
 | `drill_down_k(2)` | `DrillDownK: 2` | `drill_down_k: 2` |
 
+### Phase 7-8 Options
+
+| Prolog Option | Go Constant | Rust Constant |
+|--------------|-------------|---------------|
+| `k_local(10)` | `KLocal = 10` | `K_LOCAL: usize = 10` |
+| `k_long(5)` | `KLong = 5` | `K_LONG: usize = 5` |
+| `alpha(2.0)` | `Alpha = 2.0` | `ALPHA: f64 = 2.0` |
+| `gamma(2.5)` | `Gamma = 2.5` | `GAMMA: f64 = 2.5` |
+| `min_interfaces(1)` | `MinInterfaces = 1` | `MIN_INTERFACES: usize = 1` |
+| `max_interfaces(100)` | `MaxInterfaces = 100` | `MAX_INTERFACES: usize = 100` |
+
 ## Testing Generated Code
 
 ```prolog
-% Test all Phase 5 predicates generate valid code
+% Test Phase 5-8 predicates generate valid code
 ?- use_module('src/unifyweaver/targets/go_target'),
    use_module('src/unifyweaver/targets/rust_target'),
 
-   % Go tests
+   % Phase 5: Go tests
    compile_adaptive_federation_go([adaptive_k([base_k(5)])], GoAdapt),
    string_length(GoAdapt, GoAdaptLen),
    format('Go Adaptive-K: ~w chars~n', [GoAdaptLen]),
@@ -593,22 +641,56 @@ Prolog options map directly to generated code defaults:
    string_length(GoPlan, GoPlanLen),
    format('Go Query Planner: ~w chars~n', [GoPlanLen]),
 
-   % Rust tests
+   % Phase 5: Rust tests
    compile_adaptive_federation_rust([adaptive_k([])], RustAdapt),
    string_length(RustAdapt, RustAdaptLen),
    format('Rust Adaptive-K: ~w chars~n', [RustAdaptLen]),
 
    compile_streaming_federation_rust([streaming([])], RustStream),
    string_length(RustStream, RustStreamLen),
-   format('Rust Streaming: ~w chars~n', [RustStreamLen]).
+   format('Rust Streaming: ~w chars~n', [RustStreamLen]),
+
+   % Phase 7: Small-world tests
+   compile_small_world_proper_go([k_local(10), k_long(5)], GoSW),
+   string_length(GoSW, GoSWLen),
+   format('Go Small-World: ~w chars~n', [GoSWLen]),
+
+   compile_small_world_proper_rust([k_local(10), k_long(5)], RustSW),
+   string_length(RustSW, RustSWLen),
+   format('Rust Small-World: ~w chars~n', [RustSWLen]),
+
+   % Phase 8: Multi-interface tests
+   compile_multi_interface_node_go([gamma(2.5)], GoMI),
+   string_length(GoMI, GoMILen),
+   format('Go Multi-Interface: ~w chars~n', [GoMILen]),
+
+   compile_multi_interface_node_rust([gamma(2.5)], RustMI),
+   string_length(RustMI, RustMILen),
+   format('Rust Multi-Interface: ~w chars~n', [RustMILen]).
+```
+
+There's also a standalone test file for Phase 7-8:
+
+```bash
+swipl -g run_tests -t halt tests/prolog/test_small_world_codegen.pl
 ```
 
 Expected output:
 ```
-Go Adaptive-K: 11166 chars
-Go Query Planner: 13227 chars
-Rust Adaptive-K: 2112 chars
-Rust Streaming: 2138 chars
+=== Phase 7-8 Code Generation Tests ===
+
+Testing Python small-world code generation...
+  [PASS] Python small-world with k_local=10
+Testing Go small-world code generation...
+  [PASS] Go small-world with KLocal=15
+Testing Rust small-world code generation...
+  [PASS] Rust small-world with K_LOCAL=20
+Testing multi-interface code generation...
+  [PASS] Python multi-interface with gamma=2.5
+  [PASS] Go multi-interface with Gamma=3
+  [PASS] Rust multi-interface with GAMMA=2
+
+=== All tests completed ===
 ```
 
 ## Deployment Patterns
@@ -672,14 +754,18 @@ This chapter covered:
 3. **Rust code generation** with tokio async/await and mpsc channels
 4. **Configuration mapping** from Prolog options to generated defaults
 5. **Deployment patterns** for homogeneous and heterogeneous clusters
+6. **Phase 7: Proper small-world networks** with k_local + k_long for true Kleinberg routing
+7. **Phase 8: Scale-free multi-interface nodes** with power-law distribution
 
 The polyglot architecture allows you to:
 - Prototype in Python
 - Deploy high-throughput services in Go
 - Run resource-constrained edge nodes in Rust
 - Mix languages in a single federation
+- Configure network topology (k_local, k_long, gamma) from Prolog specs
 
 ## Next Steps
 
-- [Chapter 11: Benchmarking Federation](11_benchmarking.md) - Performance comparison across targets
-- [Adversarial Robustness Proposal](../../docs/proposals/ADVERSARIAL_ROBUSTNESS.md) - Protecting against malicious nodes
+- [Chapter 11: Adversarial Robustness](11_adversarial_robustness.md) - Protecting against malicious nodes
+- [Chapter 13: Advanced Routing](13_advanced_routing.md) - Greedy vs Kleinberg routing distinction
+- [Chapter 14: Scale-Free Networks](14_scale_free_networks.md) - Power-law interface distribution
