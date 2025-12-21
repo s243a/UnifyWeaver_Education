@@ -745,6 +745,44 @@ Testing multi-interface code generation...
 └────────┘     └────────┘     └────────┘
 ```
 
+## Integration Tests
+
+All generated code is tested to ensure it compiles and functions correctly.
+
+### Running the Test Suite
+
+```bash
+# Run all integration tests (Prolog, Python, Go, Rust)
+./tests/integration/run_all_tests.sh
+
+# Run individual language tests
+python3 -m unittest tests.integration.test_small_world_integration -v
+cd tests/integration/generated/smallworld && go test -v
+cd tests/integration/generated/rust_smallworld && cargo test
+```
+
+### Test Results
+
+| Target | Tests | Coverage |
+|--------|-------|----------|
+| Prolog | 6 | Code generation for all 3 targets |
+| Python | 23 | AngleOrdering, SWNode, SmallWorldProper, routing, KNN |
+| Go | 5 | Network creation, cosine similarity, routing |
+| Rust | 5 | Network creation, cosine similarity, routing |
+
+### Benchmarks
+
+Run the benchmark suite to measure performance:
+
+```bash
+python3 tests/integration/benchmark_small_world.py
+```
+
+Sample results (n=100, k_local=10, k_long=5):
+- **Path length**: 2.3 hops average
+- **Recall@5**: 100%
+- **Construction**: 0.73ms/node
+
 ## Summary
 
 This chapter covered:
@@ -756,6 +794,7 @@ This chapter covered:
 5. **Deployment patterns** for homogeneous and heterogeneous clusters
 6. **Phase 7: Proper small-world networks** with k_local + k_long for true Kleinberg routing
 7. **Phase 8: Scale-free multi-interface nodes** with power-law distribution
+8. **Integration tests** verifying generated code compiles and works correctly across all targets
 
 The polyglot architecture allows you to:
 - Prototype in Python
