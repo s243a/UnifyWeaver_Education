@@ -93,7 +93,7 @@ For semantic search:
     },
     "__embedding": {
         "model": "all-MiniLM-L6-v2",
-        "vector": [0.1, 0.2, ...]
+        "vector": [0.1, 0.2, 0.3, 0.4, 0.5]
     },
     "payload": {
         "query_text": "How do I parse CSV?",

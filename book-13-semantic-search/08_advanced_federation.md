@@ -375,20 +375,37 @@ class StreamingFederatedEngine(FederatedQueryEngine):
 For HTTP/2 streaming to browsers:
 
 ```python
+import asyncio
+import json
+
 async def federated_query_sse(self, query_text, embedding, **kwargs):
     """Yield SSE-formatted strings for HTTP streaming."""
-    async for partial in self.federated_query_streaming(...):
+    async for partial in self.federated_query_streaming(query_text, embedding, **kwargs):
         yield f"data: {json.dumps(partial.to_dict())}\n\n"
 ```
 
-Flask endpoint:
+Flask endpoint with event loop:
 
 ```python
+from flask import Flask, Response
+import asyncio
+
 @app.route('/kg/stream')
 def stream_query():
+    query = request.args.get('q')
+    embedding = request.args.get('embedding')
+
     def generate():
-        async for sse_line in engine.federated_query_sse(query, embedding):
-            yield sse_line
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            async def stream():
+                async for sse_line in engine.federated_query_sse(query, embedding):
+                    yield sse_line
+            yield from loop.run_until_complete(stream())
+        finally:
+            loop.close()
+
     return Response(generate(), mimetype='text/event-stream')
 ```
 
