@@ -284,7 +284,7 @@ Query → Rank Regions → Top K Regions → Query Children → Aggregate
 
 ```python
 class HierarchicalFederatedEngine(FederatedQueryEngine):
-    def federated_query(self, query_text, embedding, ...):
+    def federated_query(self, query_text, embedding, top_k=5):
         # Level 1: Query regional nodes
         regions = self.hierarchy.get_regional_nodes(level=0)
         ranked_regions = self._rank_regions(embedding, regions)
