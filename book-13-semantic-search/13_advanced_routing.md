@@ -89,10 +89,10 @@ Where α = 2.0 is optimal for 2D grids, but **for high-dimensional embedding spa
 The proper small-world network is implemented in `small_world_proper.py`:
 
 ```python
-from small_world_proper import ProperSmallWorldNetwork
+from small_world_proper import SmallWorldProper
 
 # Create network with proper structure
-network = ProperSmallWorldNetwork(
+network = SmallWorldProper(
     embedding_dim=384,
     k_local=10,      # 10 nearest neighbors
     k_long=5,        # 5 long-range shortcuts
@@ -110,12 +110,31 @@ for node in nodes:
 # Build the small-world structure
 network.build_connections()
 
-# Route a query (now gets O(log²n) path length)
-path = network.route_to_target(
-    query_embedding=embed("How do I parse CSV?"),
+# Route a query using the unified route() method
+path, comparisons = network.route(
+    query=embed("How do I parse CSV?"),
     max_hops=10
 )
 ```
+
+### Backtracking (Default Enabled)
+
+All routing implementations now default to **backtracking enabled** for better success rates in P2P scenarios:
+
+```python
+# Default: backtracking ON (recommended for P2P/distributed)
+path, comps = network.route(query, use_backtrack=True)   # default
+
+# Disable backtracking for performance-critical paths with known good entry points
+path, comps = network.route(query, use_backtrack=False)
+```
+
+| Setting | Use Case | Success Rate |
+|---------|----------|--------------|
+| `use_backtrack=True` (default) | P2P, arbitrary start node | ~100% |
+| `use_backtrack=False` | Centralized, optimal entry point | ~85-95% |
+
+The unified `route()` method delegates to `route_greedy()` or `route_with_backtrack()` based on this parameter. This applies to both `SmallWorldProper` and `SmallWorldNetwork` (evolution variant).
 
 ### Cosine-Based Angle Ordering
 
