@@ -166,7 +166,7 @@ thread_local! {
 }
 
 fn triangular(n: i32) -> i32 {
-    if let Some(&result) = TRIANGULAR_MEMO.with(|m| m.borrow().get(&n).copied()) {
+    if let Some(result) = TRIANGULAR_MEMO.with(|m| m.borrow().get(&n).copied()) {
         return result;
     }
     // ... base cases and memoization
@@ -202,7 +202,7 @@ thread_local! {
 
 fn is_even(n: i32) -> bool {
     let key = format!("is_even:{}", n);
-    if let Some(&result) = IS_EVEN_IS_ODD_MEMO.with(|m| m.borrow().get(&key).copied()) {
+    if let Some(result) = IS_EVEN_IS_ODD_MEMO.with(|m| m.borrow().get(&key).copied()) {
         return result;
     }
     
