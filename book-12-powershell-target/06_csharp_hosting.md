@@ -381,3 +381,9 @@ The C# hosting integration enables seamless .NET ecosystem access from UnifyWeav
 - [Chapter 4: .NET Integration](04_dotnet_integration.md) - Add-Type and inline C#
 - [Book 7: Cross-Target Glue](../book-07-cross-target-glue/README.md) - Multi-language pipelines
 - [Book 3: C# Target](../book-03-csharp-target/README.md) - Pure C# compilation
+
+---
+
+## Navigation
+
+[← Previous: Chapter 5: Windows Automation](05_windows_automation.md) | [📖 Book 12: PowerShell Target](./) | [Next: Chapter 7: Recursive Queries →](07_recursive_queries.md)

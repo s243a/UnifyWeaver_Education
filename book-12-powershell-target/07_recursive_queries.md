@@ -3,7 +3,7 @@ SPDX-License-Identifier: MIT AND CC-BY-4.0
 Copyright (c) 2025 John William Creighton (s243a)
 -->
 
-# Chapter 6: Recursive Queries
+# Chapter 7: Recursive Queries
 
 This chapter covers compiling recursive predicates like `ancestor/2` to PowerShell using BFS-based transitive closure with .NET collections.
 
@@ -251,4 +251,4 @@ function triangular {
 
 ## Navigation
 
-**←** [Previous: Chapter 5: Windows Automation](05_windows_automation) | [📖 Book 12: PowerShell Target](./)
+[← Previous: Chapter 6: In-Process C# Hosting](06_csharp_hosting.md) | [📖 Book 12: PowerShell Target](./)

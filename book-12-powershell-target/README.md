@@ -53,6 +53,10 @@ This table shows the current implementation status of features described in each
 | [Ch 4](04_dotnet_integration.md) | DLL caching | **Implemented** | `pre_compile(true)` generates caching |
 | [Ch 4](04_dotnet_integration.md) | NuGet references | **Implemented** | `references(['LiteDB'])` works |
 | [Ch 5](05_windows_automation.md) | Windows automation | Design only | Examples show patterns, not auto-generated |
+| [Ch 6](06_csharp_hosting.md) | C# hosting bridges | **Implemented** | PowerShell, IronPython, CPython bridges generated |
+| [Ch 6](06_csharp_hosting.md) | Runtime detection | **Implemented** | Automatic .NET, PowerShell, IronPython detection |
+| [Ch 7](07_recursive_queries.md) | BFS transitive closure | **Implemented** | Recursive predicate compilation with .NET collections |
+| [Ch 7](07_recursive_queries.md) | Linear recursion memo | **Implemented** | Memoization patterns for overlapping subproblems |
 
 **Legend:** **Implemented** = tested and working, Partial = works with limitations, Not yet = documented but not implemented, Design only = conceptual/aspirational
 
@@ -92,19 +96,27 @@ This table shows the current implementation status of features described in each
 - Registry access
 - Event logs and WMI/CIM queries
 
-### Part 3: Advanced Topics (Planned)
+### Part 3: Advanced Topics
 
-**Chapter 6: In-Process Hosting** *(coming soon)*
-- Sharing runtime with C# target
-- Cross-target glue via .NET
-- Performance considerations
+**[Chapter 6: In-Process C# Hosting](06_csharp_hosting.md)** - *Implemented*
+- In-process C# hosting architecture
+- `compile_with_csharp_host/4` for dual-output compilation
+- Bridge generation for PowerShell, IronPython, CPython
+- 16 new bindings for C# hosting operations
+- Runtime detection and selection
 
-**Chapter 7: Active Directory** *(coming soon)*
+**[Chapter 7: Recursive Queries](07_recursive_queries.md)** - *Implemented*
+- Compiling recursive predicates using BFS-based transitive closure
+- .NET collection usage for efficient query processing
+- Class-based design for PowerShell
+- Linear recursion with memoization patterns
+
+**Chapter 8: Active Directory** *(planned)*
 - LDAP queries from Prolog
 - User and group management
 - Permission handling
 
-**Chapter 8: Enterprise Patterns** *(coming soon)*
+**Chapter 9: Enterprise Patterns** *(planned)*
 - Remote execution (PSRemoting)
 - Scheduled tasks
 - Credential management

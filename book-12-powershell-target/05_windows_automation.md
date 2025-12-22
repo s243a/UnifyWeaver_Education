@@ -679,4 +679,4 @@ HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall
 
 ## Navigation
 
-[← Previous: Chapter 4: .NET Integration](04_dotnet_integration.md) | [📖 Book 12: PowerShell Target](./) | [Next: Chapter 6: In-Process Hosting →](06_inprocess_hosting.md)
+[← Previous: Chapter 4: .NET Integration](04_dotnet_integration.md) | [📖 Book 12: PowerShell Target](./) | [Next: Chapter 6: In-Process C# Hosting →](06_csharp_hosting.md)
