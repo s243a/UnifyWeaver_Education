@@ -41,8 +41,7 @@ run_test :-
 % === Entry Point ===
 
 main :-
-
-    main,
+    run_test,
     halt(0).
 
 main :-
