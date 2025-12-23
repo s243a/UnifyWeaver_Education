@@ -15,8 +15,8 @@ When clusters have few training examples, projections can overfit. **Smoothness 
 
 Build a similarity graph between clusters, then penalize projection differences:
 
-```python
-# Cluster similarity graph
+```
+# Cluster similarity graph (mathematical notation)
 S[i,j] = cosine_sim(centroid_i, centroid_j)
 
 # Graph Laplacian

@@ -87,8 +87,8 @@ optimal_architecture(100)  # → (4, 3) = 64 heads (closest)
 
 Train the transformer to match LDA outputs using MSE + cosine loss:
 
-```python
-# Loss function
+```
+# Loss function (mathematical notation)
 L = (1 - λ) × MSE(pred, target) + λ × (1 - cosine_sim(pred, target))
 
 # Recommended: λ = 0.7 (cosine-weighted)
