@@ -45,23 +45,60 @@ adult(Name, Age) :-
 
 Supported operators: `>`, `<`, `>=`, `=<`, `==`, `\=`.
 
-## Aggregations
+## Aggregations & Analytics
 
-You can perform aggregations on numeric fields using the `aggregation/1` predicate.
+UnifyWeaver supports powerful aggregation capabilities for both database and stream processing, comparable to SQL.
+
+### Simple Aggregations
+
+Aggregate across all matching records.
 
 ```prolog
 % Calculate sum of values
 total_score(Sum) :-
-    aggregation(sum),
-    score(Sum).
+    aggregate(sum(Score), json_record([score-Score]), Sum).
 
 % Count records
 record_count(Count) :-
-    aggregation(count),
-    record(Count).
+    aggregate(count, json_record([_-_]), Count).
 ```
 
-Supported aggregations: `sum`, `count`, `avg`, `min`, `max`.
+### Group By
+
+Group records by one or more fields and compute multiple metrics.
+
+```prolog
+% Stats per city
+city_stats(City, Count, AvgAge) :-
+    group_by(City, 
+             json_record([city-City, age-Age]), 
+             [count(Count), avg(Age, AvgAge)]).
+```
+
+### Advanced Functions
+
+- **Statistical**: `stddev(Field, Result)`, `median(Field, Result)`, `percentile(Field, 90, Result)`
+- **Arrays**: `collect_list(Field, Result)`, `collect_set(Field, Result)`
+- **Window**: `row_number(OrderField, Result)`, `rank(OrderField, Result)`
+
+```prolog
+% Advanced analytics
+analysis(City, MedAge, TopAges) :-
+    group_by(City, 
+             json_record([city-City, age-Age]), 
+             [median(Age, MedAge), collect_set(Age, TopAges)]).
+```
+
+### Filtering (HAVING)
+
+Filter groups based on aggregation results.
+
+```prolog
+% High-value customers
+vip_customers(Customer, TotalSpent) :-
+    group_by(Customer, json_record([cust-Customer, amount-Amount]), sum(Amount, TotalSpent)),
+    TotalSpent > 1000.
+```
 
 ### Example: Log Analysis Pipeline
 

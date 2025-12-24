@@ -92,6 +92,32 @@ compile_predicate_to_go(versioned_doc/3, [
 
 Generated key: `"readme:a3f2b1c9..."`
 
+## Secondary Indexes
+
+You can declare secondary indexes to optimize lookups on non-key fields.
+
+```prolog
+% Declare index on email field for user/2 predicate
+:- index(user/2, email).
+```
+
+### Write Path
+The compiler automatically generates code to maintain index buckets (e.g., `index_user_email`) alongside the main record bucket.
+- **Bucket Name**: `index_Predicate_Field`
+- **Key Format**: `Value:PrimaryKey` (allows multiple records with same value)
+- **Value**: Empty
+
+### Read Path
+When a query filters on an indexed field using equality:
+
+```prolog
+user(Id, Email) :-
+    json_record([id-Id, email-Email]),
+    Email = "alice@example.com".
+```
+
+The compiler generates an optimized `cursor.Seek()` on the index bucket to find matching primary keys, then fetches the full records from the main bucket. This avoids a full table scan.
+
 ## Write Path
 
 ### Populating the Database
