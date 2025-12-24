@@ -33,7 +33,7 @@ object ANCESTORQuery {
 
     while (queue.nonEmpty) {
       val current = queue.dequeue()
-      baseRelation.getOrElse(current, Set()).foreach { next =>
+      baseRelation.getOrElse(current, mutable.Set.empty[String]).foreach { next =>
         if (!visited.contains(next)) {
           visited += next
           queue.enqueue(next)

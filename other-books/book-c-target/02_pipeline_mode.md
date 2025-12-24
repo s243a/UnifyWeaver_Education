@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
 ```c
 cJSON* process(cJSON* record) {
     cJSON* value = cJSON_GetObjectItem(record, "value");
-    if (value && cJSON_IsNumber(value) && value->valueint > 50) {
+    if (value && cJSON_IsNumber(value) && cJSON_GetNumberValue(value) > 50) {
         return record;
     }
     return NULL;  /* Filter out */

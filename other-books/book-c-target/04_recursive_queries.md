@@ -13,6 +13,8 @@ This chapter covers compiling recursive predicates to C.
 The C target generates a complete BFS implementation with:
 
 ```c
+#define MAX_NODES 1000
+
 /* Simple hash table for adjacency list */
 typedef struct Edge {
     char* to;

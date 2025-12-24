@@ -75,7 +75,7 @@ public class ANCESTOR {
 
     // Check if target is reachable from start
     public static boolean check(String start, String target) {
-        // ... BFS implementation
+        return findAll(start).contains(target);
     }
 }
 ```
@@ -124,8 +124,8 @@ This generates `PARENT.java` with:
 ```java
 private static final List<String[]> facts = Arrays.asList(
     new String[]{"abraham", "ishmael"},
-    new String[]{"abraham", "isaac"},
-    // ...
+    new String[]{"abraham", "isaac"}
+    // ... more facts
 );
 
 public static Stream<String[]> stream() {

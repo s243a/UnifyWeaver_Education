@@ -51,6 +51,7 @@ For patterns like Fibonacci that recompute values.
 ```
 
 ```typescript
+// Note: Requires --target ES2015 or later for Map
 const fibMemo = new Map<number, number>();
 
 export const fib = (n: number): number => {
