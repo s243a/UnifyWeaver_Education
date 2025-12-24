@@ -87,6 +87,43 @@ valid_user(Name) :-
     json_get([name], Name).
 ```
 
+## Stream Observability
+
+For large-scale data processing, you can enable observability features to track progress and capture errors.
+
+### Error Aggregation
+
+The `error_file(Path)` option captures malformed records and validation failures into a separate JSONL file instead of dropping them.
+
+```prolog
+compile_predicate_to_go(process/1, [
+    json_input(true),
+    error_file('errors.jsonl')
+], Code).
+```
+
+### Progress Reporting
+
+The `progress(interval(N))` option prints processing statistics to stderr every N records.
+
+```prolog
+compile_predicate_to_go(process/1, [
+    json_input(true),
+    progress(interval(1000))
+], Code).
+```
+
+### Fail-Fast with Thresholds
+
+Use `error_threshold(count(N))` to stop processing if the error count exceeds a specific limit.
+
+```prolog
+compile_predicate_to_go(process/1, [
+    json_input(true),
+    error_threshold(count(100))
+], Code).
+```
+
 ## Example: JSON ETL Pipeline
 
 ```prolog
