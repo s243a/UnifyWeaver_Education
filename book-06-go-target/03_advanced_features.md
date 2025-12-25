@@ -79,14 +79,84 @@ city_stats(City, Count, AvgAge) :-
 
 - **Statistical**: `stddev(Field, Result)`, `median(Field, Result)`, `percentile(Field, 90, Result)`
 - **Arrays**: `collect_list(Field, Result)`, `collect_set(Field, Result)`
-- **Window**: `row_number(OrderField, Result)`, `rank(OrderField, Result)`
+- **Window**: `row_number(OrderField, Result)`, `rank(OrderField, Result)`, `lag`, `lead`, `first_value`, `last_value`
 
 ```prolog
 % Advanced analytics
 analysis(City, MedAge, TopAges) :-
-    group_by(City, 
-             json_record([city-City, age-Age]), 
+    group_by(City,
+             json_record([city-City, age-Age]),
              [median(Age, MedAge), collect_set(Age, TopAges)]).
+```
+
+## Window Functions
+
+The Go target provides comprehensive window function support for analytics queries.
+
+### Ranking Functions
+
+```prolog
+% Rank employees by salary within department
+ranked_employees(Dept, Name, Salary, Rank) :-
+    employee(Name, Dept, Salary),
+    rank(Salary, Rank).
+
+% Row numbers for pagination
+paginated(Id, Name, RowNum) :-
+    record(Id, Name),
+    row_number(Id, RowNum).
+```
+
+### LAG and LEAD Functions
+
+Access values from previous or following rows - essential for time-series analysis.
+
+```prolog
+% Calculate day-over-day change in stock price
+daily_change(Date, Price, PrevPrice, Change) :-
+    stock_price(Date, Price),
+    lag(Date, Price, 1, 0, PrevPrice),  % Previous row, default 0
+    Change is Price - PrevPrice.
+
+% Look ahead to next value
+next_value(Date, Value, NextValue) :-
+    time_series(Date, Value),
+    lead(Date, Value, 1, null, NextValue).  % Next row, default null
+```
+
+**LAG function variants:**
+- `lag(SortField, ValueField, Result)` - Previous value (offset 1, default null)
+- `lag(SortField, ValueField, Offset, Result)` - Previous by N rows
+- `lag(SortField, ValueField, Offset, Default, Result)` - With custom default
+
+**LEAD function variants:**
+- `lead(SortField, ValueField, Result)` - Next value (offset 1, default null)
+- `lead(SortField, ValueField, Offset, Result)` - Next by N rows
+- `lead(SortField, ValueField, Offset, Default, Result)` - With custom default
+
+### First and Last Value
+
+Access boundary values within a window partition.
+
+```prolog
+% Get first and last price in each trading session
+session_bounds(Session, FirstPrice, LastPrice) :-
+    trade(Session, Time, Price),
+    first_value(Time, Price, FirstPrice),
+    last_value(Time, Price, LastPrice).
+```
+
+### Example: Moving Averages
+
+Combine window functions for financial analysis:
+
+```prolog
+% Calculate 3-day moving average with price comparison
+moving_avg(Date, Price, PrevPrice, MovingAvg) :-
+    daily_price(Date, Price),
+    lag(Date, Price, 1, Price, PrevPrice),
+    % Additional logic for moving average calculation
+    MovingAvg is (Price + PrevPrice) / 2.
 ```
 
 ### Filtering (HAVING)

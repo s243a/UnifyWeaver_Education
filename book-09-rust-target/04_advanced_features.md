@@ -5,6 +5,8 @@ Copyright (c) 2025 John William Creighton (s243a)
 
 # Chapter 4: Advanced Features
 
+The Rust target provides high-performance data processing with statistical aggregations, collection operations, and comprehensive observability features.
+
 ## JSON Processing
 
 The Rust target supports high-performance JSON processing using `serde` and `serde_json`.
@@ -37,7 +39,9 @@ compile_output :-
 
 ## Aggregations
 
-Rust target supports efficient aggregations.
+### Basic Aggregations
+
+Rust target supports efficient aggregations compiled to native Rust iterators.
 
 ```prolog
 total_sales(Sum) :-
@@ -46,6 +50,154 @@ total_sales(Sum) :-
 ```
 
 Supported: `sum`, `count`, `min`, `max`, `avg`.
+
+### Statistical Aggregations
+
+The Rust target provides advanced statistical functions for analytics:
+
+```prolog
+% Calculate standard deviation of scores
+score_stddev(StdDev) :-
+    aggregation(stddev),
+    score(StdDev).
+
+% Find the median value
+median_price(Median) :-
+    aggregation(median),
+    price(Median).
+
+% Calculate 95th percentile
+percentile_95(P95) :-
+    aggregation(percentile(95)),
+    response_time(P95).
+```
+
+**Supported statistical aggregations:**
+- `stddev` - Sample standard deviation
+- `median` - Median value (50th percentile)
+- `percentile(N)` - Nth percentile (0-100)
+
+### Collection Aggregations
+
+Aggregate values into JSON arrays:
+
+```prolog
+% Collect all tags (with duplicates)
+all_tags(Tags) :-
+    aggregation(collect_list),
+    tag(Tags).
+
+% Collect unique categories (sorted)
+unique_categories(Categories) :-
+    aggregation(collect_set),
+    category(Categories).
+```
+
+**Output examples:**
+```json
+// collect_list preserves duplicates
+["rust", "go", "rust", "python"]
+
+// collect_set produces sorted unique values
+["go", "python", "rust"]
+```
+
+## Observability
+
+The Rust target provides comprehensive observability features for production data pipelines.
+
+### Progress Reporting
+
+Report processing progress to stderr at regular intervals:
+
+```prolog
+compile_with_progress :-
+    compile_predicate_to_rust(process/2, [
+        json_input(true),
+        progress(interval(10000))  % Report every 10,000 records
+    ], Code),
+    write_rust_project(Code, 'output/processor').
+```
+
+Output:
+```
+Processed 10000 records...
+Processed 20000 records...
+Processed 30000 records...
+Completed: 35000 records in 2.34s
+```
+
+### Error Logging
+
+Log parsing and validation errors to a JSON file:
+
+```prolog
+compile_with_error_log :-
+    compile_predicate_to_rust(process/2, [
+        json_input(true),
+        error_file("errors.jsonl")
+    ], Code),
+    write_rust_project(Code, 'output/processor').
+```
+
+Error log format:
+```json
+{"timestamp": "2025-12-25T10:30:00Z", "error": "parse error", "line": "invalid data"}
+{"timestamp": "2025-12-25T10:30:01Z", "error": "missing field: name", "line": "{\"age\": 25}"}
+```
+
+### Error Threshold
+
+Exit processing after a maximum number of errors:
+
+```prolog
+compile_with_threshold :-
+    compile_predicate_to_rust(process/2, [
+        json_input(true),
+        error_threshold(count(100))  % Exit after 100 errors
+    ], Code),
+    write_rust_project(Code, 'output/processor').
+```
+
+### Metrics Export
+
+Export processing statistics to a JSON file:
+
+```prolog
+compile_with_metrics :-
+    compile_predicate_to_rust(process/2, [
+        json_input(true),
+        metrics_file("metrics.json")
+    ], Code),
+    write_rust_project(Code, 'output/processor').
+```
+
+Metrics output:
+```json
+{
+  "total_records": 50000,
+  "error_records": 5,
+  "duration_secs": 2.345,
+  "records_per_sec": 21322.6
+}
+```
+
+### Combined Observability
+
+For production pipelines, combine all observability features:
+
+```prolog
+compile_production :-
+    compile_predicate_to_rust(etl_pipeline/3, [
+        json_input(true),
+        json_output(true),
+        progress(interval(10000)),
+        error_file("errors.jsonl"),
+        error_threshold(count(1000)),
+        metrics_file("metrics.json")
+    ], Code),
+    write_rust_project(Code, 'output/etl_processor').
+```
 
 ## Constraints
 
@@ -57,6 +209,26 @@ high_value(Val) :-
     Val > 1000,
     Val =< 5000.
 ```
+
+## Feature Comparison with Go Target
+
+| Feature | Rust | Go | Notes |
+|---------|------|-----|-------|
+| Statistical Aggs | ✅ | ✅ | Both support stddev, median, percentile |
+| collect_list/set | ✅ | ✅ | Both output JSON arrays |
+| Observability | ✅ | ✅ | Same options available |
+| Window Functions | ❌ | ✅ | Use Go for LAG/LEAD |
+| Database Integration | ❌ | ✅ | Use Go for BoltDB |
+
+Choose Rust when you need:
+- Maximum performance with zero-cost abstractions
+- Compile-time memory safety guarantees
+- Small binary size and minimal memory footprint
+
+Choose Go when you need:
+- Window functions (LAG/LEAD, first_value, last_value)
+- Embedded database support (BoltDB)
+- Faster compilation times
 
 ---
 

@@ -12,6 +12,36 @@ All notable changes to UnifyWeaver will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - 2025-12-25
+
+### Added
+
+#### Rust Target Enhancements
+- **Statistical aggregations** - `stddev`, `median`, `percentile(N)` functions
+- **Collection aggregations** - `collect_list`, `collect_set` for JSON array output
+- **Observability features** - Progress reporting, error logging, error thresholds, metrics export
+
+#### Go Target Enhancements
+- **Window functions** - Full LAG/LEAD support with offset and default values
+  - `lag(SortField, ValueField, Result)` - Previous row value
+  - `lag(SortField, ValueField, Offset, Result)` - Previous by N rows
+  - `lag(SortField, ValueField, Offset, Default, Result)` - With custom default
+  - `lead/3`, `lead/4`, `lead/5` - Next row value variants
+  - `first_value/3` - First value in window partition
+  - `last_value/3` - Last value in window partition
+
+### Changed
+- Updated Book 6 (Go Target) Chapter 3 with window function documentation
+- Updated Book 9 (Rust Target) Chapter 4 with statistical aggregations and observability
+
+### Cross-Target Feature Parity
+The following features are now available in both Go and Rust targets:
+- Statistical aggregations (stddev, median, percentile)
+- Collection aggregations (collect_list, collect_set)
+- Observability (progress, error_file, error_threshold, metrics_file)
+
+---
+
 ## [1.0.0] - 2025-10-11
 
 ### Added
