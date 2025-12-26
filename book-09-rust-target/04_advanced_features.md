@@ -37,6 +37,47 @@ compile_output :-
     write_rust_project(Code, 'output/json_writer').
 ```
 
+### Schema Validation
+
+Define schemas with field constraints for data validation:
+
+```prolog
+% Define a user schema with constraints
+:- json_schema(user, [
+    field(name, string, [required, min(1), max(100)]),
+    field(age, integer, [required, min(0), max(150)]),
+    field(email, string, [required, format(email)]),
+    field(bio, string, [optional, max(500)])
+]).
+
+% Nested schema with address
+:- json_schema(customer, [
+    field(name, string, [required]),
+    field(address, object(address_schema), [optional])
+]).
+
+:- json_schema(address_schema, [
+    field(street, string, [required]),
+    field(city, string, [required])
+]).
+```
+
+**Supported Types:**
+- `string`, `integer`, `float`, `boolean`, `any`
+- `array(Type)` - Typed arrays
+- `object(SchemaName)` - Nested schemas
+
+**Field Options:**
+- `required` / `optional` - Field presence
+- `min(N)`, `max(N)` - Value/length constraints
+- `format(email)`, `format(date)` - Format validation
+
+**Generate Validators:**
+```prolog
+?- generate_rust_schema_validator(user, Code).
+% Generates: fn validate_user(data: &serde_json::Value) -> bool { ... }
+```
+
 ## Aggregations
 
 ### Basic Aggregations
