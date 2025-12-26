@@ -122,4 +122,4 @@ cargo clean && cargo build
 
 ---
 
-**←** [Previous: LLVM FFI](17_llvm_ffi.md) | [📖 Book: Cross-Target Glue](./)
+**←** [Previous: LLVM FFI](17_llvm_ffi.md) | [Next: WASM Visualization →](19_wasm_visualization.md) | [📖 Book: Cross-Target Glue](./)
