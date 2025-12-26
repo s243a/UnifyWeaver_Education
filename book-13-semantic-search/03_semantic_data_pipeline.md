@@ -97,10 +97,12 @@ def load_or_embed(texts, embedder, cache_path):
 
 ### Performance Impact
 
-| Model | First Run | Cached |
-|-------|-----------|--------|
-| all-MiniLM-L6-v2 (384d) | ~7s / 644 items | 0.03s |
-| nomic-embed-text-v1.5 (768d) | ~36s / 644 items | 0.03s |
+Caching provides **200-1000x speedup** for iterative development:
+
+| Model | First Run | Cached | Speedup |
+|-------|-----------|--------|---------|
+| all-MiniLM-L6-v2 (384d) | ~7s / 644 items | 0.03s | ~230x |
+| nomic-embed-text-v1.5 (768d) | ~36s / 644 items | 0.03s | ~1200x |
 
 ### Cache Invalidation
 

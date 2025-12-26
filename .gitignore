@@ -15,6 +15,7 @@
 /output/
 /drafts/
 /sandbox/
+/context/
 
 # Also track root-level files
 !*.md
