@@ -5,11 +5,11 @@ Copyright (c) 2025 John William Creighton (s243a)
 This documentation is dual-licensed under MIT and CC-BY-4.0.
 -->
 
-# Video Script: Stream Target Deep Dive
+# Video Script: Native Target Deep Dive
 
 **Duration:** 8-10 minutes
-**Target Audience:** Developers ready to use Stream Target in production
-**Goal:** Understand LINQ translation, performance characteristics, and best practices
+**Target Audience:** Developers ready to use Native Target in production
+**Goal:** Understand LINQ translation, semi-naive recursion, performance characteristics, and best practices
 
 ---
 
@@ -17,10 +17,11 @@ This documentation is dual-licensed under MIT and CC-BY-4.0.
 
 **[Screen: Split view - Prolog query on left, C# LINQ on right]**
 
-> "The Stream Target translates Prolog into LINQ.
+> "The Native Target translates Prolog into standalone C# code.
+> LINQ for simple queries, semi-naive iteration for recursion.
 > Let's understand exactly how it works."
 
-**Show title card:** "Stream Target Deep Dive"
+**Show title card:** "Native Target Deep Dive"
 
 ---
 
@@ -217,21 +218,45 @@ valid_order(Order) :-
 > "Sweet spot: 100-10,000 records.
 > Beyond that, consider Query Runtime."
 
-### ❌ When NOT to Use Stream Target
+### ✅ Recursive Queries (Now Supported!)
 
-**1. Recursive Queries**
+**Example:**
 ```prolog
 ancestor(X, Y) :- parent(X, Y).
 ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).
 ```
 
-> "Error: Cannot compile recursive predicate.
-> Use Query Runtime instead."
+> "Native Target now handles recursion with semi-naive iteration.
+> Uses HashSet for deduplication and termination."
+
+**Generated C#:**
+```csharp
+while (delta.Count > 0) {
+    var newDelta = new List<...>();
+    foreach (var d in delta) {
+        // Process only new tuples
+        if (seen.Add(newItem)) { newDelta.Add(newItem); }
+    }
+    delta = newDelta;
+}
+```
+
+### ❌ When NOT to Use Native Target
+
+**1. Mutual Recursion**
+```prolog
+even(0).
+even(N) :- N > 0, N1 is N - 1, odd(N1).
+odd(N) :- N > 0, N1 is N - 1, even(N1).
+```
+
+> "For mutual recursion across predicates,
+> use Query Runtime instead."
 
 **2. Very Large Data**
 
 > "If n × m > 1 million operations,
-> Query Runtime's hash joins are faster."
+> Query Runtime's hash joins may be more efficient."
 
 **3. Dynamic Rules**
 
@@ -276,11 +301,12 @@ var report = seniorEngineers
 - ✓ Lazy evaluation = efficient
 - ✓ O(n × m) for joins
 - ✓ Best for < 10k records
-- ✓ Use Query Runtime for recursion
+- ✓ Semi-naive iteration for recursion
+- ✓ Query Runtime only needed for mutual recursion
 - ✓ Fully composable with LINQ
 
-> "Now you understand how Stream Target works under the hood.
-> Next: Query Runtime for recursive queries."
+> "Now you understand how Native Target works under the hood.
+> Next: Query Runtime for mutual recursion across predicates."
 
 **[Screen: Next video preview]**
 
@@ -306,6 +332,7 @@ var report = seniorEngineers
 - Q: "Why SelectMany not Join?" → A: "Join requires matching keys upfront, SelectMany more flexible"
 - Q: "Can I optimize the generated code?" → A: "Usually not needed, but yes - it's just C#"
 - Q: "Thread-safe?" → A: "Yes, facts are readonly arrays"
+- Q: "What about recursion?" → A: "Now supported with semi-naive iteration - no stack overflow!"
 
 **Mistakes to Avoid:**
 - Don't skip the execution trace - it's the most valuable part

@@ -61,12 +61,12 @@ swipl -q
 **Then load:**
 ```prolog
 ?- ['family.pl'].
-?- use_module('src/unifyweaver/targets/csharp_stream_target').
+?- use_module('src/unifyweaver/targets/csharp_native_target').
 ?- compile_predicate_to_csharp(grandparent/2, [], Code).
 ```
 
 **Voiceover:**
-> "Load UnifyWeaver's C# Stream Target.
+> "Load UnifyWeaver's C# Native Target.
 > Compile grandparent to C#.
 > Watch what happens."
 
@@ -169,7 +169,7 @@ What grandparents will we find?
 
 **Voiceover:**
 > "You just compiled Prolog to production C# code.
-> Next video: handling larger datasets with the Stream Target.
+> Next video: deep dive into the Native Target.
 > See you there."
 
 **[Screen: Links to next videos]**
@@ -192,7 +192,7 @@ What grandparents will we find?
 **Common Questions to Address:**
 - Q: "Why C#?" → A: "Type safety, performance, LINQ makes query translation natural"
 - Q: "Can I use other .NET languages?" → A: "Yes, F# and VB.NET work too"
-- Q: "What about large data?" → A: "Stream Target handles modest data, Query Runtime for big data"
+- Q: "What about recursion?" → A: "Native Target handles recursion with semi-naive iteration, Query Runtime for mutual recursion"
 
 **Files to Prepare:**
 - `family.pl` - demo file
@@ -208,6 +208,6 @@ What grandparents will we find?
 ## Follow-up Video Ideas
 
 After this quick start, viewers should watch:
-1. **Stream Target Deep Dive** - Join strategies, performance tips
-2. **Query Runtime Tutorial** - Recursive queries, fixpoint iteration
+1. **Native Target Deep Dive** - Join strategies, semi-naive recursion, performance tips
+2. **Query Runtime Tutorial** - Mutual recursion, fixpoint iteration
 3. **Real-World Example** - CSV to C# analysis pipeline

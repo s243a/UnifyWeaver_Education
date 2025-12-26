@@ -112,7 +112,7 @@ Future examples will demonstrate:
 
 ## References
 
-- Chapter 2: C# Stream Target
+- Chapter 2: C# Native Target
 - Chapter 3: Query Engine Deep Dive
 - Chapter 4: Runtime Libraries and Deployment
 

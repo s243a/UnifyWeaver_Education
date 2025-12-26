@@ -5,27 +5,28 @@ Copyright (c) 2025 John William Creighton (s243a)
 This documentation is dual-licensed under MIT and CC-BY-4.0.
 -->
 
-# Chapter 2: C# Stream Target
+# Chapter 2: C# Native Target
 
 ## Overview
 
-The C# Stream Target compiles simple Prolog predicates directly into C# source code using LINQ pipelines. This approach generates standalone, human-readable C# files that can be integrated into .NET applications.
+The C# Native Target (`csharp_native`) compiles Prolog predicates directly into standalone C# source code. It uses LINQ pipelines for non-recursive predicates and **semi-naive iteration** for recursive predicates. This approach generates human-readable C# files that can be integrated into .NET applications without any runtime dependencies.
 
 ## What Gets Generated?
 
-The Stream Target translates Prolog predicates into:
+The Native Target translates Prolog predicates into:
 - **Facts** → C# arrays
 - **Simple rules** → LINQ Select/Where operations
 - **Multiple clauses** → Union of LINQ pipelines
-- **Deduplication** → Distinct() operators
+- **Recursive predicates** → Semi-naive iteration with HashSet deduplication
+- **Deduplication** → Distinct() operators or HashSet
 
-## Your First Stream Compilation
+## Your First Native Target Compilation
 
 ### Example 1: Pure Facts
 
 **Prolog Source:**
 ```prolog
-:- use_module(unifyweaver(targets/csharp_stream_target)).
+:- use_module(unifyweaver(targets/csharp_native_target)).
 
 parent(alice, bob).
 parent(bob, charlie).
@@ -117,7 +118,7 @@ age(charlie, 30).
 
 **Compilation Strategy:**
 
-The Stream Target recognizes this as a **single rule** and compiles it to LINQ:
+The Native Target recognizes this as a **single rule** and compiles it to LINQ:
 
 **Generated C# (conceptual):**
 ```csharp
@@ -254,7 +255,7 @@ grandparent(bob, dave)
 
 ## Type Inference
 
-The Stream Target infers C# types from Prolog terms:
+The Native Target infers C# types from Prolog terms:
 
 | Prolog Term | C# Type |
 |-------------|---------|
@@ -279,18 +280,93 @@ static readonly (string, int, string)[] Facts = {
 };
 ```
 
-## Limitations of Stream Target
+## Recursive Predicates: Semi-Naive Iteration
 
-### 1. No Recursion
-**Does NOT work:**
+The Native Target fully supports **recursive predicates** using semi-naive iteration. This was a major addition in v0.1.
+
+### Example: Transitive Closure (Ancestor)
+
+**Prolog Source:**
 ```prolog
+parent(alice, bob).
+parent(bob, charlie).
+parent(charlie, diana).
+parent(diana, eve).
+
 ancestor(X, Y) :- parent(X, Y).
-ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).  % Recursive!
+ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).
 ```
 
-**Workaround:** Use C# Query Runtime (Chapter 3)
+**Compile to C#:**
+```prolog
+?- compile_predicate_to_csharp(ancestor/2, [mode(procedural)], Code).
+```
 
-### 2. No Unification Variables in Head
+**Generated C# (semi-naive iteration):**
+```csharp
+public static IEnumerable<(string, string)> AncestorStream()
+{
+    var seen = new HashSet<(string, string)>();
+    var delta = new List<(string, string)>();
+
+    // Base case: ancestor(X,Y) :- parent(X,Y)
+    foreach (var item in _clause_1())
+    {
+        if (seen.Add(item)) { delta.Add(item); yield return item; }
+    }
+
+    // Semi-naive iteration: ancestor(X,Z) :- parent(X,Y), ancestor(Y,Z)
+    while (delta.Count > 0)
+    {
+        var newDelta = new List<(string, string)>();
+        foreach (var d in delta)
+        {
+            foreach (var b in ParentStream())
+            {
+                if (b.Item2 == d.Item1)
+                {
+                    var newItem = (b.Item1, d.Item2);
+                    if (seen.Add(newItem)) { newDelta.Add(newItem); yield return newItem; }
+                }
+            }
+        }
+        delta = newDelta;
+    }
+}
+```
+
+**Output:**
+```
+alice:bob
+bob:charlie
+charlie:diana
+diana:eve
+alice:charlie
+bob:diana
+charlie:eve
+alice:diana
+bob:eve
+alice:eve
+```
+
+### How Semi-Naive Iteration Works
+
+1. **Base case first**: Computes all non-recursive clause results
+2. **Delta iteration**: Only processes newly-discovered tuples in each round
+3. **HashSet deduplication**: O(1) checks prevent duplicates and ensure termination
+4. **Incremental yield**: Results stream out as they're discovered
+
+This approach avoids stack overflow that would occur with naive recursion, and is more efficient than recomputing all results in each iteration.
+
+### Why Not LINQ Join for Recursion?
+
+LINQ `Join` eagerly materializes its right operand before iteration begins. For recursive calls, this would cause infinite expansion. The semi-naive approach solves this by:
+- Only joining new delta tuples with base relations
+- Using worklist-based iteration instead of recursive method calls
+
+## Limitations of Native Target
+
+### 1. No Unification Variables in Head
 **Does NOT work:**
 ```prolog
 duplicate(X, X) :- number(X).  % Same variable appears twice
@@ -298,9 +374,12 @@ duplicate(X, X) :- number(X).  % Same variable appears twice
 
 **Workaround:** Add explicit equality check in body
 
-### 3. Limited Built-ins
+### 2. Limited Built-ins
 Supported: `=`, `\=`, `<`, `>`, `=<`, `>=`, `is`
 Not supported: `findall`, `bagof`, `setof`, complex arithmetic
+
+### 3. No Mutual Recursion
+For mutual recursion across multiple predicates, use the C# Query Runtime (Chapter 3)
 
 ## Building and Deploying
 
@@ -354,7 +433,7 @@ dotnet pack
 
 **Prolog:**
 ```prolog
-:- use_module(unifyweaver(targets/csharp_stream_target)).
+:- use_module(unifyweaver(targets/csharp_native_target)).
 
 parent(alice, bob).
 parent(alice, charlie).
@@ -405,9 +484,9 @@ namespace UnifyWeaver.Generated {
 
 ## Troubleshooting
 
-### Error: "Cannot compile recursive predicate"
-**Cause:** Stream Target doesn't support recursion
-**Solution:** Use C# Query Runtime (Chapter 3)
+### Recursion causes stack overflow
+**Cause:** Older versions used LINQ Join for recursion, which eagerly materializes
+**Solution:** Update to v0.1+ which uses semi-naive iteration, or use Query Runtime
 
 ### Error: "Type inference failed"
 **Cause:** Mixed types in same argument position
@@ -475,7 +554,7 @@ try {
 
 ## Real-World Example: Employee Analysis
 
-Let's build a complete employee database query system using the Stream Target.
+Let's build a complete employee database query system using the Native Target.
 
 ### The Scenario
 
@@ -485,7 +564,7 @@ You have employee data and want to analyze it using C# LINQ, but want to express
 
 **`employees.pl`:**
 ```prolog
-:- use_module(unifyweaver(targets/csharp_stream_target)).
+:- use_module(unifyweaver(targets/csharp_native_target)).
 
 % Employee facts: employee(Name, Department)
 employee(alice, engineering).
@@ -598,12 +677,13 @@ Team sizes: Engineering=2, Sales=2
 
 ### What This Demonstrates
 
-**Benefits of Stream Target:**
+**Benefits of Native Target:**
 1. **Query as Code** - Prolog queries become reusable C# methods
 2. **Type Safety** - Compile-time checking of query results
 3. **LINQ Integration** - Generated code works with standard LINQ operations
 4. **No Runtime Dependency** - Standalone C# files, no Prolog needed at runtime
 5. **Performance** - Direct LINQ execution, no interpretation overhead
+6. **Recursion Support** - Semi-naive iteration handles transitive closures
 
 **Typical Use Cases:**
 - Business rule engines with stable rules
@@ -633,15 +713,16 @@ Compile and integrate into your dashboard for richer analysis!
 
 ## Summary
 
-The C# Stream Target:
+The C# Native Target:
 - ✅ Compiles facts and simple rules to LINQ
-- ✅ Generates standalone C# source files
-- ✅ Excellent performance for non-recursive queries
+- ✅ Full recursion support via semi-naive iteration
+- ✅ Generates standalone C# source files (no runtime dependencies)
+- ✅ Excellent performance with HashSet deduplication
 - ✅ Easy integration with .NET applications
-- ❌ No recursion support
+- ❌ No mutual recursion support (use Query Runtime for that)
 - ❌ Limited to in-memory operations
 
-**Next Chapter:** Learn about the C# Query Runtime for handling recursive predicates and complex queries.
+**Next Chapter:** Learn about the C# Query Runtime for handling mutual recursion and complex query optimization.
 
 ---
 
@@ -650,7 +731,8 @@ The C# Stream Target:
 1. Compile a simple fact predicate to C# and run it
 2. Add a filtering rule and observe the `Where()` clause
 3. Create a multi-clause predicate and examine the `Union()` pattern
-4. Benchmark C# vs Bash for your use case
+4. Compile the ancestor/2 recursive predicate and verify the semi-naive iteration output
+5. Benchmark C# vs Bash for your use case
 
 Next: **Chapter 3 - C# Query Runtime and Engine** →
 
@@ -658,4 +740,4 @@ Next: **Chapter 3 - C# Query Runtime and Engine** →
 
 ## Navigation
 
-**←** [Previous: Chapter 1: Introduction to Multi-Target Compilation](01_introduction_multi_target) | [📖 Book 3: C# Target](./) | [Next: Chapter 3: C# Query Runtime →](03_query_engine_deep_dive)
+**←** [Previous: Chapter 1: Introduction to Multi-Target Compilation](01_introduction_multi_target.md) | [📖 Book 3: C# Target](./) | [Next: Chapter 3: C# Query Runtime →](03_query_engine_deep_dive.md)

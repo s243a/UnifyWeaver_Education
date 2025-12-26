@@ -7,7 +7,7 @@
 /**
  * Employee Database Example for Chapter 2
  *
- * This example demonstrates Stream Target compilation with
+ * This example demonstrates Native Target compilation with
  * a simple employee management system.
  *
  * Usage:
@@ -15,7 +15,7 @@
  *   ?- compile_all_queries.
  */
 
-:- use_module('../../src/unifyweaver/targets/csharp_stream_target').
+:- use_module('../../src/unifyweaver/targets/csharp_native_target').
 
 % Employee facts: employee(Name, Department)
 employee(alice, engineering).

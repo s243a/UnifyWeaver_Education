@@ -11,19 +11,20 @@ This documentation is dual-licensed under MIT and CC-BY-4.0.
 
 The C# Query Runtime uses an **Intermediate Representation (IR)** approach instead of direct source-to-source translation. This chapter explains how the query engine works, breaking down complex concepts into understandable pieces.
 
-## Why Query Runtime vs Stream Target?
+## Why Query Runtime vs Native Target?
 
-**Stream Target (Chapter 2):**
+**Native Target (Chapter 2):**
 ```
-Prolog → C# LINQ directly
+Prolog → Standalone C# code
 ```
-- Simple, fast, but **no recursion**
+- Standalone, uses LINQ for non-recursive and semi-naive iteration for recursive predicates
+- **Supports single-predicate recursion** (e.g., ancestor/2)
 
 **Query Runtime (This Chapter):**
 ```
 Prolog → IR (Query Plan) → Runtime Engine executes
 ```
-- More complex, but **supports recursion**
+- More complex, but **supports mutual recursion** across multiple predicates
 
 ## The Big Picture
 
@@ -956,4 +957,4 @@ Next: **Chapter 4 - Runtime Libraries and Deployment** →
 
 ## Navigation
 
-**←** [Previous: Chapter 2: C# Stream Target](02_csharp_stream_target) | [📖 Book 3: C# Target](./) | [Next: Chapter 4: Runtime Libraries and Deployment →](04_runtime_libraries_deployment)
+**←** [Previous: Chapter 2: C# Native Target](02_csharp_native_target.md) | [📖 Book 3: C# Target](./) | [Next: Chapter 4: Runtime Libraries and Deployment →](04_runtime_libraries_deployment.md)

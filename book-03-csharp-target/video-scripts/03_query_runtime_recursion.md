@@ -17,19 +17,20 @@ This documentation is dual-licensed under MIT and CC-BY-4.0.
 
 **[Screen: Social network graph with cycles]**
 
-> "Stream Target can't handle recursion.
-> Query Runtime can.
+> "Native Target handles single-predicate recursion.
+> But for mutual recursion across predicates?
+> You need Query Runtime.
 > Let's see how."
 
-**Show title card:** "Query Runtime and Recursion"
+**Show title card:** "Query Runtime and Mutual Recursion"
 
 ---
 
-## Section 1: Why Stream Target Fails (1 minute)
+## Section 1: When You Need Query Runtime (1 minute)
 
-**[Screen: Code editor with recursive predicate]**
+**[Screen: Code editor with mutually recursive predicates]**
 
-### The Problem
+### Simple Recursion: Native Target Handles It
 
 **Prolog:**
 ```prolog
@@ -37,20 +38,28 @@ ancestor(X, Y) :- parent(X, Y).
 ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).
 ```
 
-**Try to compile with Stream Target:**
+> "Single-predicate recursion like ancestor/2?
+> Native Target handles it with semi-naive iteration.
+> No Query Runtime needed."
+
+### The Problem: Mutual Recursion
+
+**Prolog:**
 ```prolog
-?- compile_predicate_to_csharp(ancestor/2, [], Code).
-ERROR: Cannot compile recursive predicate ancestor/2
+even(0).
+even(N) :- N > 0, N1 is N - 1, odd(N1).
+odd(N) :- N > 0, N1 is N - 1, even(N1).
 ```
 
-> "Stream Target generates LINQ chains.
-> LINQ can't call itself.
-> We need a different approach."
+> "even/1 calls odd/1.
+> odd/1 calls even/1.
+> They depend on each other.
+> This is mutual recursion."
 
-**[Screen: Diagram showing recursive call cycle]**
+**[Screen: Diagram showing cross-predicate dependencies]**
 
-> "Recursion needs iteration.
-> That's what Query Runtime provides."
+> "For mutual recursion, you need Query Runtime.
+> It handles strongly-connected components (SCCs) together."
 
 ---
 
@@ -432,9 +441,9 @@ follows(bob, alice).  % Bidirectional
 ```
 
 > "Query Runtime finds all paths.
-> Stream Target needs fixed depth."
+> Native Target needs known recursion patterns."
 
-### ❌ Use Stream Target Instead When:
+### ❌ Use Native Target Instead When:
 
 **1. Non-Recursive Queries**
 ```prolog
@@ -445,18 +454,20 @@ engineer(Name) :- employee(Name, engineering).
 > Direct lookups.
 > No iteration needed."
 
-**2. Fixed Join Depth**
+**2. Single-Predicate Recursion**
 ```prolog
-grandparent(GP, GC) :- parent(GP, P), parent(P, GC).
+ancestor(X, Y) :- parent(X, Y).
+ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).
 ```
 
-> "Exactly 2 hops.
-> Stream Target is faster.
-> No fixpoint overhead."
+> "Transitive closure on a single predicate.
+> Native Target handles with semi-naive iteration.
+> Faster than Query Runtime."
 
 **Quick Rule:**
-- Recursion → Query Runtime
-- No recursion → Stream Target
+- Mutual recursion → Query Runtime
+- Single-predicate recursion → Native Target
+- No recursion → Native Target
 
 ---
 
@@ -499,15 +510,16 @@ grandparent(GP, GC) :- parent(GP, P), parent(P, GC).
 **[Screen: Key takeaways]**
 
 **Show bullet points:**
-- ✓ Query Runtime handles recursion
+- ✓ Native Target handles single-predicate recursion
+- ✓ Query Runtime handles mutual recursion
 - ✓ Fixpoint iteration finds all derivations
 - ✓ Semi-naive = efficient
 - ✓ Cycles handled automatically
-- ✓ Use for: graphs, hierarchies, transitive queries
-- ✓ Stream Target for: non-recursive, simple queries
+- ✓ Use Query Runtime for: mutual recursion, complex SCC groups
+- ✓ Use Native Target for: everything else
 
 > "Now you can handle any Prolog query in C#.
-> Recursion, cycles, complex derivations.
+> Single recursion, mutual recursion, cycles.
 > All production-ready."
 
 **[Screen: Next steps preview]**
@@ -546,13 +558,13 @@ grandparent(GP, GC) :- parent(GP, P), parent(P, GC).
 - Don't skip the iteration-by-iteration trace - it's crucial for understanding
 - Don't assume viewers understand fixpoint - explain from first principles
 - Show actual timing numbers, not just complexity notation
-- Emphasize when to use Stream Target vs Query Runtime
+- Emphasize when to use Native Target vs Query Runtime
 
 **Demonstrations:**
 - Run social_network.pl compilation live
 - Show generated C# code structure
 - Execute and display iteration-by-iteration output (if possible to add logging)
-- Compare Stream Target error vs Query Runtime success on same recursive query
+- Compare Native Target for single recursion vs Query Runtime for mutual recursion
 
 **Pacing:**
 - Slower on fixpoint explanation (core concept)

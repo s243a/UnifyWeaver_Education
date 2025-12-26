@@ -25,7 +25,7 @@ Before starting Book 3, you should have:
 ## What You'll Learn
 
 - How to compile Prolog to C# source code
-- Two C# target approaches: Stream Target vs Query Runtime
+- Two C# target approaches: Native Target vs Query Runtime
 - LINQ-based query execution
 - Semi-naive fixpoint evaluation and mutual recursion (v0.1)
 - Runtime libraries and IR (Intermediate Representation)
@@ -36,16 +36,17 @@ Before starting Book 3, you should have:
 
 UnifyWeaver provides two C# compilation targets:
 
-### 1. **Stream Target** (`csharp_stream_target.pl`)
+### 1. **Native Target** (`csharp_native_target.pl`)
 - Generates standalone C# source files
-- Direct translation of predicates to LINQ pipelines
-- Best for: Simple, non-recursive predicates
+- LINQ pipelines for non-recursive predicates
+- **Semi-naive iteration** for recursive predicates (no stack overflow!)
+- Best for: Both simple and recursive predicates
 - Output: Compilable .cs files with `Main()` entry points
 
 ### 2. **Query Runtime** (`csharp_query_target.pl`)
 - Generates Intermediate Representation (IR)
 - Uses shared runtime library for execution (semi-naive + mutual fixpoint)
-- Best for: Recursive predicates, complex queries
+- Best for: Complex mutual recursion, advanced optimization
 - Output: C# projects with runtime dependencies
 
 ## Book Structure
@@ -56,10 +57,10 @@ UnifyWeaver provides two C# compilation targets:
 - Target selection strategies
 - Installation and setup
 
-### Chapter 2: C# Stream Target
+### Chapter 2: C# Native Target
 - Compiling facts to C# arrays
-- LINQ-based query translation
-- Deduplication with `Distinct()`
+- LINQ-based query translation for simple predicates
+- Semi-naive iteration for recursive predicates
 - Building and running generated code
 
 ### Chapter 3: C# Query Runtime
@@ -135,12 +136,12 @@ namespace UnifyWeaver.Generated {
 
 ## Comparison: Bash vs C# Targets
 
-| Feature | Bash Target | C# Stream | C# Query Runtime |
+| Feature | Bash Target | C# Native | C# Query Runtime |
 |---------|-------------|-----------|------------------|
-| **Recursion** | Full support | Limited | Full support |
+| **Recursion** | Full support | Full support (semi-naive) | Full support (mutual) |
 | **Performance** | Good | Excellent | Very Good |
 | **Deployment** | Shell scripts | .NET apps | .NET apps |
-| **Memory** | Streaming | In-memory | Hybrid |
+| **Memory** | Streaming | In-memory + HashSet | Hybrid |
 | **Debugging** | Shell tools | Visual Studio | Visual Studio |
 | **Dependencies** | Bash 4.0+ | .NET SDK | .NET SDK + Runtime lib |
 
@@ -152,16 +153,16 @@ namespace UnifyWeaver.Generated {
 - Integrating with shell scripts
 - Minimal deployment dependencies needed
 
-**Use C# Stream Target when:**
-- Compiling simple, non-recursive predicates
-- Need maximum performance
-- Want standalone C# source files
-- Building .NET applications
+**Use C# Native Target when:**
+- Compiling both simple and recursive predicates
+- Need maximum performance with standalone code
+- Want standalone C# source files (no runtime dependencies)
+- Building .NET applications with single-predicate recursion
 
 **Use C# Query Runtime when:**
-- Compiling recursive predicates
+- Compiling mutually recursive predicates
 - Need advanced query optimization
-- Building complex relational queries
+- Building complex relational queries with cross-predicate dependencies
 - Want runtime flexibility
 
 ## Learning Path

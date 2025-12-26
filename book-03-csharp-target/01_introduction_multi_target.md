@@ -60,9 +60,9 @@ The same logic, multiple execution environments.
 
 UnifyWeaver provides **two** C# compilation strategies:
 
-### 1. Stream Target (`csharp_stream_target.pl`)
+### 1. Native Target (`csharp_native_target.pl`)
 
-**Approach:** Direct source-to-source translation
+**Approach:** Direct source-to-source translation with semi-naive iteration for recursion
 
 **Generates:**
 ```csharp
@@ -72,16 +72,24 @@ public static class Parent {
     public static IEnumerable<(string, string)> Stream()
         => Facts.AsEnumerable();
 }
+
+// For recursive predicates - semi-naive iteration:
+public static IEnumerable<(string, string)> AncestorStream() {
+    var seen = new HashSet<(string, string)>();
+    var delta = new List<(string, string)>();
+    // Base case + iterative fixpoint
+    ...
+}
 ```
 
 **Best For:**
 - Simple fact queries
-- Non-recursive predicates
+- Recursive predicates (transitive closure, ancestor, etc.)
 - Maximum performance
-- Standalone deployments
+- Standalone deployments (no runtime dependencies)
 
 **Limitations:**
-- Limited recursion support
+- No mutual recursion support
 - Each predicate generates new code
 - Changes require recompilation
 
@@ -103,16 +111,16 @@ runtime.Execute(plan);
 ```
 
 **Best For:**
-- Recursive predicates
-- Complex queries
+- Mutual recursion across multiple predicates
+- Complex queries with optimization
 - Shared runtime optimizations
 - Flexible query execution
 
 **Advantages:**
-- Full recursion support (semi-naive evaluation)
+- Full mutual recursion support (`MutualFixpointNode`, `CrossRefNode`)
 - Centralized query engine
 - Runtime can evolve independently
-- Better for large predicate sets
+- Better for large predicate sets with complex dependencies
 
 ## Installation & Setup
 
@@ -168,7 +176,7 @@ dotnet run
 
 ```prolog
 % family.pl
-:- use_module(unifyweaver(targets/csharp_stream_target)).
+:- use_module(unifyweaver(targets/csharp_native_target)).
 
 parent(alice, bob).
 parent(bob, charlie).
@@ -207,19 +215,17 @@ dotnet run
 ### Decision Tree
 
 ```
-Is the predicate recursive?
-├─ NO  → Use Stream Target (faster, simpler)
-└─ YES → Is it tail-recursive or transitive closure?
-          ├─ YES → Use Query Runtime (supports recursion)
-          └─ NO  → Consider Bash target or wait for full C# recursion support
+Does the predicate involve mutual recursion across multiple predicates?
+├─ NO  → Use Native Target (standalone, semi-naive for single recursion)
+└─ YES → Use Query Runtime (MutualFixpointNode for mutual recursion)
 ```
 
 ### Configuration Examples
 
-**Force Stream Target:**
+**Force Native Target:**
 ```prolog
 compile_predicate_to_csharp(predicate/N, [
-    target(csharp_stream),
+    mode(procedural),
     dedup(unique)
 ], Code).
 ```
@@ -239,7 +245,7 @@ compile_predicate_to_csharp(predicate/N, [
 | Target | Time (ms) | Memory (MB) | Notes |
 |--------|-----------|-------------|-------|
 | Bash | 850 | 45 | Fork/pipe overhead |
-| C# Stream | 12 | 8 | In-memory arrays |
+| C# Native | 12 | 8 | In-memory arrays + HashSet |
 | C# Query | 45 | 15 | IR + runtime overhead |
 
 **Conclusion:** C# targets are 20-70x faster for in-memory operations.
@@ -282,8 +288,8 @@ Copy to target, run: dotnet app.dll
 
 In the following chapters, you'll learn:
 
-- **Chapter 2:** Deep dive into Stream Target
-- **Chapter 3:** Query Runtime and IR
+- **Chapter 2:** Deep dive into Native Target (LINQ + semi-naive recursion)
+- **Chapter 3:** Query Runtime and IR (mutual recursion)
 - **Chapter 4:** Deployment and runtime libraries
 
 ## Hands-On Exercise
@@ -297,14 +303,14 @@ In the following chapters, you'll learn:
 
 - UnifyWeaver supports multiple target languages
 - C# offers better performance and .NET ecosystem
-- Two C# approaches: Stream (simple) and Query Runtime (advanced)
-- Target selection depends on recursion needs and deployment context
+- Two C# approaches: Native (standalone with semi-naive recursion) and Query Runtime (mutual recursion)
+- Native target for most use cases; Query Runtime for complex mutual recursion
 - Both targets share the same Prolog source
 
-Next: **Chapter 2 - C# Stream Target** →
+Next: **Chapter 2 - C# Native Target** →
 
 ---
 
 ## Navigation
 
-[📖 Book 3: C# Target](./) | [Next: Chapter 2: C# Stream Target →](02_csharp_stream_target)
+[📖 Book 3: C# Target](./) | [Next: Chapter 2: C# Native Target →](02_csharp_native_target.md)
