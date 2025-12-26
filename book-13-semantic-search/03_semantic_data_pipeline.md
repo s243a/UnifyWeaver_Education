@@ -63,7 +63,69 @@ When found, it creates a directed edge in the `links` table:
 
 This builds the graph that enables **Graph RAG**.
 
-## 3.4 Running a Crawl
+## 3.4 Embedding Cache
+
+Embedding models are computationally expensive. For iterative development, cache embeddings to disk:
+
+### Cache Strategy
+
+```python
+import hashlib
+import numpy as np
+from pathlib import Path
+
+def get_cache_key(data_config: dict) -> str:
+    """Generate unique key from data configuration."""
+    key_str = "|".join([
+        data_config["data_dir"],
+        ",".join(sorted(data_config.get("subdirs", []))),
+        str(data_config.get("max_items", "all")),
+        data_config["embedder_name"],
+    ])
+    return hashlib.md5(key_str.encode()).hexdigest()[:12]
+
+def load_or_embed(texts, embedder, cache_path):
+    """Load from cache or embed and save."""
+    if cache_path.exists():
+        data = np.load(cache_path)
+        return data["embeddings"]
+
+    embeddings = embedder.encode(texts)
+    np.savez_compressed(cache_path, embeddings=embeddings)
+    return embeddings
+```
+
+### Performance Impact
+
+| Model | First Run | Cached |
+|-------|-----------|--------|
+| all-MiniLM-L6-v2 (384d) | ~7s / 644 items | 0.03s |
+| nomic-embed-text-v1.5 (768d) | ~36s / 644 items | 0.03s |
+
+### Cache Invalidation
+
+The cache key includes:
+- Data directory path
+- Subdirectories included
+- Maximum items limit
+- Embedder model name
+
+Changing any of these creates a new cache file. Use `force_recompute=True` to regenerate manually.
+
+### Storage Format
+
+```
+embeddings_cache/
+├── embeddings_all-minilm_93580adb4bd7.npz
+└── embeddings_modernbert_cd1428fa3e83.npz
+```
+
+Each `.npz` file contains:
+- `embeddings`: The embedding vectors (N × dim)
+- `ids`: Original item identifiers
+- `metadata`: Any additional fields needed for reconstruction
+
+## 3.5 Running a Crawl
 
 To trigger this pipeline, use the `crawler_run/2` predicate in your Prolog script:
 
