@@ -78,6 +78,38 @@ Define schemas with field constraints for data validation:
 % Generates: fn validate_user(data: &serde_json::Value) -> bool { ... }
 ```
 
+## XML Processing
+
+Stream and process XML files using the `quick-xml` crate:
+
+```prolog
+% Define XML field extraction
+book_info(Title, Author) :-
+    xml_field(title, Title),
+    xml_field(author, Author).
+
+% Compile for XML input
+compile_books :-
+    compile_rust_xml_mode(book_info, 2, [
+        xml_file("library.xml"),
+        tags([book]),
+        unique(true)
+    ], Code),
+    write_rust_project(Code, 'output/book_processor').
+```
+
+**Features:**
+- Streaming parsing (memory-efficient)
+- Attribute extraction with `@` prefix
+- Tag filtering with `tags([...])`
+- Deduplication with `unique(true)`
+
+**Cargo.toml:**
+```toml
+[dependencies]
+quick-xml = "0.31"
+```
+
 ## Aggregations
 
 ### Basic Aggregations
