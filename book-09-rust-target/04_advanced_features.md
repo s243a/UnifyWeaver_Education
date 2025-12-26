@@ -345,6 +345,140 @@ high_value(Val) :-
     Val =< 5000.
 ```
 
+## Database Integration
+
+The Rust target supports embedded database persistence using the `sled` crate.
+
+### Basic Database Operations
+
+```prolog
+% Write mode - store records from JSONL input
+compile_with_db_write :-
+    compile_predicate_to_rust(user/3, [
+        db_backend(sled),
+        db_file('users.db'),
+        db_key_field(name),
+        db_mode(write),
+        json_input(true)
+    ], Code),
+    write_rust_project(Code, 'output/db_writer').
+
+% Read mode - query from database
+compile_with_db_read :-
+    compile_predicate_to_rust(user/3, [
+        db_backend(sled),
+        db_file('users.db'),
+        db_key_field(name),
+        db_mode(read)
+    ], Code),
+    write_rust_project(Code, 'output/db_reader').
+```
+
+### Key Strategies
+
+Define how primary keys are generated:
+
+```prolog
+% Simple field key
+compile_simple_key :-
+    compile_predicate_to_rust(user/3, [
+        db_backend(sled),
+        db_key_field(email)
+    ], Code).
+
+% Composite key (dept:name)
+compile_composite_key :-
+    compile_predicate_to_rust(employee/3, [
+        db_backend(sled),
+        db_key_strategy(composite([field(dept), field(name)])),
+        db_key_delimiter(':')
+    ], Code).
+
+% Hash-based key
+compile_hash_key :-
+    compile_predicate_to_rust(document/2, [
+        db_backend(sled),
+        db_key_strategy(hash(field(content), sha256))
+    ], Code).
+
+% UUID key
+compile_uuid_key :-
+    compile_predicate_to_rust(event/2, [
+        db_backend(sled),
+        db_key_strategy(uuid)
+    ], Code).
+```
+
+### Secondary Indexes
+
+Declare secondary indexes for faster lookups:
+
+```prolog
+% Declare index on email field
+:- index(user/3, email).
+:- index(user/3, age).
+
+% The compiler will automatically:
+% 1. Create index trees (index_user_email, index_user_age)
+% 2. Update indexes during writes
+% 3. Use indexes for optimized reads when possible
+```
+
+### Predicate Pushdown
+
+The compiler automatically optimizes database queries:
+
+```prolog
+% Direct lookup - O(log n) when key field is constrained
+find_user(Name, Email, Age) :-
+    Name = alice,  % Constraint on key field
+    user(Name, Email, Age).
+
+% Prefix scan - O(k log n) for composite key prefix
+find_dept_users(Dept, Name, Salary) :-
+    Dept = engineering,  % First field of composite key
+    employee(Dept, Name, Salary).
+
+% Index scan - O(k log n) using secondary index
+find_by_email(Name, Email, Age) :-
+    Email = 'alice@example.com',  % Indexed field
+    user(Name, Email, Age).
+```
+
+### Statistics Analysis
+
+Generate tools to collect database statistics:
+
+```prolog
+compile_analyzer :-
+    compile_predicate_to_rust(user/3, [
+        db_backend(sled),
+        db_file('users.db'),
+        db_mode(analyze)
+    ], Code),
+    write_rust_project(Code, 'output/db_analyzer').
+```
+
+Output:
+```json
+{
+  "tree": "user",
+  "record_count": 10000,
+  "avg_key_length": 12.5,
+  "avg_value_length": 156.3,
+  "field_counts": {"name": 10000, "email": 10000, "age": 9500},
+  "field_cardinality": {"name": 10000, "email": 10000, "age": 80},
+  "field_selectivity": {"name": 1.0, "email": 1.0, "age": 0.008}
+}
+```
+
+**Cargo.toml:**
+```toml
+[dependencies]
+sled = "0.34"
+serde_json = "1.0"
+```
+
 ## Feature Comparison with Go Target
 
 | Feature | Rust | Go | Notes |
@@ -353,15 +487,16 @@ high_value(Val) :-
 | collect_list/set | ✅ | ✅ | Both output JSON arrays |
 | Observability | ✅ | ✅ | Same options available |
 | Window Functions | ✅ | ✅ | Both support LAG/LEAD/first/last |
-| Database Integration | ❌ | ✅ | Use Go for BoltDB |
+| Database Integration | ✅ (sled) | ✅ (BoltDB) | Both support secondary indexes |
 
 Choose Rust when you need:
 - Maximum performance with zero-cost abstractions
 - Compile-time memory safety guarantees
 - Small binary size and minimal memory footprint
+- Pure Rust embedded database (sled)
 
 Choose Go when you need:
-- Embedded database support (BoltDB)
+- BoltDB (battle-tested embedded database)
 - Faster compilation times
 
 ---

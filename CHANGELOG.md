@@ -20,6 +20,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Statistical aggregations** - `stddev`, `median`, `percentile(N)` functions
 - **Collection aggregations** - `collect_list`, `collect_set` for JSON array output
 - **Observability features** - Progress reporting, error logging, error thresholds, metrics export
+- **Database integration** - Embedded sled database support
+  - `db_backend(sled)` - Enable sled persistence
+  - `db_mode(read|write|analyze)` - Database operation modes
+  - `db_key_field(Field)` - Single field as primary key
+  - `db_key_strategy(composite|hash|uuid)` - Complex key generation
+  - Secondary index support with automatic index updates
+  - Predicate pushdown optimization (direct lookup, prefix scan, index scan)
+  - Statistics collection for cost-based optimization
 
 #### Go Target Enhancements
 - **Window functions** - Full LAG/LEAD support with offset and default values
@@ -39,6 +47,7 @@ The following features are now available in both Go and Rust targets:
 - Statistical aggregations (stddev, median, percentile)
 - Collection aggregations (collect_list, collect_set)
 - Observability (progress, error_file, error_threshold, metrics_file)
+- Database integration (Go: BoltDB, Rust: sled)
 
 ---
 
