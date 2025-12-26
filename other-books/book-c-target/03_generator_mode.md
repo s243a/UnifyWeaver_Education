@@ -53,6 +53,8 @@ Since C lacks generators, we use callbacks:
 ## Example: Expanding Arrays
 
 ```c
+/* This function requires the record_callback typedef from earlier.
+   See the "Generated Code Structure" section above. */
 int generate(cJSON* record, record_callback callback, void* user_data) {
     cJSON* items = cJSON_GetObjectItem(record, "items");
     if (!cJSON_IsArray(items)) return 0;
@@ -76,6 +78,9 @@ int generate(cJSON* record, record_callback callback, void* user_data) {
 For recursive predicates, use explicit iteration:
 
 ```c
+/* This function also requires the record_callback typedef.
+   It demonstrates explicit iteration for recursive predicates.
+   See the "Generated Code Structure" section above. */
 int generate(cJSON* record, record_callback callback, void* user_data) {
     cJSON* current = cJSON_Duplicate(record, 1);
     int count = 0;

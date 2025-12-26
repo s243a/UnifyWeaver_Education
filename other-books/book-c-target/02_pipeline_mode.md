@@ -49,6 +49,13 @@ int main(int argc, char** argv) {
 }
 ```
 
+> **Note:** The complete pipeline code requires the cJSON library headers.
+> You must have `libcjson-dev` installed:
+> - Ubuntu/Debian: `sudo apt install libcjson-dev`
+> - macOS: `brew install cjson`
+>
+> For testing syntax without the library, see Chapter 4: Build Systems.
+
 ## cJSON Basics
 
 | Function | Purpose |
