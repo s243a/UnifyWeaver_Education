@@ -177,7 +177,27 @@ By completing this book, you will be able to:
 - Cloud functions (Lambda, GCF, Azure Functions)
 - API Gateway integration
 
-### Part 8: Reference (Chapters 13-14)
+### Part 8: LLVM and WebAssembly (Chapters 17-19)
+
+**17. LLVM FFI** (`17_llvm_ffi.md`)
+- Compiling Prolog to LLVM IR
+- C ABI exports for FFI
+- Go and Rust integration
+- Shared library generation
+
+**18. LLVM Examples** (`18_llvm_examples.md`)
+- Working FFI examples (Go, Rust)
+- Build automation
+- Troubleshooting
+
+**19. WASM Visualization** (`19_wasm_visualization.md`)
+- Graph visualization with Cytoscape.js
+- Curve plotting with Chart.js
+- Prolog → LLVM → WASM pipeline
+- TypeScript bindings generation
+- Custom chart component
+
+### Part 9: Reference (Chapters 13-14)
 
 **13. API Reference** (`13_api_reference.md`)
 - Complete predicate documentation
@@ -216,6 +236,9 @@ By completing this book, you will be able to:
 | 14 | Case Studies | Real-world examples |
 | 15 | Production | Deployment, security, monitoring |
 | 16 | Cloud & Enterprise | Containers, secrets, serverless |
+| 17 | LLVM FFI | C ABI, shared libraries, Go/Rust FFI |
+| 18 | LLVM Examples | Working examples, build automation |
+| 19 | WASM Visualization | Cytoscape.js, Chart.js, browser pipelines |
 
 ## Implementation Status
 
