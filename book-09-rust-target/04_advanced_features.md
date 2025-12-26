@@ -199,6 +199,68 @@ compile_production :-
     write_rust_project(Code, 'output/etl_processor').
 ```
 
+## Window Functions
+
+The Rust target provides full window function support for analytics queries.
+
+### Ranking Functions
+
+```prolog
+% Rank items by score
+ranked_items(Id, Score, Rank) :-
+    item(Id, Score),
+    rank(Score, Rank).
+
+% Row numbers for pagination
+paginated(Id, Name, RowNum) :-
+    record(Id, Name),
+    row_number(Id, RowNum).
+```
+
+**Supported ranking functions:**
+- `row_number/2` - Sequential numbering within partition
+- `rank/2` - Rank with gaps for ties
+- `dense_rank/2` - Rank without gaps
+
+### LAG and LEAD Functions
+
+Access values from previous or following rows - essential for time-series analysis.
+
+```prolog
+% Calculate day-over-day change
+daily_change(Date, Price, PrevPrice, Change) :-
+    stock_price(Date, Price),
+    lag(Date, Price, 1, 0, PrevPrice),
+    Change is Price - PrevPrice.
+
+% Look ahead to next value
+next_value(Date, Value, NextValue) :-
+    time_series(Date, Value),
+    lead(Date, Value, 1, null, NextValue).
+```
+
+**LAG function variants:**
+- `lag(SortField, ValueField, Result)` - Previous value (offset 1, default null)
+- `lag(SortField, ValueField, Offset, Result)` - Previous by N rows
+- `lag(SortField, ValueField, Offset, Default, Result)` - With custom default
+
+**LEAD function variants:**
+- `lead(SortField, ValueField, Result)` - Next value (offset 1, default null)
+- `lead(SortField, ValueField, Offset, Result)` - Next by N rows
+- `lead(SortField, ValueField, Offset, Default, Result)` - With custom default
+
+### First and Last Value
+
+Access boundary values within a window partition.
+
+```prolog
+% Get first and last price in each session
+session_bounds(Session, FirstPrice, LastPrice) :-
+    trade(Session, Time, Price),
+    first_value(Time, Price, FirstPrice),
+    last_value(Time, Price, LastPrice).
+```
+
 ## Constraints
 
 Numeric constraints are compiled to native Rust comparisons.
@@ -217,7 +279,7 @@ high_value(Val) :-
 | Statistical Aggs | ✅ | ✅ | Both support stddev, median, percentile |
 | collect_list/set | ✅ | ✅ | Both output JSON arrays |
 | Observability | ✅ | ✅ | Same options available |
-| Window Functions | ❌ | ✅ | Use Go for LAG/LEAD |
+| Window Functions | ✅ | ✅ | Both support LAG/LEAD/first/last |
 | Database Integration | ❌ | ✅ | Use Go for BoltDB |
 
 Choose Rust when you need:
@@ -226,7 +288,6 @@ Choose Rust when you need:
 - Small binary size and minimal memory footprint
 
 Choose Go when you need:
-- Window functions (LAG/LEAD, first_value, last_value)
 - Embedded database support (BoltDB)
 - Faster compilation times
 
