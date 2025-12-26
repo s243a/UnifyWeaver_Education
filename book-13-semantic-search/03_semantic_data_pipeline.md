@@ -63,7 +63,42 @@ When found, it creates a directed edge in the `links` table:
 
 This builds the graph that enables **Graph RAG**.
 
-## 3.4 Embedding Cache
+## 3.4 Pre-computed Embeddings (Hugging Face)
+
+Pre-computed Q/A embeddings are available on Hugging Face Hub for immediate use:
+
+**Dataset**: [s243a/unifyweaver-embeddings](https://huggingface.co/datasets/s243a/unifyweaver-embeddings)
+
+### Available Files
+
+| File | Model | Dimensions | Pairs |
+|------|-------|------------|-------|
+| `tailored_all-minilm_384d_v1_2025-12-25.npz` | all-MiniLM-L6-v2 | 384 | 644 |
+| `tailored_modernbert_768d_v1_2025-12-25.npz` | nomic-embed-text-v1.5 | 768 | 644 |
+
+### Download and Use
+
+```python
+import numpy as np
+from huggingface_hub import hf_hub_download
+
+# Download embeddings
+path = hf_hub_download(
+    repo_id="s243a/unifyweaver-embeddings",
+    filename="tailored_all-minilm_384d_v1_2025-12-25.npz"
+)
+
+# Load
+data = np.load(path)
+q_embeddings = data["q_embeddings"]  # (644, 384)
+a_embeddings = data["a_embeddings"]  # (644, 384)
+cluster_ids = data["cluster_ids"].tolist()
+pair_ids = data["pair_ids"].tolist()
+
+print(f"Loaded {len(q_embeddings)} Q/A pairs")
+```
+
+## 3.5 Local Embedding Cache
 
 Embedding models are computationally expensive. For iterative development, cache embeddings to disk:
 
@@ -127,7 +162,7 @@ Each `.npz` file contains:
 - `ids`: Original item identifiers
 - `metadata`: Any additional fields needed for reconstruction
 
-## 3.5 Running a Crawl
+## 3.6 Running a Crawl
 
 To trigger this pipeline, use the `crawler_run/2` predicate in your Prolog script:
 
