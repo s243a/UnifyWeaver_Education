@@ -197,6 +197,14 @@ By completing this book, you will be able to:
 - TypeScript bindings generation
 - Custom chart component
 
+**20. Pyodide and Python Variants** (`20_pyodide_python_variants.md`)
+- Python variant overview (Numba, Cython, Nuitka, Codon, mypyc, Pyodide)
+- Pyodide for secure browser-based computation
+- Numba for JIT-compiled numerical code
+- Cython for C extension modules
+- Choosing the right variant
+- Custom components for each variant
+
 ### Part 9: Reference (Chapters 13-14)
 
 **13. API Reference** (`13_api_reference.md`)
@@ -239,6 +247,7 @@ By completing this book, you will be able to:
 | 17 | LLVM FFI | C ABI, shared libraries, Go/Rust FFI |
 | 18 | LLVM Examples | Working examples, build automation |
 | 19 | WASM Visualization | Cytoscape.js, Chart.js, browser pipelines |
+| 20 | Pyodide & Python Variants | Numba, Cython, Nuitka, Pyodide, secure browser |
 
 ## Implementation Status
 
