@@ -358,6 +358,83 @@ alice:eve
 
 This approach avoids stack overflow that would occur with naive recursion, and is more efficient than recomputing all results in each iteration.
 
+### LINQ-Style TransitiveClosure (Alternative)
+
+For cleaner, more readable generated code, you can use the `linq_recursive(true)` option. This generates code using the `TransitiveClosure` extension method from the `UnifyWeaver.Native` runtime library:
+
+**Compile with LINQ style:**
+```prolog
+?- compile_predicate_to_csharp(ancestor/2, [linq_recursive(true)], Code).
+```
+
+**Generated C# (LINQ TransitiveClosure):**
+```csharp
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnifyWeaver.Native;  // Runtime library
+
+namespace UnifyWeaver.Generated
+{
+    public static class AncestorModule
+    {
+        private static readonly (string, string)[] ParentData = new[] {
+            ("alice", "bob"),
+            ("bob", "charlie"),
+            ("charlie", "diana"),
+            ("diana", "eve")
+        };
+
+        public static IEnumerable<(string, string)> ParentStream() => ParentData;
+
+        private static List<(string, string)>? _cache;
+
+        public static IEnumerable<(string, string)> AncestorStream()
+        {
+            if (_cache != null) return _cache;
+            _cache = ParentStream().TransitiveClosure(
+                (d, baseRel) => baseRel
+                    .Where(b => b.Item2 == d.Item1)
+                    .Select(b => (b.Item1, d.Item2))
+            ).ToList();
+            return _cache;
+        }
+    }
+}
+```
+
+**Comparison of Styles:**
+
+| Aspect | Inline Semi-Naive | LINQ TransitiveClosure |
+|--------|-------------------|------------------------|
+| Code readability | Explicit loops visible | Clean method call |
+| Runtime dependency | None | `UnifyWeaver.Native` library |
+| Customization | Full control | Abstracted |
+| Generated code size | Larger | Smaller |
+
+**When to use each:**
+- **Inline (default)**: No runtime dependencies, full transparency
+- **LINQ style**: Cleaner code, when using `UnifyWeaver.Native` package
+
+### UnifyWeaver.Native Runtime Library
+
+The `linq_recursive(true)` option requires the `UnifyWeaver.Native` NuGet package, which provides:
+
+- `TransitiveClosure<T>()` - Computes transitive closure with semi-naive iteration
+- `SafeRecursiveJoin<T>()` - Safe join for self-referential queries
+- `Fixpoint<T>()` - General fixpoint computation
+- `MemoizedTransitiveClosure<T>()` - Thread-safe cached version
+
+**Installation:**
+```bash
+dotnet add package UnifyWeaver.Native
+```
+
+Or reference the source directly:
+```
+src/unifyweaver/targets/csharp_native_runtime/LinqRecursive.cs
+```
+
 ### Why Not LINQ Join for Recursion?
 
 LINQ `Join` eagerly materializes its right operand before iteration begins. For recursive calls, this would cause infinite expansion. The semi-naive approach solves this by:
@@ -766,7 +843,8 @@ The compiler automatically detects these patterns and generates appropriate LINQ
 The C# Native Target:
 - ✅ Compiles facts and simple rules to LINQ
 - ✅ Full recursion support via semi-naive iteration
-- ✅ Generates standalone C# source files (no runtime dependencies)
+- ✅ Optional LINQ-style `TransitiveClosure` with `linq_recursive(true)`
+- ✅ Generates standalone C# source files (no runtime dependencies for inline style)
 - ✅ Excellent performance with HashSet deduplication
 - ✅ Easy integration with .NET applications
 - ✅ Full outer join support (LEFT, RIGHT, FULL OUTER)
