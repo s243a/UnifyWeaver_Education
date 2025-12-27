@@ -42,8 +42,11 @@ Janus provides **direct in-process** communication between Prolog and Python:
 | Transport | Overhead | Use Case |
 |-----------|----------|----------|
 | **Janus** | Minimal (in-process) | Tight integration, NumPy, ML |
+| **RPyC** | Low (network, live proxies) | Network RPC, live objects |
 | **Pipe** | Medium (serialization) | Process isolation, streaming |
 | **HTTP** | High (network) | Distributed, microservices |
+
+> **RPyC Transport:** For network-based RPC with live object proxies (like Janus but over network), see the [RPyC transport module](../../src/unifyweaver/glue/rpyc/) and `examples/rpyc-integration/`.
 
 ### Performance
 
@@ -361,6 +364,8 @@ compile_pipeline(Steps, [transport(janus)], Code).
 | NumPy/SciPy heavy computation | **Janus** |
 | ML model inference | **Janus** |
 | Large array processing | **Janus** |
+| Network RPC with live proxies | **RPyC** |
+| Remote Python server access | **RPyC** |
 | Streaming data | Pipe |
 | Process isolation needed | Pipe |
 | Distributed system | HTTP |

@@ -32,11 +32,11 @@ UnifyWeaver supports seven Python compilation variants:
 | **numba** | BSD 2-Clause | ✅ | JIT → LLVM | Numerical loops |
 | **cython** | Apache 2.0 | ✅ | AOT → C | C extensions |
 | **nuitka** | Apache 2.0 | ✅ | AOT → C | Deployment |
-| **codon** | BSL 1.1* | ⚠️ | AOT → LLVM | Maximum speed |
+| **codon** | Apache 2.0* | ✅ | AOT → LLVM | Maximum speed |
 | **mypyc** | MIT | ✅ | AOT → C | Type-checked code |
 | **pyodide** | MPL 2.0 | ✅ | WASM | Browser/security |
 
-*Codon has commercial restrictions.
+*Codon switched to Apache 2.0 open source license in 2025.
 
 ### Inheritance Architecture
 
@@ -401,6 +401,38 @@ Create a pipeline that uses:
 | **Nuitka** | Compile to standalone executables |
 | **Inheritance** | All variants share bindings and components |
 | **Security** | Pyodide eliminates server-side injection risks |
+
+---
+
+## 20.10 RPyC Network Compatibility
+
+When using RPyC (Remote Python Call) for network-based RPC, variant compatibility depends on whether the variant runs on CPython:
+
+| Variant | RPyC Compatible | Notes |
+|---------|-----------------|-------|
+| **CPython** | ✅ Yes | Baseline - all RPyC features work |
+| **Numba** | ✅ Yes | JIT-compiled functions callable via RPyC |
+| **Cython** | ✅ Yes | Services run correctly |
+| **mypyc** | ✅ Yes | Type-annotated services work |
+| **Nuitka** | ✅ Yes | Service patterns verified |
+| **Codon** | ⚠️ Partial | Requires CPython bridge via `from python import` |
+| **Pyodide** | ❌ No | Browser sandbox, no TCP sockets |
+
+### Why Most Variants Work
+
+RPyC requires real CPython. All working variants either:
+- Run on CPython (Numba)
+- Compile to CPython extensions (Cython, mypyc)
+- Include CPython runtime (Nuitka)
+- Have Python interop (Codon)
+
+### Known Incompatible
+
+- **Pyodide**: No network access in browser WASM sandbox
+- **Jython**: Python 2.7 on JVM (reimplementation)
+- **IronPython**: .NET CLR (reimplementation)
+
+See `tests/rpyc_variants/test_rpyc_variants.py` for the full test suite.
 
 ---
 
