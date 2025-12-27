@@ -205,6 +205,14 @@ By completing this book, you will be able to:
 - Choosing the right variant
 - Custom components for each variant
 
+**21. Janus In-Process Integration** (`21_janus_integration.md`)
+- Janus overview (SWI-Prolog specific)
+- In-process Python↔Prolog communication
+- NumPy integration
+- Bidirectional calling
+- Code generation for wrappers
+- Performance comparison (50-100x vs pipe)
+
 ### Part 9: Reference (Chapters 13-14)
 
 **13. API Reference** (`13_api_reference.md`)
@@ -248,6 +256,7 @@ By completing this book, you will be able to:
 | 18 | LLVM Examples | Working examples, build automation |
 | 19 | WASM Visualization | Cytoscape.js, Chart.js, browser pipelines |
 | 20 | Pyodide & Python Variants | Numba, Cython, Nuitka, Pyodide, secure browser |
+| 21 | Janus In-Process | SWI-Prolog Python integration, NumPy, bidirectional |
 
 ## Implementation Status
 
