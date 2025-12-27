@@ -406,10 +406,10 @@ Create a pipeline that uses:
 
 ## Next Steps
 
-- [Chapter 19: WASM Visualization](19_wasm_visualization.md) - LLVM→WASM pipeline
+- [Chapter 21: Janus In-Process Integration](21_janus_integration.md) - SWI-Prolog Python integration
 - [API Reference](13_api_reference.md) - Complete predicate documentation
 - [docs/PYTHON_VARIANTS.md](../../docs/PYTHON_VARIANTS.md) - Full variant reference
 
 ---
 
-*[Previous: Chapter 19 - WASM Visualization](19_wasm_visualization.md)*
+**←** [Previous: Chapter 19 - WASM Visualization](19_wasm_visualization.md) | [Next: Chapter 21 - Janus Integration](21_janus_integration.md) **→**
