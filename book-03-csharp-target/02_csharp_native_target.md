@@ -297,12 +297,14 @@ ancestor(X, Y) :- parent(X, Y).
 ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).
 ```
 
-**Compile to C#:**
+**Compile to C# (with inline_recursion to see the algorithm):**
 ```prolog
-?- compile_predicate_to_csharp(ancestor/2, [mode(procedural)], Code).
+?- compile_predicate_to_csharp(ancestor/2, [inline_recursion(true)], Code).
 ```
 
-**Generated C# (semi-naive iteration):**
+> **Note:** The default (without `inline_recursion(true)`) generates cleaner LINQ-style code using `TransitiveClosure()`. The inline style shown here reveals the underlying algorithm.
+
+**Generated C# (inline semi-naive iteration):**
 ```csharp
 public static IEnumerable<(string, string)> AncestorStream()
 {
@@ -358,13 +360,13 @@ alice:eve
 
 This approach avoids stack overflow that would occur with naive recursion, and is more efficient than recomputing all results in each iteration.
 
-### LINQ-Style TransitiveClosure (Alternative)
+### LINQ-Style TransitiveClosure (Default)
 
-For cleaner, more readable generated code, you can use the `linq_recursive(true)` option. This generates code using the `TransitiveClosure` extension method from the `UnifyWeaver.Native` runtime library:
+The default compilation uses the `TransitiveClosure` extension method from the `UnifyWeaver.Native` runtime library for cleaner, more readable generated code:
 
-**Compile with LINQ style:**
+**Default compilation (LINQ style):**
 ```prolog
-?- compile_predicate_to_csharp(ancestor/2, [linq_recursive(true)], Code).
+?- compile_predicate_to_csharp(ancestor/2, [], Code).
 ```
 
 **Generated C# (LINQ TransitiveClosure):**
@@ -405,20 +407,25 @@ namespace UnifyWeaver.Generated
 
 **Comparison of Styles:**
 
-| Aspect | Inline Semi-Naive | LINQ TransitiveClosure |
-|--------|-------------------|------------------------|
-| Code readability | Explicit loops visible | Clean method call |
-| Runtime dependency | None | `UnifyWeaver.Native` library |
-| Customization | Full control | Abstracted |
-| Generated code size | Larger | Smaller |
+| Aspect | LINQ TransitiveClosure (Default) | Inline Semi-Naive |
+|--------|----------------------------------|-------------------|
+| Code readability | Clean method call | Explicit loops visible |
+| Runtime dependency | `UnifyWeaver.Native` library | None |
+| Customization | Abstracted | Full control |
+| Generated code size | Smaller | Larger |
 
 **When to use each:**
-- **Inline (default)**: No runtime dependencies, full transparency
-- **LINQ style**: Cleaner code, when using `UnifyWeaver.Native` package
+- **LINQ style (default)**: Cleaner code, recommended for most use cases
+- **Inline style**: Use `inline_recursion(true)` when you need zero runtime dependencies
+
+**Compile with inline style (fallback):**
+```prolog
+?- compile_predicate_to_csharp(ancestor/2, [inline_recursion(true)], Code).
+```
 
 ### UnifyWeaver.Native Runtime Library
 
-The `linq_recursive(true)` option requires the `UnifyWeaver.Native` NuGet package, which provides:
+The default LINQ style requires the `UnifyWeaver.Native` NuGet package, which provides:
 
 - `TransitiveClosure<T>()` - Computes transitive closure with semi-naive iteration
 - `SafeRecursiveJoin<T>()` - Safe join for self-referential queries
