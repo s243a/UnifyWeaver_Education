@@ -711,6 +711,56 @@ non_manager(Employee) :-
 
 Compile and integrate into your dashboard for richer analysis!
 
+## Outer Joins (LEFT, RIGHT, FULL OUTER)
+
+The C# Stream Target supports **outer joins** - a common SQL pattern for including unmatched records.
+
+### LEFT OUTER JOIN
+
+A LEFT JOIN returns all records from the left table, with matched records from the right table or `null`:
+
+```prolog
+% All employees, with their department (or null if unassigned)
+employee_dept(Emp, Dept) :-
+    employee(Emp, DeptId),
+    (department(DeptId, Dept) ; Dept = null).
+```
+
+The compiler generates LINQ using `GroupJoin` + `SelectMany` + `DefaultIfEmpty`:
+
+```csharp
+EmployeeStream()
+    .GroupJoin(DepartmentStream(),
+               emp => emp.DeptId,
+               dept => dept.Id,
+               (emp, deptGroup) => new { emp, deptGroup })
+    .SelectMany(
+        x => x.deptGroup.DefaultIfEmpty(),
+        (x, dept) => (x.emp.Name, dept?.Name))
+```
+
+### RIGHT OUTER JOIN
+
+A RIGHT JOIN returns all records from the right table:
+
+```prolog
+dept_employee(Emp, Dept) :-
+    (employee(Emp, DeptId) ; Emp = null),
+    department(DeptId, Dept).
+```
+
+### FULL OUTER JOIN
+
+A FULL OUTER JOIN returns all records from both sides:
+
+```prolog
+full_join(Emp, Dept) :-
+    (employee(Emp, DeptId) ; Emp = null),
+    (department(DeptId, Dept) ; Dept = null).
+```
+
+The compiler automatically detects these patterns and generates appropriate LINQ code with null-conditional operators (`?.`) and null-coalescing patterns.
+
 ## Summary
 
 The C# Native Target:
@@ -719,6 +769,7 @@ The C# Native Target:
 - ✅ Generates standalone C# source files (no runtime dependencies)
 - ✅ Excellent performance with HashSet deduplication
 - ✅ Easy integration with .NET applications
+- ✅ Full outer join support (LEFT, RIGHT, FULL OUTER)
 - ❌ No mutual recursion support (use Query Runtime for that)
 - ❌ Limited to in-memory operations
 

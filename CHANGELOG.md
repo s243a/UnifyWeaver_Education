@@ -38,6 +38,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `first_value/3` - First value in window partition
   - `last_value/3` - Last value in window partition
 
+#### Bash Target Enhancements
+- **Full Outer Join support** - LEFT, RIGHT, and FULL OUTER JOIN patterns
+  - Pattern detection: `(LeftGoals, (RightGoal ; X = null))` for LEFT JOIN
+  - Nested loops with associative arrays for deduplication
+  - Match tracking for unmatched records in FULL OUTER
+
+#### C# Stream Target Enhancements
+- **Full Outer Join support** - LEFT, RIGHT, and FULL OUTER JOIN patterns
+  - LINQ GroupJoin + SelectMany + DefaultIfEmpty for LEFT JOIN
+  - Swap tables for RIGHT JOIN using LEFT JOIN pattern
+  - Concat unmatched right records for FULL OUTER JOIN
+
+#### PowerShell Target Enhancements
+- **Full Outer Join support** - LEFT, RIGHT, and FULL OUTER JOIN patterns
+  - Hashtable-based lookup for efficient joins
+  - PSCustomObject output with nullable properties
+  - Match tracking for unmatched records in FULL OUTER
+
 ### Changed
 - Updated Book 6 (Go Target) Chapter 3 with window function documentation
 - Updated Book 9 (Rust Target) Chapter 4 with statistical aggregations and observability
@@ -48,6 +66,10 @@ The following features are now available in both Go and Rust targets:
 - Collection aggregations (collect_list, collect_set)
 - Observability (progress, error_file, error_threshold, metrics_file)
 - Database integration (Go: BoltDB, Rust: sled)
+
+Full Outer Join is now available across all major targets:
+- Go, Python, Rust, SQL (existing)
+- Bash, C# Stream, PowerShell (newly added)
 
 ---
 

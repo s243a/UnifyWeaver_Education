@@ -126,6 +126,49 @@ child_stream() {
 
 The use of `sort -u` is a simple and robust way to implement the logical OR and ensure that each distinct result appears only once, just as it would in Prolog.
 
+## Outer Joins (LEFT, RIGHT, FULL OUTER)
+
+Beyond inner joins, UnifyWeaver supports **outer joins** - a common SQL pattern that includes unmatched records from one or both sides of a join.
+
+### LEFT OUTER JOIN
+
+A LEFT JOIN returns all records from the left table, with matched records from the right table or `null` when no match exists:
+
+```prolog
+% All employees, with their department (or null if unassigned)
+employee_dept(Emp, Dept) :-
+    employee(Emp, DeptId),
+    (department(DeptId, Dept) ; Dept = null).
+```
+
+The `stream_compiler` detects this `(Goal ; Var = null)` pattern and generates optimized Bash code with:
+- Hashtable-based lookups for the right side
+- Match tracking to identify unmatched left records
+
+### RIGHT OUTER JOIN
+
+A RIGHT JOIN returns all records from the right table:
+
+```prolog
+% All departments, with their employees (or null if empty)
+dept_employee(Emp, Dept) :-
+    (employee(Emp, DeptId) ; Emp = null),
+    department(DeptId, Dept).
+```
+
+### FULL OUTER JOIN
+
+A FULL OUTER JOIN returns all records from both sides:
+
+```prolog
+% All employees and departments, matched or unmatched
+full_join(Emp, Dept) :-
+    (employee(Emp, DeptId) ; Emp = null),
+    (department(DeptId, Dept) ; Dept = null).
+```
+
+The compiler automatically detects these patterns and generates appropriate Bash code with associative arrays for deduplication and match tracking.
+
 ## The `compile_predicate` Wrapper
 
 Instead of manually choosing between `compile_recursive/3` and `compile_stream/3`, you can use the main wrapper predicate `compile_predicate/3`. This predicate automatically analyzes the predicate and calls the correct underlying compiler.
