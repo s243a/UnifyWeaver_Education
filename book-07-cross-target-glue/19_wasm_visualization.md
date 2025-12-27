@@ -351,4 +351,4 @@ Check that you're not exceeding the allocated memory (default 64KB = 1 page). In
 
 ---
 
-**←** [Previous: LLVM Examples](18_llvm_examples.md) | [📖 Book: Cross-Target Glue](./)
+**←** [Previous: LLVM Examples](18_llvm_examples.md) | [Next: Pyodide & Python Variants](20_pyodide_python_variants.md) **→**
