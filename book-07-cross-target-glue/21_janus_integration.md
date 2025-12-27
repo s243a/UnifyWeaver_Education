@@ -167,14 +167,46 @@ Std = 2.8722813232690143.
 
 ---
 
-## Custom Python Modules
+## Dynamic Code Execution (Exec Pattern)
 
-### Creating Modules Dynamically
+The exec pattern allows you to dynamically define Python functions from Prolog and call them.
+
+> **Requirement:** The exec pattern requires `dict_wrapper.py` from JanusBridge. Add its path with `janus_add_lib_path/1`.
+
+### Non-Recursive Functions
+
+Use `janus_wrapped_exec/2` for simple functions:
 
 ```prolog
-% Define Python functions in-process
-create_module :-
-    py_call(builtins:exec("
+:- use_module('src/unifyweaver/glue/janus_glue').
+
+% Add path to dict_wrapper (from JanusBridge)
+?- janus_add_lib_path('/path/to/JanusBridge/src/core').
+
+% Define functions dynamically
+?- janus_wrapped_exec("
+def double(x):
+    return x * 2
+
+def add(a, b):
+    return a + b
+", NS).
+
+% Call the defined functions
+?- janus_call_defined(NS, double, [21], Result).
+Result = 42.
+
+?- janus_call_defined(NS, add, [10, 32], Result).
+Result = 42.
+```
+
+### Recursive Functions
+
+Recursive functions require special handling because the function needs to find itself. Use `janus_exec_recursive/2`:
+
+```prolog
+% Define recursive functions
+?- janus_exec_recursive("
 def factorial(n):
     if n <= 1:
         return 1
@@ -183,19 +215,39 @@ def factorial(n):
 def fibonacci(n):
     if n <= 1:
         return n
-    a, b = 0, 1
-    for _ in range(n - 1):
-        a, b = b, a + b
-    return b
-"), _).
+    return fibonacci(n - 1) + fibonacci(n - 2)
+", NS).
 
-% Use the functions
-?- create_module,
-   py_call(factorial(10), Fact).
-Fact = 3628800.
+% Call recursive functions
+?- janus_call_defined(NS, factorial, [5], Result).
+Result = 120.
+
+?- janus_call_defined(NS, fibonacci, [10], Result).
+Result = 55.
 ```
 
-### Custom Classes
+### Why Two Patterns?
+
+The difference lies in how Python's `exec()` handles namespaces:
+
+| Pattern | How It Works | Use Case |
+|---------|--------------|----------|
+| `janus_wrapped_exec` | `exec(code, globals(), locals)` | Non-recursive functions |
+| `janus_exec_recursive` | `exec(code, ns, ns)` (same dict) | Recursive functions |
+
+When using `exec(code, globals(), locals)`, defined functions go into `locals` but look for themselves in `globals` when making recursive calls. By using the same dictionary for both, recursive functions can find themselves.
+
+### Use Cases
+
+The exec pattern is useful for:
+- **Generated code** from UnifyWeaver compilation
+- **Dynamic algorithms** defined at runtime
+- **REPL-style** function definition
+- **Custom Python modules** created on-the-fly
+
+---
+
+## Custom Classes
 
 ```prolog
 create_processor_class :-
@@ -355,6 +407,15 @@ janus_numpy_array(+List, -NumpyArray)
 janus_numpy_call(+Function, +Args, -Result)
 ```
 
+### Dynamic Code Execution
+
+```prolog
+janus_wrapped_exec(+Code, -Namespace)           % Non-recursive functions
+janus_wrapped_exec(+Code, +InitialVars, -Namespace)
+janus_exec_recursive(+Code, -Namespace)         % Recursive functions
+janus_call_defined(+Namespace, +FuncName, +Args, -Result)
+```
+
 ### Code Generation
 
 ```prolog
@@ -410,6 +471,7 @@ See `examples/janus-integration/` for a complete demo with:
 - Bidirectional calling
 - Wrapper generation
 - Performance comparison
+- **Dynamic code execution** (exec pattern with recursive functions)
 
 Run the demo:
 ```bash
