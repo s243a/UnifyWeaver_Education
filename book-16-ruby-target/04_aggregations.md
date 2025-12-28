@@ -25,7 +25,12 @@ employee_count(Count) :-
     aggregate_all(count, employee(_, _), Count).
 ```
 
-Compiles to:
+Compile with:
+```prolog
+?- compile_predicate_to_ruby(employee_count/1, [], Code), format('~s', [Code]).
+```
+
+Generated Ruby:
 
 ```ruby
 def employee_count(&block)
@@ -46,7 +51,12 @@ total_salary(Total) :-
     aggregate_all(sum(Salary), employee(_, Salary), Total).
 ```
 
-Compiles to:
+Compile with:
+```prolog
+?- compile_predicate_to_ruby(total_salary/1, [], Code), format('~s', [Code]).
+```
+
+Generated Ruby:
 
 ```ruby
 def total_salary(&block)
@@ -71,7 +81,13 @@ max_price(Max) :-
     aggregate_all(max(Price), product(_, Price), Max).
 ```
 
-Compiles to:
+Compile with:
+```prolog
+?- compile_predicate_to_ruby(min_price/1, [], Code), format('~s', [Code]).
+?- compile_predicate_to_ruby(max_price/1, [], Code), format('~s', [Code]).
+```
+
+Generated Ruby:
 
 ```ruby
 def min_price(&block)
@@ -108,7 +124,12 @@ avg_score(Avg) :-
     aggregate_all(avg(Score), student(_, Score), Avg).
 ```
 
-Compiles to:
+Compile with:
+```prolog
+?- compile_predicate_to_ruby(avg_score/1, [], Code), format('~s', [Code]).
+```
+
+Generated Ruby:
 
 ```ruby
 def avg_score(&block)

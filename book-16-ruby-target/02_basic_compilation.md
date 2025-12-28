@@ -15,8 +15,12 @@ employee(bob, marketing).
 employee(charlie, engineering).
 ```
 
-Compiles to:
+Compile with:
+```prolog
+?- compile_predicate_to_ruby(employee/2, [], Code), format('~s', [Code]).
+```
 
+Generated Ruby:
 ```ruby
 def employee
   facts = [
@@ -42,8 +46,12 @@ Rules with a single goal compile to nested blocks:
 engineer(Name) :- employee(Name, engineering).
 ```
 
-Compiles to:
+Compile with:
+```prolog
+?- compile_predicate_to_ruby(engineer/1, [], Code), format('~s', [Code]).
+```
 
+Generated Ruby:
 ```ruby
 def engineer
   employee do |p0, p1|
@@ -67,8 +75,12 @@ When rules have multiple goals sharing variables, the compiler generates join co
 same_dept(A, B) :- employee(A, Dept), employee(B, Dept), A \= B.
 ```
 
-Compiles to:
+Compile with:
+```prolog
+?- compile_predicate_to_ruby(same_dept/2, [], Code), format('~s', [Code]).
+```
 
+Generated Ruby:
 ```ruby
 def same_dept
   employee do |p0, p1|  # A=p0, Dept=p1
@@ -123,8 +135,12 @@ manager(bob).
 manager(Name) :- employee(Name, Dept), dept_head(Dept, Name).
 ```
 
-Compiles to:
+Compile with:
+```prolog
+?- compile_predicate_to_ruby(manager/1, [], Code), format('~s', [Code]).
+```
 
+Generated Ruby:
 ```ruby
 def manager
   # Clause 1: manager(alice)

@@ -15,8 +15,12 @@ employee(bob, marketing).
 employee(charlie, engineering).
 ```
 
-Compiles to:
+Compile with:
+```prolog
+?- compile_predicate_to_perl(employee/2, [], Code), format('~s', [Code]).
+```
 
+Generated Perl:
 ```perl
 sub employee {
     my $callback = shift;
@@ -45,8 +49,12 @@ Rules with a single goal compile to nested callbacks:
 engineer(Name) :- employee(Name, engineering).
 ```
 
-Compiles to:
+Compile with:
+```prolog
+?- compile_predicate_to_perl(engineer/1, [], Code), format('~s', [Code]).
+```
 
+Generated Perl:
 ```perl
 sub engineer {
     my $callback = shift;
@@ -72,8 +80,12 @@ When rules have multiple goals sharing variables, the compiler generates join co
 same_dept(A, B) :- employee(A, Dept), employee(B, Dept), A \= B.
 ```
 
-Compiles to:
+Compile with:
+```prolog
+?- compile_predicate_to_perl(same_dept/2, [], Code), format('~s', [Code]).
+```
 
+Generated Perl:
 ```perl
 sub same_dept {
     my $callback = shift;
@@ -136,8 +148,12 @@ manager(bob).
 manager(Name) :- employee(Name, Dept), dept_head(Dept, Name).
 ```
 
-Compiles to:
+Compile with:
+```prolog
+?- compile_predicate_to_perl(manager/1, [], Code), format('~s', [Code]).
+```
 
+Generated Perl:
 ```perl
 sub manager {
     my $callback = shift;

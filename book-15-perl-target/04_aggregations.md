@@ -25,7 +25,12 @@ employee_count(Count) :-
     aggregate_all(count, employee(_, _), Count).
 ```
 
-Compiles to:
+Compile with:
+```prolog
+?- compile_predicate_to_perl(employee_count/1, [], Code), format('~s', [Code]).
+```
+
+Generated Perl:
 
 ```perl
 sub employee_count {
@@ -48,7 +53,12 @@ total_salary(Total) :-
     aggregate_all(sum(Salary), employee(_, Salary), Total).
 ```
 
-Compiles to:
+Compile with:
+```prolog
+?- compile_predicate_to_perl(total_salary/1, [], Code), format('~s', [Code]).
+```
+
+Generated Perl:
 
 ```perl
 sub total_salary {
@@ -75,7 +85,13 @@ max_price(Max) :-
     aggregate_all(max(Price), product(_, Price), Max).
 ```
 
-Compiles to:
+Compile with:
+```prolog
+?- compile_predicate_to_perl(min_price/1, [], Code), format('~s', [Code]).
+?- compile_predicate_to_perl(max_price/1, [], Code), format('~s', [Code]).
+```
+
+Generated Perl:
 
 ```perl
 sub min_price {
@@ -116,7 +132,12 @@ avg_score(Avg) :-
     aggregate_all(avg(Score), student(_, Score), Avg).
 ```
 
-Compiles to:
+Compile with:
+```prolog
+?- compile_predicate_to_perl(avg_score/1, [], Code), format('~s', [Code]).
+```
+
+Generated Perl:
 
 ```perl
 sub avg_score {

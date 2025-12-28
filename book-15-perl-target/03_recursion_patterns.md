@@ -21,8 +21,12 @@ ancestor(X, Y) :- parent(X, Y).
 ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).
 ```
 
-The compiler generates semi-naive iteration:
+Compile with:
+```prolog
+?- compile_predicate_to_perl(ancestor/2, [], Code), format('~s', [Code]).
+```
 
+Generated Perl (semi-naive iteration):
 ```perl
 sub ancestor {
     my $callback = shift;
@@ -83,7 +87,12 @@ factorial(N, Acc, Result) :-
     factorial(N1, Acc1, Result).
 ```
 
-The compiler generates an efficient loop:
+Compile with:
+```prolog
+?- compile_predicate_to_perl(factorial/3, [], Code), format('~s', [Code]).
+```
+
+Generated Perl (optimized to loop):
 
 ```perl
 sub factorial {
@@ -138,7 +147,12 @@ fib(N, Result) :-
     Result is R1 + R2.
 ```
 
-The compiler generates memoized CPS:
+Compile with:
+```prolog
+?- compile_predicate_to_perl(fib/2, [], Code), format('~s', [Code]).
+```
+
+Generated Perl (memoized CPS):
 
 ```perl
 {

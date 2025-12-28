@@ -21,7 +21,12 @@ ancestor(X, Y) :- parent(X, Y).
 ancestor(X, Z) :- parent(X, Y), ancestor(Y, Z).
 ```
 
-The compiler generates semi-naive iteration with Ruby's `Set`:
+Compile with:
+```prolog
+?- compile_predicate_to_ruby(ancestor/2, [], Code), format('~s', [Code]).
+```
+
+Generated Ruby (semi-naive iteration with `Set`):
 
 ```ruby
 require 'set'
@@ -88,7 +93,12 @@ factorial(N, Acc, Result) :-
     factorial(N1, Acc1, Result).
 ```
 
-The compiler generates an efficient loop:
+Compile with:
+```prolog
+?- compile_predicate_to_ruby(factorial/3, [], Code), format('~s', [Code]).
+```
+
+Generated Ruby (optimized to loop):
 
 ```ruby
 def factorial(arg1, arg2, arg3, &block)
@@ -150,7 +160,12 @@ fib(N, Result) :-
     Result is R1 + R2.
 ```
 
-The compiler generates memoized CPS:
+Compile with:
+```prolog
+?- compile_predicate_to_ruby(fib/2, [], Code), format('~s', [Code]).
+```
+
+Generated Ruby (memoized CPS):
 
 ```ruby
 def fib(arg1, &block)
