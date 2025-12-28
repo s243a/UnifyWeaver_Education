@@ -134,6 +134,13 @@ This book covers building intelligent semantic agents using UnifyWeaver's Python
 - Internal shortcuts between related interfaces
 - Web traffic analogy and design rationale
 
+### [Chapter 15: Zero-Shot Path Mapping](15_zero_shot_path_mapping.md)
+- Materialized path format for hierarchical retrieval
+- Per-tree Procrustes transformations with softmax routing
+- Multi-account paths with cross-account boundaries
+- Fast inference (~30ms) with cached embeddings
+- Pearltrees use case: 72% Recall@1 on tree retrieval
+
 ## The Semantic Runtime
 
 The Python semantic runtime provides:
