@@ -54,6 +54,13 @@ The books are designed to be read in sequence, with each building on concepts fr
 | **13** | [Semantic Search](book-13-semantic-search/README.md) | Graph RAG, embeddings, vector databases |
 | **14** | [AI Training](book-14-ai-training/README.md) | LDA projections, multi-head routing, transformer distillation |
 
+### Scripting Targets (Books 15-16)
+
+| Book | Title | Focus |
+|------|-------|-------|
+| **15** | [Perl Target](book-15-perl-target/README.md) | CPS with callbacks, Unix pipelines, text processing |
+| **16** | [Ruby Target](book-16-ruby-target/README.md) | Block-based CPS, Rails integration, idiomatic Ruby |
+
 ### Supplementary Material
 
 | Resource | Description |
@@ -154,6 +161,8 @@ cd UnifyWeaver
 | 12 - PowerShell Target | Planned | `book-12-powershell-target/` |
 | 13 - Semantic Search | Complete | `book-13-semantic-search/` |
 | 14 - AI Training | Complete | `book-14-ai-training/` |
+| 15 - Perl Target | Complete | `book-15-perl-target/` |
+| 16 - Ruby Target | Complete | `book-16-ruby-target/` |
 | AWK Target | Complete (supplementary) | `book-awk-target/` |
 
 ## Progress Tracking
@@ -183,6 +192,10 @@ Track your progress through the series:
 **Advanced:**
 - [ ] Book 13: Semantic Search
 - [ ] Book 14: AI Training
+
+**Scripting:**
+- [ ] Book 15: Perl Target
+- [ ] Book 16: Ruby Target
 
 ## Additional Resources
 
