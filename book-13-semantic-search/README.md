@@ -134,6 +134,20 @@ This book covers building intelligent semantic agents using UnifyWeaver's Python
 - Internal shortcuts between related interfaces
 - Web traffic analogy and design rationale
 
+### [Chapter 15: Zero-Shot Path Mapping](15_zero_shot_path_mapping.md)
+- Materialized path format for hierarchical retrieval
+- Per-tree Procrustes transformations with softmax routing
+- Multi-account paths with cross-account boundaries
+- Fast inference (~30ms) with cached embeddings
+- Pearltrees use case: 93% Recall@1 with federated model
+
+### [Chapter 16: Bookmark Filing Assistant](16_bookmark_filing.md)
+- Semantic search + LLM combining for intelligent filing
+- Multi-LLM support: Claude CLI, Gemini CLI, OpenAI, Anthropic, Ollama
+- Merged tree output for hierarchical context
+- MCP server for tool integration
+- Slash command `/file-bookmark` for quick filing
+
 ## The Semantic Runtime
 
 The Python semantic runtime provides:
