@@ -213,6 +213,17 @@ By completing this book, you will be able to:
 - Code generation for wrappers
 - Performance comparison (50-100x vs pipe)
 
+**22. Cross-Runtime Python Bridges with RPyC** (`22_python_bridges_rpyc.md`)
+- Python.NET for .NET 6+ (dynamic execution)
+- CSnakes for .NET 8+ (source generators)
+- JPype for JVM (shared memory NumPy)
+- jpy for bi-directional Java↔Python
+- PyO3 for Rust (in-process)
+- PyCall.rb for Ruby (CPython embedding)
+- Rust FFI for Go/Node/Lua (universal bridge via cdylib)
+- Code generation for all bridges
+- Decision matrix and tested configurations
+
 ### Part 9: Reference (Chapters 13-14)
 
 **13. API Reference** (`13_api_reference.md`)
@@ -257,6 +268,7 @@ By completing this book, you will be able to:
 | 19 | WASM Visualization | Cytoscape.js, Chart.js, browser pipelines |
 | 20 | Pyodide & Python Variants | Numba, Cython, Nuitka, Pyodide, secure browser |
 | 21 | Janus In-Process | SWI-Prolog Python integration, NumPy, bidirectional |
+| 22 | Python Bridges + RPyC | Python.NET, CSnakes, JPype, jpy, PyO3, PyCall.rb, Rust FFI |
 
 ## Implementation Status
 
