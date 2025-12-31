@@ -156,6 +156,13 @@ This book covers building intelligent semantic agents using UnifyWeaver's Python
 - Mathematical foundations: product t-norm, probabilistic sum
 - Non-distributivity of fuzzy AND over OR
 
+### [Chapter 18: Fuzzy Logic Python Code Generation](18_fuzzy_python_codegen.md)
+- Compiling Prolog fuzzy expressions to Python
+- NumPy-based runtime with scalar and batch operations
+- Filter predicate translation to Python lambdas
+- Vectorized batch processing for efficiency
+- Bookmark filing integration example
+
 ## The Semantic Runtime
 
 The Python semantic runtime provides:
@@ -231,6 +238,8 @@ After completing this book, you'll be able to:
 - ✅ Run comprehensive integration tests for all federation features
 - ✅ Use fuzzy logic DSL for probabilistic scoring and boosting
 - ✅ Combine fuzzy AND/OR with hierarchical filters
+- ✅ Compile fuzzy expressions to Python with NumPy vectorization
+- ✅ Use batch operations for efficient processing of large datasets
 
 ## Integration Tests
 
