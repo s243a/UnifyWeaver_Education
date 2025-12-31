@@ -738,6 +738,73 @@ All tests passed!
 - Want single bridge library for multiple languages
 - Performance acceptable (FFI overhead + JSON serialization)
 
+### Node.js Full-Stack Example
+
+The `rust-ffi-node/` directory contains a complete full-stack application:
+
+**Architecture:**
+```
+Browser (React) → Express API → koffi (FFI) → Rust cdylib → PyO3 → TCP → RPyC → Python
+```
+
+**Security Features:**
+- **Module whitelisting**: Only `math`, `numpy`, `statistics` allowed
+- **Function whitelisting**: Only specific functions per module
+- **Input validation**: Type checking, depth limits, size limits
+- **Rate limiting**: 100 requests/minute
+- **Body size limits**: 100kb max
+
+**Running the Full-Stack Example:**
+
+```bash
+# 1. Build Rust library (if not already built)
+cd examples/python-bridges/rust-ffi-go
+cargo build --release
+cp target/release/librpyc_bridge.so ../rust-ffi-node/
+
+# 2. Start RPyC server
+python examples/rpyc-integration/rpyc_server.py &
+
+# 3. Install and start backend
+cd examples/python-bridges/rust-ffi-node
+npm install
+npm run dev  # Runs on http://localhost:3001
+
+# 4. Install and start frontend (in another terminal)
+cd frontend
+npm install
+npm start  # Opens http://localhost:3000
+```
+
+**API Endpoints:**
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/health` | GET | Health check with connection status |
+| `/connect` | POST | Connect to RPyC server |
+| `/disconnect` | POST | Disconnect from server |
+| `/python/call` | POST | Generic Python call (whitelisted) |
+| `/numpy/mean` | POST | Calculate mean of array |
+| `/numpy/std` | POST | Calculate standard deviation |
+| `/math/sqrt` | POST | Calculate square root |
+| `/math/pi` | GET | Get π constant |
+
+**TypeScript FFI with koffi:**
+
+```typescript
+import koffi from 'koffi';
+
+const lib = koffi.load('./librpyc_bridge.so');
+
+const rpyc_init = lib.func('void rpyc_init()');
+const rpyc_connect = lib.func('int rpyc_connect(const char* host, int port)');
+const rpyc_call = lib.func('const char* rpyc_call(const char* m, const char* f, const char* args)');
+
+rpyc_init();
+rpyc_connect('localhost', 18812);
+const result = rpyc_call('numpy', 'mean', JSON.stringify([[1,2,3,4,5]]));
+```
+
 ### API Reference
 
 | Function | Description |
@@ -752,7 +819,391 @@ All tests passed!
 
 ---
 
-## 22.12 Architecture Overview
+## 22.12 Declarative TypeScript Generation (Alternative Approach)
+
+The previous sections showed the **manual approach** - writing TypeScript code directly. This section introduces the **declarative approach** using Prolog glue modules that generate TypeScript code from declarative specifications.
+
+### Why Declarative?
+
+The manual approach requires writing:
+- Security validation code in TypeScript
+- Express routers by hand
+- React components manually
+- CSS styles for each component
+
+The declarative approach lets you:
+- Define **what** you want (not **how** to code it)
+- Generate consistent, well-structured TypeScript
+- Keep security rules in one place (Prolog)
+- Generate entire applications from a single spec
+
+### The Glue Modules
+
+UnifyWeaver provides four TypeScript glue modules:
+
+| Module | Purpose | Location |
+|--------|---------|----------|
+| `rpyc_security.pl` | Security whitelisting | `glue/rpyc_security.pl` |
+| `express_generator.pl` | Express API generation | `glue/express_generator.pl` |
+| `react_generator.pl` | React component generation | `glue/react_generator.pl` |
+| `full_pipeline.pl` | Full-stack app generation | `glue/full_pipeline.pl` |
+
+### 22.12.1 Declarative Security (rpyc_security.pl)
+
+**Old Approach (Manual TypeScript):**
+
+```typescript
+// security.ts - written by hand
+const ALLOWED_MODULES: Record<string, Set<string>> = {
+  'math': new Set(['sqrt', 'sin', 'cos', 'tan', 'log', 'exp', 'pow']),
+  'numpy': new Set(['mean', 'std', 'sum', 'min', 'max', 'array'])
+};
+
+export function isCallAllowed(module: string, func: string): boolean {
+  const funcs = ALLOWED_MODULES[module];
+  return funcs ? funcs.has(func) : false;
+}
+```
+
+**New Approach (Declarative Prolog):**
+
+```prolog
+% Define security rules declaratively
+rpyc_allowed_module(math, [sqrt, sin, cos, tan, log, log10, exp, pow, floor, ceil, abs]).
+rpyc_allowed_module(numpy, [mean, std, sum, min, max, median, var, array, zeros, ones]).
+rpyc_allowed_module(statistics, [mean, median, mode, stdev, variance, quantiles]).
+
+rpyc_allowed_attr(math, [pi, e, tau, inf, nan]).
+rpyc_allowed_attr(numpy, ['__version__']).
+```
+
+**Generate TypeScript:**
+
+```prolog
+?- use_module('src/unifyweaver/glue/rpyc_security').
+
+% Generate the whitelist module
+?- generate_typescript_whitelist(Code).
+% Code contains:
+%   export const ALLOWED_MODULES = {
+%     'math': new Set(['sqrt', 'sin', ...]),
+%     ...
+%   };
+%   export function isCallAllowed(module, func) { ... }
+
+% Generate validation middleware
+?- generate_express_security_middleware(Code).
+% Code contains rate limiter, timeout, validation middleware
+```
+
+**Query Security Rules:**
+
+```prolog
+% Check what's allowed
+?- is_call_allowed(math, sqrt, Result).
+Result = true.
+
+?- is_call_allowed(os, system, Result).
+Result = false.
+
+% Validate before generation
+?- validate_call(numpy, mean, ok).
+true.
+
+?- validate_call(subprocess, call, error(Msg)).
+Msg = "Blocked module: subprocess".
+```
+
+### 22.12.2 Declarative API Endpoints (express_generator.pl)
+
+**Old Approach (Manual Express routes):**
+
+```typescript
+// router.ts - written by hand
+import { Router } from 'express';
+
+const router = Router();
+
+router.post('/numpy/mean', async (req, res) => {
+  const { data } = req.body;
+  if (!Array.isArray(data)) {
+    return res.status(400).json({ error: 'Missing data array' });
+  }
+  try {
+    const result = await bridge.call('numpy', 'mean', [data]);
+    res.json({ success: true, result });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+```
+
+**New Approach (Declarative Prolog):**
+
+```prolog
+% Define API endpoints declaratively
+api_endpoint('/numpy/mean', [
+    method(post),
+    module(numpy),
+    function(mean),
+    input_schema([data: array(number)]),
+    output_schema(number),
+    description("Calculate arithmetic mean of an array")
+]).
+
+api_endpoint('/math/sqrt', [
+    method(post),
+    module(math),
+    function(sqrt),
+    input_schema([value: number]),
+    output_schema(number),
+    description("Calculate square root")
+]).
+
+api_endpoint('/math/pi', [
+    method(get),
+    module(math),
+    attr(pi),
+    output_schema(number),
+    description("Get mathematical constant pi")
+]).
+```
+
+**Generate Express Router:**
+
+```prolog
+?- use_module('src/unifyweaver/glue/express_generator').
+
+% Generate the complete router
+?- generate_express_router(python_api, Code).
+% Code contains validated Express routes for all endpoints
+
+% Query endpoints
+?- all_endpoints(Endpoints), length(Endpoints, Count).
+Count = 12.
+
+?- endpoints_for_module(numpy, NumpyEndpoints).
+NumpyEndpoints = ['/numpy/mean', '/numpy/std', '/numpy/sum', ...].
+```
+
+### 22.12.3 Declarative React Components (react_generator.pl)
+
+**Old Approach (Manual React components):**
+
+```tsx
+// NumpyCalculator.tsx - written by hand
+import React, { useState } from 'react';
+import styles from './NumpyCalculator.module.css';
+
+export const NumpyCalculator: React.FC = () => {
+  const [data, setData] = useState('');
+  const [result, setResult] = useState<number | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleMean = async () => {
+    setLoading(true);
+    const response = await fetch('/api/numpy/mean', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: data.split(',').map(Number) })
+    });
+    const json = await response.json();
+    setResult(json.result);
+    setLoading(false);
+  };
+
+  return (
+    <div className={styles.container}>
+      <h2>NumPy Calculator</h2>
+      <input value={data} onChange={e => setData(e.target.value)} />
+      <button onClick={handleMean}>Calculate Mean</button>
+      {result !== null && <div>{result}</div>}
+    </div>
+  );
+};
+```
+
+**New Approach (Declarative Prolog):**
+
+```prolog
+% Define UI components declaratively
+ui_component(numpy_calculator, [
+    type(form),
+    title("NumPy Calculator"),
+    inputs([
+        input(data, array(number), "Numbers", "Enter comma-separated numbers")
+    ]),
+    operations([
+        operation(mean, '/api/numpy/mean', "Mean", []),
+        operation(std, '/api/numpy/std', "Std Dev", []),
+        operation(sum, '/api/numpy/sum', "Sum", [])
+    ]),
+    result_display(number, [precision(6)])
+]).
+
+ui_component(math_constants, [
+    type(display),
+    title("Math Constants"),
+    constants([
+        constant(pi, '/api/math/pi', "π"),
+        constant(e, '/api/math/e', "e"),
+        constant(tau, '/api/math/tau', "τ")
+    ])
+]).
+```
+
+**Generate React Components:**
+
+```prolog
+?- use_module('src/unifyweaver/glue/react_generator').
+
+% Generate TSX component
+?- generate_react_component(numpy_calculator, TsxCode).
+% TsxCode contains full React.FC component with TypeScript
+
+% Generate CSS module
+?- generate_component_styles(numpy_calculator, CssCode).
+% CssCode contains .container, .button, .input, .result, .error classes
+
+% Generate custom hooks
+?- generate_api_hooks(python, HooksCode).
+% HooksCode contains useApiCall hook with loading/error state
+```
+
+### 22.12.4 Full Application Generation (full_pipeline.pl)
+
+The most powerful feature: generate a complete full-stack application from a single specification.
+
+**Old Approach:** Manually create 15-20 files, copy boilerplate, ensure consistency.
+
+**New Approach (Single Prolog Specification):**
+
+```prolog
+% Define entire application declaratively
+application(python_bridge_demo, [
+    backend([
+        server(express, [port(3001)]),
+        rpyc_server([host(localhost), port(18812)]),
+        security([whitelist(rpyc_security), rate_limit(100)])
+    ]),
+    api([
+        include_endpoints([math_endpoints, numpy_endpoints, statistics_endpoints]),
+        prefix('/api')
+    ]),
+    frontend([
+        framework(react),
+        components([numpy_calculator, math_calculator, math_constants]),
+        theme(modern)
+    ]),
+    deployment([
+        docker([node_version('18'), python_version('3.10')]),
+        port(3000)
+    ])
+]).
+```
+
+**Generate Complete Application:**
+
+```prolog
+?- use_module('src/unifyweaver/glue/full_pipeline').
+
+% Generate all files
+?- generate_application(python_bridge_demo, Files).
+Files = [
+    file('package.json', '...'),
+    file('tsconfig.json', '...'),
+    file('src/server/index.ts', '...'),
+    file('src/server/router.ts', '...'),
+    file('src/server/whitelist.ts', '...'),
+    file('src/server/validator.ts', '...'),
+    file('src/server/middleware.ts', '...'),
+    file('src/App.tsx', '...'),
+    file('src/components/NumpyCalculator.tsx', '...'),
+    file('src/components/MathCalculator.tsx', '...'),
+    file('src/components/MathConstants.tsx', '...'),
+    file('src/hooks/useApiCall.ts', '...'),
+    file('src/styles/*.module.css', '...'),
+    file('Dockerfile', '...'),
+    file('docker-compose.yml', '...'),
+    file('README.md', '...')
+].
+```
+
+**Write to Disk:**
+
+```prolog
+% Generate and write all files
+?- generate_application(python_bridge_demo, Files),
+   forall(member(file(Path, Content), Files),
+          (format("Writing: ~w~n", [Path]),
+           write_file(Path, Content))).
+```
+
+### 22.12.5 Comparison: Manual vs Declarative
+
+| Aspect | Manual Approach | Declarative Approach |
+|--------|-----------------|----------------------|
+| **Effort** | Write each file by hand | Define spec, generate all |
+| **Consistency** | Depends on developer | Guaranteed by generator |
+| **Maintainability** | Update each file separately | Update spec, regenerate |
+| **Security rules** | Scattered across files | Centralized in Prolog |
+| **Customization** | Full control | Extensible templates |
+| **Learning curve** | Know TypeScript/React | Know Prolog specs |
+
+### When to Use Each Approach
+
+**Use Manual Approach when:**
+- Building highly custom UI
+- Need fine-grained control
+- Prototyping one-off components
+- Team doesn't know Prolog
+
+**Use Declarative Approach when:**
+- Building multiple similar applications
+- Want consistent security enforcement
+- Need to maintain many endpoints
+- Integrating with UnifyWeaver pipelines
+- Want single source of truth
+
+### Running the Integration Tests
+
+The glue modules include comprehensive tests:
+
+```bash
+swipl -g "consult('tests/integration/glue/test_typescript_glue'), run_tests, halt"
+```
+
+Expected output:
+```
+TypeScript Glue Integration Tests
+========================================
+
+--- RPyC Security Validation ---
+  [PASS] math.sqrt is allowed
+  [PASS] os.system is denied
+  ...
+
+--- Express Endpoint Queries ---
+  [PASS] Has more than 5 endpoints (12 > 5)
+  ...
+
+--- React Component Generation ---
+  [PASS] Component code length > 3000
+  ...
+
+--- Full Pipeline File Generation ---
+  [PASS] Generates more than 15 files (20 > 15)
+  ...
+
+========================================
+Results: 111/111 tests passed
+All tests passed!
+========================================
+```
+
+---
+
+## 22.13 Architecture Overview
 
 All bridges follow a similar architecture pattern:
 
@@ -785,7 +1236,7 @@ All bridges follow a similar architecture pattern:
 
 ---
 
-## 22.13 Decision Matrix
+## 22.14 Decision Matrix
 
 | Scenario | Recommended Bridge |
 |----------|--------------------|
@@ -798,12 +1249,13 @@ All bridges follow a similar architecture pattern:
 | Rust project, in-process Python | **PyO3** |
 | Ruby project | **PyCall.rb** |
 | Go project (no CGO alternatives) | **Rust FFI** |
-| Node.js project | **Rust FFI** |
+| Node.js project | **Rust FFI + koffi** |
+| Full-stack JS with Python ML | **Rust FFI + Express + React** |
 | Multi-language FFI from single lib | **Rust FFI** |
 
 ---
 
-## 22.14 Tested Configurations
+## 22.15 Tested Configurations
 
 These configurations have been verified (2025-12-29):
 
@@ -815,10 +1267,11 @@ These configurations have been verified (2025-12-29):
 | PyO3 | Rust/Cargo | 3.8.10 | math, NumPy |
 | PyCall.rb | Ruby 3.0+ | 3.8.10 | math, NumPy |
 | Rust FFI (Go) | Go 1.21+ | 3.8.10 | math, numpy.mean, math.pi |
+| Rust FFI (Node.js) | Node.js 18+ | 3.8.10 | math, numpy.mean, math.pi |
 
 ---
 
-## 22.15 Example Projects
+## 22.16 Example Projects
 
 See `examples/python-bridges/` for complete working examples:
 
@@ -846,17 +1299,26 @@ examples/python-bridges/
 ├── pycall-rb/
 │   ├── rpyc_client.rb
 │   └── Gemfile
-└── rust-ffi-go/
-    ├── src/lib.rs
-    ├── Cargo.toml
-    ├── rpyc_bridge.h
-    ├── main.go
+├── rust-ffi-go/
+│   ├── src/lib.rs
+│   ├── Cargo.toml
+│   ├── rpyc_bridge.h
+│   ├── main.go
+│   └── README.md
+└── rust-ffi-node/
+    ├── src/
+    │   ├── rpyc_bridge.ts
+    │   ├── server.ts
+    │   └── test.ts
+    ├── frontend/
+    │   └── src/App.tsx
+    ├── package.json
     └── README.md
 ```
 
 ---
 
-## 22.16 Exercises
+## 22.17 Exercises
 
 ### Exercise 1: Python.NET NumPy Pipeline
 
@@ -898,9 +1360,26 @@ Create a pipeline using multiple bridges:
 3. Results stored in database
 4. Use cross_runtime_pipeline.pl for orchestration
 
+### Exercise 6: Node.js Full-Stack Application
+
+Build a full-stack JavaScript application:
+1. Run the rust-ffi-node example
+2. Add a new API endpoint for `statistics.median`
+3. Update the React UI to include median calculation
+4. Add the new function to the security whitelist
+5. Test with various input arrays
+
+### Exercise 7: Declarative Security Rules
+
+Define security rules in Prolog:
+1. Create whitelisting rules: `allowed_module(Module, Functions)`
+2. Generate TypeScript validation code from these rules
+3. Compare with manual approach in server.ts
+4. Consider how preferences/firewall could control this
+
 ---
 
-## 22.17 Summary
+## 22.18 Summary
 
 | Concept | Key Point |
 |---------|-----------|
@@ -911,6 +1390,7 @@ Create a pipeline using multiple bridges:
 | **PyO3** | Rust-native CPython embedding |
 | **PyCall.rb** | Ruby CPython embedding |
 | **Rust FFI** | Universal bridge for Go/Node/Lua via cdylib |
+| **Node.js + React** | Full-stack JS with security whitelisting |
 | **RPyC** | Live object proxies over network |
 | **CPython required** | Reimplementations (IronPython, Jython) won't work |
 | **Auto-detection** | `detect_all_bridges/1` finds available bridges |
@@ -919,6 +1399,10 @@ Create a pipeline using multiple bridges:
 | **Firewall** | Deny/allow bridges via `rule_firewall/2` |
 | **Fallback chains** | `[fallback([jpy, jpype])]` for resilience |
 | **Code generation** | `generate_*_rpyc_client/2` for all bridges |
+| **Declarative security** | `rpyc_security.pl` - whitelisting in Prolog |
+| **Declarative API** | `express_generator.pl` - endpoints from specs |
+| **Declarative UI** | `react_generator.pl` - components from specs |
+| **Full-stack generation** | `full_pipeline.pl` - 20 files from one spec |
 
 ---
 
