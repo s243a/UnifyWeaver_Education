@@ -148,6 +148,14 @@ This book covers building intelligent semantic agents using UnifyWeaver's Python
 - MCP server for tool integration
 - Slash command `/file-bookmark` for quick filing
 
+### [Chapter 17: Fuzzy Logic DSL](17_fuzzy_logic_dsl.md)
+- Prolog-based fuzzy logic for probabilistic scoring
+- Core operations: f_and, f_or, f_dist_or, f_union, f_not
+- Optional operator syntax: `&` for AND, `v` for OR
+- Hierarchical filters: child_of, descendant_of, near
+- Mathematical foundations: product t-norm, probabilistic sum
+- Non-distributivity of fuzzy AND over OR
+
 ## The Semantic Runtime
 
 The Python semantic runtime provides:
@@ -221,6 +229,8 @@ After completing this book, you'll be able to:
 - ✅ Tune HNSW M parameter for recall vs memory tradeoffs
 - ✅ Protect against adversarial nodes (outlier rejection, collision detection, trust)
 - ✅ Run comprehensive integration tests for all federation features
+- ✅ Use fuzzy logic DSL for probabilistic scoring and boosting
+- ✅ Combine fuzzy AND/OR with hierarchical filters
 
 ## Integration Tests
 
