@@ -358,6 +358,54 @@ react_page(dashboard, [
 ]).
 ```
 
+## Layout System
+
+The visualization modules integrate with a declarative layout system for composing UIs.
+
+### Outer Layouts (Container Positioning)
+
+```prolog
+:- use_module('src/unifyweaver/glue/layout_generator').
+
+% Define a sidebar + content layout
+layout(my_dashboard, grid, [
+    areas([["sidebar", "main"]]),
+    columns(["320px", "1fr"]),
+    gap("1rem")
+]).
+
+% Place components in regions
+place(my_dashboard, sidebar, [controls]).
+place(my_dashboard, main, [chart]).
+
+% Generate with layout
+?- generate_graph_with_layout(family_tree, sidebar_content, Code).
+?- generate_curve_with_layout(trig_demo, dashboard, Code).
+```
+
+### Subplot Layouts (Internal Component Grids)
+
+For composite components with multiple charts/graphs:
+
+```prolog
+% Define a 2x2 subplot grid
+subplot_layout(comparison_demo, grid, [rows(2), cols(2)]).
+
+% Place content in cells
+subplot_content(comparison_demo, pos(1,1), [curve(sine), title("Sine")]).
+subplot_content(comparison_demo, pos(1,2), [curve(cosine), title("Cosine")]).
+subplot_content(comparison_demo, pos(2,1), [curve(quadratic), title("Quadratic")]).
+subplot_content(comparison_demo, pos(2,2), [curve(exponential), title("Exp")]).
+
+% Generate - target-aware!
+?- generate_subplot_css(comparison_demo, CSS).      % Web: nested CSS grid
+?- generate_subplot_matplotlib(comparison_demo, Code). % Python: native subplots
+```
+
+The layout system is target-aware:
+- **Web targets**: Synthesizes nested CSS grids with multiple chart instances
+- **Matplotlib**: Uses native `plt.subplots()` for efficient multi-plot figures
+
 ## Testing
 
 The integration tests verify all visualization glue modules:
@@ -367,7 +415,7 @@ The integration tests verify all visualization glue modules:
 swipl -g "run_tests" -t halt tests/integration/glue/test_visualization_glue.pl
 
 # Expected output:
-# Results: 49/49 tests passed
+# Results: 75/75 tests passed
 # All tests passed!
 ```
 
@@ -378,6 +426,9 @@ swipl -g "run_tests" -t halt tests/integration/glue/test_visualization_glue.pl
 | graph_generator | 16 | Node/edge queries, component generation, CSS, config |
 | curve_plot_generator | 17 | Curve queries, evaluation, component generation |
 | matplotlib_generator | 16 | Curve queries, code generation, NumPy expressions |
+| layout_generator | 8 | Default layouts, themes, CSS/JSX generation |
+| layout_integration | 8 | Graph/curve with layout patterns |
+| subplot_layout | 10 | Subplot CSS, JSX, matplotlib generation |
 
 ## Best Practices
 
@@ -427,9 +478,11 @@ The visualization glue modules provide:
 
 - **Declarative definitions** - Define graphs and plots in Prolog
 - **Multi-target generation** - React/TypeScript for web, Python for data science
+- **Layout system** - Declarative CSS Grid/Flexbox layouts with subplot support
+- **Target-aware subplots** - Native matplotlib subplots or synthesized CSS grids
 - **Runtime evaluation** - Evaluate curves programmatically
 - **Consistent patterns** - Same workflow as other UnifyWeaver glue modules
-- **Full test coverage** - 49 integration tests
+- **Full test coverage** - 75 integration tests
 
 ## What's Next?
 
