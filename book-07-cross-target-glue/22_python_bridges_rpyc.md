@@ -1201,6 +1201,86 @@ All tests passed!
 ========================================
 ```
 
+### 22.12.6 Preferences and Firewall Integration
+
+The glue modules integrate with UnifyWeaver's preference and firewall systems for context-aware code generation.
+
+**Configuration Module:** `glue/typescript_glue_config.pl`
+
+**Setting Generation Context:**
+
+```prolog
+?- use_module('src/unifyweaver/glue/typescript_glue_config').
+
+% Set context for all subsequent generation
+?- set_generation_context(production).
+
+% Or use context temporarily
+?- with_context(testing, generate_application(my_app, Files)).
+```
+
+**Context-Based Defaults:**
+
+| Context | RPyC Timeout | Retry Count | Express Morgan | Allowed Modules |
+|---------|--------------|-------------|----------------|-----------------|
+| production | 60000ms | 5 | combined | math, numpy, statistics |
+| development | 5000ms | 1 | dev | + pandas, matplotlib |
+| testing | 1000ms | 1 | dev | + unittest, pytest |
+
+**Getting Configuration with Preferences:**
+
+```prolog
+% Get RPyC config with defaults and context applied
+?- get_rpyc_config(Config).
+Config = [host(localhost), port(18812), timeout(30000), ...].
+
+% Override specific values
+?- get_rpyc_config([port(19000), timeout(5000)], Config).
+
+% Get Express config
+?- get_express_config(Config).
+Config = [port(3001), cors_enabled(true), ...].
+```
+
+**Context-Aware Application Generation:**
+
+```prolog
+% Generate with production settings
+?- generate_application(python_bridge_demo, [context(production)], Files).
+
+% Generate with development settings (more lenient)
+?- generate_application(python_bridge_demo, [context(development)], Files).
+```
+
+**Firewall-Aware Validation:**
+
+```prolog
+% Validate using both local rules and firewall
+?- validate_with_firewall(math, sqrt, Result).
+Result = ok.
+
+?- validate_with_firewall(os, system, Result).
+Result = error(module_not_allowed(os)).
+```
+
+**Firewall Implications:**
+
+The config module registers default firewall implications:
+
+```prolog
+% No Python → deny RPyC services
+firewall_implies_default(no_python_available,
+                        denied(service(typescript, rpyc(_)))).
+
+% Offline mode → deny RPyC connections
+firewall_implies_default(mode(offline),
+                        denied(service(typescript, rpyc(_)))).
+
+% Strict security → require module whitelist
+firewall_implies_default(security_policy(strict),
+                        require_python_module_whitelist).
+```
+
 ---
 
 ## 22.13 Architecture Overview
@@ -1403,6 +1483,8 @@ Define security rules in Prolog:
 | **Declarative API** | `express_generator.pl` - endpoints from specs |
 | **Declarative UI** | `react_generator.pl` - components from specs |
 | **Full-stack generation** | `full_pipeline.pl` - 20 files from one spec |
+| **Context-aware config** | `typescript_glue_config.pl` - preferences integration |
+| **Generation contexts** | production, development, testing modes |
 
 ---
 
