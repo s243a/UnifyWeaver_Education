@@ -224,6 +224,14 @@ By completing this book, you will be able to:
 - Code generation for all bridges
 - Decision matrix and tested configurations
 
+**23. Declarative Visualization Glue** (`23_visualization_glue.md`)
+- Graph visualization with Cytoscape.js (React/TypeScript)
+- Curve plotting with Chart.js (React/TypeScript)
+- Python matplotlib code generation
+- NumPy expression generation
+- Runtime curve evaluation
+- Integration with Express and React generators
+
 ### Part 9: Reference (Chapters 13-14)
 
 **13. API Reference** (`13_api_reference.md`)
@@ -269,6 +277,7 @@ By completing this book, you will be able to:
 | 20 | Pyodide & Python Variants | Numba, Cython, Nuitka, Pyodide, secure browser |
 | 21 | Janus In-Process | SWI-Prolog Python integration, NumPy, bidirectional |
 | 22 | Python Bridges + RPyC | Python.NET, CSnakes, JPype, jpy, PyO3, PyCall.rb, Rust FFI |
+| 23 | Visualization Glue | Cytoscape.js, Chart.js, matplotlib code generation |
 
 ## Implementation Status
 
