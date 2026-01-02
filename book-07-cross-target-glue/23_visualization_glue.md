@@ -9,14 +9,26 @@ This documentation is dual-licensed under MIT and CC-BY-4.0.
 
 **Generating React Components and Python Plots from Prolog Specifications**
 
-This chapter covers six declarative glue modules that generate visualization code:
+This chapter covers the declarative glue modules that generate visualization code:
 
+**Core Visualization Modules:**
 - **graph_generator.pl** - Cytoscape.js graph visualization with React/TypeScript
 - **curve_plot_generator.pl** - Chart.js curve plotting with React/TypeScript
 - **matplotlib_generator.pl** - Python matplotlib code generation
 - **heatmap_generator.pl** - Heatmap visualization with React and seaborn
 - **treemap_generator.pl** - Hierarchical treemap visualization with React and Plotly
 - **plot3d_generator.pl** - 3D surface, scatter, and line plots with Plotly.js
+
+**Layout & Controls:**
+- **layout_generator.pl** - Declarative CSS Grid/Flexbox layouts and controls
+- **responsive_generator.pl** - Responsive breakpoints and mobile support
+- **accessibility_generator.pl** - ARIA attributes, keyboard navigation, color blindness
+- **animation_generator.pl** - CSS keyframes, sequences, and transitions
+- **interaction_generator.pl** - Pan/zoom, brush selection, tooltips, drill-down
+
+**Export & Preview:**
+- **export_generator.pl** - SVG, PNG, PDF, JSON, CSV export functionality
+- **live_preview_generator.pl** - Vite dev server, hot-reload, state synchronization
 
 ## Overview
 
@@ -794,6 +806,352 @@ line3d_point(helix, 2, 0.309, 0.951, 0.4).
 ?- generate_plot3d_plotly(wave_surface, PyCode).
 ```
 
+## Export System
+
+The export system provides declarative specifications for exporting visualizations to various formats including SVG, PNG, PDF, JSON, and CSV.
+
+### Defining Export Configurations
+
+```prolog
+:- use_module('src/unifyweaver/glue/export_generator').
+
+% Define export configuration for a chart type
+export_config(my_chart, [
+    formats([svg, png, pdf]),
+    filename_template("chart-{date}-{title}"),
+    default_size(800, 600),
+    scale(2),
+    background(white),
+    include_styles(true)
+]).
+
+% Chart-specific export configs are predefined
+% line_chart, bar_chart, scatter_plot, pie_chart, heatmap, network_graph, plot3d
+```
+
+### Supported Export Formats
+
+| Format | Extension | Description | Use Case |
+|--------|-----------|-------------|----------|
+| `svg` | `.svg` | Scalable Vector Graphics | Web embedding, printing |
+| `png` | `.png` | PNG Image (rasterized) | Screenshots, social media |
+| `pdf` | `.pdf` | PDF Document | Reports, presentations |
+| `json` | `.json` | JSON Data | Data interchange, APIs |
+| `csv` | `.csv` | CSV Data | Spreadsheets, analysis |
+
+### Code Generation
+
+```prolog
+% Generate complete export component
+?- generate_export_component(my_chart, Component).
+
+% Generate export hook for React
+?- generate_export_hook(my_chart, Hook).
+
+% Generate individual format exports
+?- generate_svg_export(my_chart, SVGCode).
+?- generate_png_export(my_chart, PNGCode).
+?- generate_pdf_export(my_chart, PDFCode).
+
+% Generate export menu with buttons
+?- generate_export_menu(my_chart, MenuJSX).
+
+% Generate export CSS
+?- generate_export_css(CSS).
+```
+
+### Generated Export Hook
+
+```typescript
+// Generated: useExport.ts
+export const useExport = (
+  chartRef: RefObject<HTMLDivElement | SVGSVGElement>,
+  data?: unknown[],
+  title?: string
+) => {
+  const [isExporting, setIsExporting] = useState(false);
+
+  const exportToSVG = async () => {
+    // SVG serialization and download
+  };
+
+  const exportToPNG = async () => {
+    // Canvas rendering with scale factor
+  };
+
+  const exportToPDF = async () => {
+    // jsPDF document generation
+  };
+
+  const exportToJSON = async () => {
+    // JSON serialization with formatting
+  };
+
+  const exportToCSV = async () => {
+    // CSV generation from data array
+  };
+
+  return { exportToSVG, exportToPNG, exportToPDF, exportToJSON, exportToCSV, isExporting };
+};
+```
+
+### Export Menu Component
+
+```typescript
+// Generated: ExportControls.tsx
+export const ExportControls: React.FC<ExportProps> = ({ chartRef, data, title }) => {
+  const { exportToSVG, exportToPNG, exportToPDF, isExporting } = useExport(chartRef, data, title);
+
+  return (
+    <div className="export-menu">
+      <button onClick={exportToSVG} disabled={isExporting}>Export SVG</button>
+      <button onClick={exportToPNG} disabled={isExporting}>Export PNG</button>
+      <button onClick={exportToPDF} disabled={isExporting}>Export PDF</button>
+    </div>
+  );
+};
+```
+
+### PNG Export with Scaling
+
+PNG exports support scale factors for high-DPI displays:
+
+```prolog
+export_config(high_res_chart, [
+    formats([png]),
+    default_size(800, 600),
+    scale(4),              % 4x scale for 3200x2400 output
+    background(white)
+]).
+```
+
+### PDF Export with jsPDF
+
+PDF generation uses jsPDF library:
+
+```prolog
+export_format(pdf, [
+    mime_type('application/pdf'),
+    extension('.pdf'),
+    description("PDF Document"),
+    vector(true),
+    library(jspdf)
+]).
+```
+
+## Live Preview System
+
+The live preview system provides a development environment with hot-reload capabilities for real-time visualization prototyping.
+
+### Dev Server Configuration
+
+```prolog
+:- use_module('src/unifyweaver/glue/live_preview_generator').
+
+% Configure development server
+dev_server_config(my_project, [
+    port(3000),
+    host('localhost'),
+    hot_reload(true),
+    open_browser(true),
+    watch_paths(['src/**/*.pl', 'src/**/*.ts', 'src/**/*.tsx']),
+    ignore_paths(['node_modules', 'dist', '.git']),
+    debounce_ms(100),
+    https(false)
+]).
+
+% Visualization preview configuration
+dev_server_config(visualization_preview, [
+    port(3001),
+    hot_reload(true),
+    watch_paths([
+        'src/unifyweaver/glue/**/*.pl',
+        'src/**/*.ts',
+        'src/**/*.tsx'
+    ]),
+    proxy([
+        rule('/api', 'http://localhost:5000')
+    ])
+]).
+```
+
+### Preview Layout Configurations
+
+```prolog
+% Split layout with code editor
+preview_config(chart_preview, [
+    layout(split),
+    editor_position(left),
+    editor_width('35%'),
+    preview_width('65%'),
+    show_console(true),
+    show_props_panel(true),
+    show_data_panel(true),
+    theme(dark),
+    auto_refresh(true),
+    controls([
+        data_editor,
+        props_inspector,
+        export_options
+    ])
+]).
+
+% Graph preview with bottom editor
+preview_config(graph_preview, [
+    layout(split),
+    editor_position(bottom),
+    editor_height('30%'),
+    preview_height('70%'),
+    show_console(true),
+    controls([
+        node_inspector,
+        edge_editor,
+        layout_selector
+    ])
+]).
+```
+
+### Code Generation
+
+```prolog
+% Generate Node.js dev server
+?- generate_dev_server(my_project, ServerCode).
+
+% Generate Vite configuration
+?- generate_vite_config(my_project, ViteConfig).
+
+% Generate preview application
+?- generate_preview_app(my_chart, AppCode).
+
+% Generate hot-reload React hook
+?- generate_hot_reload_hook(HookCode).
+
+% Generate state synchronization hook
+?- generate_state_sync_hook(SyncHook).
+
+% Generate preview wrapper component
+?- generate_preview_wrapper(my_chart, WrapperCode).
+
+% Generate code editor component
+?- generate_code_editor(my_chart, EditorCode).
+
+% Generate preview CSS with themes
+?- generate_preview_css(CSS).
+```
+
+### Hot Reload Hook
+
+```typescript
+// Generated: useHotReload.ts
+export const useHotReload = (onReload?: () => void) => {
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+
+  useEffect(() => {
+    const ws = new WebSocket(`ws://${window.location.host}/__hmr`);
+
+    ws.onopen = () => setIsConnected(true);
+    ws.onclose = () => setIsConnected(false);
+
+    ws.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      if (message.type === 'reload') {
+        setLastUpdate(new Date());
+        onReload?.();
+      }
+    };
+
+    return () => ws.close();
+  }, [onReload]);
+
+  return { lastUpdate, isConnected };
+};
+```
+
+### State Synchronization Hook
+
+```typescript
+// Generated: useStateSync.ts
+export const useStateSync = <T>(key: string, initialState: T) => {
+  const [state, setState] = useState<T>(() => {
+    const saved = sessionStorage.getItem(key);
+    return saved ? JSON.parse(saved) : initialState;
+  });
+
+  useEffect(() => {
+    sessionStorage.setItem(key, JSON.stringify(state));
+  }, [key, state]);
+
+  return [state, setState] as const;
+};
+```
+
+### Preview App Structure
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Preview App                                      [Theme] ◐ │
+├──────────────────────┬──────────────────────────────────────┤
+│                      │                                      │
+│   Code Editor        │      Live Preview                    │
+│                      │                                      │
+│   ┌──────────────┐   │   ┌────────────────────────────┐    │
+│   │ Prolog spec  │   │   │                            │    │
+│   │ ------------ │   │   │     [Visualization]        │    │
+│   │ curve(...)   │   │   │                            │    │
+│   │ plot_spec(.) │   │   │                            │    │
+│   └──────────────┘   │   └────────────────────────────┘    │
+│                      │                                      │
+├──────────────────────┴──────────────────────────────────────┤
+│  Props Panel │ Console │ Data Editor        [Export ▼]      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Preview Themes
+
+The preview system supports dark and light themes:
+
+```prolog
+preview_config(my_preview, [
+    theme(dark),   % or theme(light)
+    ...
+]).
+```
+
+Generated CSS includes both themes:
+
+```css
+/* Dark theme */
+.preview-container[data-theme="dark"] {
+  --bg-primary: #1a1a2e;
+  --bg-secondary: #16213e;
+  --text-primary: #e8e8e8;
+  --border-color: #2d3748;
+}
+
+/* Light theme */
+.preview-container[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --text-primary: #1a202c;
+  --border-color: #e2e8f0;
+}
+```
+
+### WebSocket Hot-Reload Architecture
+
+```
+┌────────────────┐         ┌─────────────────┐         ┌──────────────┐
+│  File Watcher  │ ──────▶ │   Dev Server    │ ──────▶ │   Browser    │
+│   (Chokidar)   │ change  │   (Express +    │   WS    │  (Preview    │
+│                │         │   WebSocket)    │ reload  │   App)       │
+└────────────────┘         └─────────────────┘         └──────────────┘
+       │                          │                          │
+       ▼                          ▼                          ▼
+  .pl, .ts, .tsx            Vite middleware           React re-render
+  file changes              + HMR endpoint            with new props
+```
+
 ## Testing
 
 The integration tests verify all visualization glue modules:
@@ -803,7 +1161,7 @@ The integration tests verify all visualization glue modules:
 swipl -g "run_tests" -t halt tests/integration/glue/test_visualization_glue.pl
 
 # Expected output:
-# Results: 128/128 tests passed
+# Results: 246/246 tests passed
 # All tests passed!
 ```
 
@@ -822,6 +1180,12 @@ swipl -g "run_tests" -t halt tests/integration/glue/test_visualization_glue.pl
 | heatmap_generator | 9 | Specs, cells, dimensions, React/matplotlib |
 | treemap_generator | 9 | Specs, nodes, hierarchy, React/Plotly |
 | plot3d_generator | 11 | Surfaces, scatter, lines, React/matplotlib |
+| responsive_generator | 15 | Breakpoints, hooks, containers, touch |
+| accessibility_generator | 16 | ARIA, keyboard nav, color blindness |
+| animation_generator | 13 | Keyframes, sequences, transitions |
+| interaction_generator | 25 | Pan/zoom, brush, tooltips, drill-down |
+| export_generator | 22 | SVG/PNG/PDF/JSON/CSV export, hooks, menus |
+| live_preview_generator | 23 | Dev server, hot-reload, state sync, preview app |
 
 ## Best Practices
 
@@ -876,8 +1240,14 @@ The visualization glue modules provide:
 - **Control system** - Declarative UI controls (sliders, selects, checkboxes, etc.)
 - **Wired components** - Controls automatically connected to visualization state
 - **Runtime evaluation** - Evaluate curves programmatically
+- **Responsive design** - Breakpoint-based layouts, mobile/tablet/desktop support
+- **Accessibility** - ARIA attributes, keyboard navigation, screen reader support
+- **Animation system** - CSS keyframes, sequences, transition orchestration
+- **Interactions** - Pan/zoom, brush selection, tooltips, drill-down navigation
+- **Export capabilities** - SVG, PNG, PDF, JSON, CSV with configurable options
+- **Live preview** - Vite dev server with WebSocket hot-reload
 - **Consistent patterns** - Same workflow as other UnifyWeaver glue modules
-- **Full test coverage** - 128 integration tests
+- **Full test coverage** - 246 integration tests across all modules
 
 ## What's Next?
 
@@ -885,3 +1255,5 @@ The visualization glue modules provide:
 - Use matplotlib scripts for data analysis workflows
 - Combine with RPyC bridges for remote visualization
 - Extend with custom curve types or graph layouts
+- Set up live preview for rapid visualization prototyping
+- Export visualizations for reports and presentations

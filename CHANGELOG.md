@@ -12,9 +12,34 @@ All notable changes to UnifyWeaver will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 2025-12-25
+## [Unreleased] - 2026-01-02
 
 ### Added
+
+#### Visualization Glue Enhancements (Chapter 23)
+- **Export System** - Declarative export specifications for visualizations
+  - SVG export with style serialization
+  - PNG export with configurable scale factors (2x, 4x for high-DPI)
+  - PDF export using jsPDF library
+  - JSON and CSV data export
+  - `export_config/2` for component-specific settings
+  - `generate_export_component/2`, `generate_export_hook/2`, `generate_export_menu/2`
+  - Pre-configured exports for line_chart, bar_chart, scatter_plot, pie_chart, heatmap, network_graph, plot3d
+
+- **Live Preview System** - Development environment with hot-reload
+  - Vite-based development server with Express
+  - WebSocket hot-reload notifications (Chokidar file watching)
+  - `useHotReload` hook for React components
+  - `useStateSync` hook for session storage persistence
+  - Split-pane preview layout (editor + visualization)
+  - Dark/light theme support
+  - `dev_server_config/2` for server settings
+  - `preview_config/2` for UI layout
+  - `generate_dev_server/2`, `generate_vite_config/2`, `generate_preview_app/2`
+
+- **Updated test coverage** - 246 integration tests (was 128)
+  - 22 tests for export_generator
+  - 23 tests for live_preview_generator
 
 #### Rust Target Enhancements
 - **Statistical aggregations** - `stddev`, `median`, `percentile(N)` functions

@@ -231,6 +231,8 @@ By completing this book, you will be able to:
 - NumPy expression generation
 - Runtime curve evaluation
 - Integration with Express and React generators
+- **Export system** - SVG, PNG, PDF, JSON, CSV export with scaling and templates
+- **Live preview** - Vite dev server with WebSocket hot-reload and state sync
 
 ### Part 9: Reference (Chapters 13-14)
 
@@ -277,7 +279,7 @@ By completing this book, you will be able to:
 | 20 | Pyodide & Python Variants | Numba, Cython, Nuitka, Pyodide, secure browser |
 | 21 | Janus In-Process | SWI-Prolog Python integration, NumPy, bidirectional |
 | 22 | Python Bridges + RPyC | Python.NET, CSnakes, JPype, jpy, PyO3, PyCall.rb, Rust FFI |
-| 23 | Visualization Glue | Cytoscape.js, Chart.js, matplotlib code generation |
+| 23 | Visualization Glue | Cytoscape.js, Chart.js, matplotlib, export, live preview |
 
 ## Implementation Status
 
