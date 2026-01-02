@@ -29,6 +29,17 @@ This chapter covers the declarative glue modules that generate visualization cod
 **Export & Preview:**
 - **export_generator.pl** - SVG, PNG, PDF, JSON, CSV export functionality
 - **live_preview_generator.pl** - Vite dev server, hot-reload, state synchronization
+- **data_binding_generator.pl** - Reactive data binding, computed properties, WebSocket sync
+
+**Theme & Templates:**
+- **theme_generator.pl** - Centralized themes with CSS custom properties
+- **animation_presets.pl** - Curated animation library (entry, exit, attention, chart)
+- **template_library.pl** - Pre-built dashboard and report templates
+
+**Performance:**
+- **lazy_loading_generator.pl** - Pagination, infinite scroll, chunked loading
+- **virtual_scroll_generator.pl** - Efficient rendering for large lists/tables/grids
+- **webworker_generator.pl** - Background data processing and chart calculations
 
 ## Overview
 
@@ -1152,6 +1163,532 @@ Generated CSS includes both themes:
   file changes              + HMR endpoint            with new props
 ```
 
+## Theme System
+
+The theme generator provides centralized theme management with CSS custom properties and theme inheritance.
+
+### Defining Themes
+
+```prolog
+:- use_module('src/unifyweaver/glue/theme_generator').
+
+% Define a complete theme
+theme(my_app, [
+    name("My App Theme"),
+    colors([
+        primary('#3b82f6'),
+        secondary('#10b981'),
+        background('#ffffff'),
+        surface('#f8fafc'),
+        text_primary('#1a202c'),
+        text_secondary('#64748b'),
+        border('#e2e8f0')
+    ]),
+    typography([
+        font_family("Inter, sans-serif"),
+        font_size_base("16px"),
+        line_height_base(1.5)
+    ]),
+    spacing([
+        xs("0.25rem"),
+        sm("0.5rem"),
+        md("1rem"),
+        lg("1.5rem"),
+        xl("2rem")
+    ]),
+    borders([
+        radius_sm("0.25rem"),
+        radius_md("0.5rem"),
+        radius_lg("1rem")
+    ])
+]).
+```
+
+### Theme Inheritance
+
+Create theme variants by extending base themes:
+
+```prolog
+% Dark theme extends light theme
+theme(my_app_dark, [
+    extends(my_app),
+    colors([
+        background('#1a1a2e'),
+        surface('#16213e'),
+        text_primary('#e8e8e8'),
+        text_secondary('#a0aec0'),
+        border('#2d3748')
+    ])
+]).
+```
+
+### Code Generation
+
+```prolog
+% Generate CSS custom properties
+?- generate_theme_css(my_app, CSS).
+
+% Generate theme toggle component
+?- generate_theme_toggle([light, dark], ToggleCode).
+
+% Generate theme provider React component
+?- generate_theme_provider(my_app, ProviderCode).
+
+% Generate useTheme hook
+?- generate_theme_hook(HookCode).
+```
+
+### Generated Theme CSS
+
+```css
+/* Generated: theme.css */
+:root {
+  --color-primary: #3b82f6;
+  --color-secondary: #10b981;
+  --color-background: #ffffff;
+  --color-surface: #f8fafc;
+  --color-text-primary: #1a202c;
+  --color-text-secondary: #64748b;
+  --color-border: #e2e8f0;
+
+  --font-family: Inter, sans-serif;
+  --font-size-base: 16px;
+  --line-height-base: 1.5;
+
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+
+  --border-radius-sm: 0.25rem;
+  --border-radius-md: 0.5rem;
+  --border-radius-lg: 1rem;
+}
+
+[data-theme="dark"] {
+  --color-background: #1a1a2e;
+  --color-surface: #16213e;
+  --color-text-primary: #e8e8e8;
+  --color-text-secondary: #a0aec0;
+  --color-border: #2d3748;
+}
+```
+
+## Animation Presets
+
+The animation presets module provides a curated library of CSS animations for entry, exit, and attention effects.
+
+### Using Animation Presets
+
+```prolog
+:- use_module('src/unifyweaver/glue/animation_presets').
+
+% Query available presets
+?- animation_preset(Name, Category, _).
+Name = fade_in, Category = entry ;
+Name = fade_out, Category = exit ;
+Name = pulse, Category = attention ;
+...
+
+% Get specific preset
+?- animation_preset(bounce_in, entry, Props).
+Props = [keyframes([...]), duration('0.6s'), timing('ease-out')].
+```
+
+### Available Preset Categories
+
+**Entry Animations:**
+- `fade_in`, `fade_in_up`, `fade_in_down`, `fade_in_left`, `fade_in_right`
+- `slide_in_up`, `slide_in_down`, `slide_in_left`, `slide_in_right`
+- `scale_in`, `scale_in_center`, `zoom_in`, `bounce_in`
+- `flip_in_x`, `flip_in_y`
+
+**Exit Animations:**
+- `fade_out`, `fade_out_up`, `fade_out_down`
+- `scale_out`, `zoom_out`
+
+**Attention Animations:**
+- `pulse`, `bounce`, `shake`, `wiggle`, `flash`, `heartbeat`, `jello`
+
+**Chart-Specific Animations:**
+- `chart_draw` - SVG path drawing effect
+- `bar_grow` - Bar chart entry animation
+- `pie_reveal` - Pie chart reveal effect
+- `data_point_pop` - Scatter plot point animation
+- `tooltip_appear` - Tooltip fade-in
+
+### Code Generation
+
+```prolog
+% Generate CSS for specific preset
+?- generate_preset_css(fade_in_up, CSS).
+
+% Generate CSS for all presets
+?- generate_all_presets_css(CSS).
+
+% Generate useAnimation React hook
+?- generate_preset_hook(HookCode).
+
+% Get preset timing function
+?- preset_timing(bounce_in, Timing).
+Timing = 'cubic-bezier(0.68, -0.55, 0.265, 1.55)'.
+```
+
+### Generated Animation CSS
+
+```css
+/* Generated: animations.css */
+@keyframes fade_in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade_in_up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes bounce_in {
+  0% { opacity: 0; transform: scale(0.3); }
+  50% { opacity: 1; transform: scale(1.05); }
+  70% { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+.animate-fade_in { animation: fade_in 0.3s ease-out forwards; }
+.animate-fade_in_up { animation: fade_in_up 0.4s ease-out forwards; }
+.animate-bounce_in { animation: bounce_in 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; }
+```
+
+## Template Library
+
+The template library provides pre-built dashboard and report templates that can be customized.
+
+### Available Templates
+
+```prolog
+:- use_module('src/unifyweaver/glue/template_library').
+
+% Query available templates
+?- template(Name, Category, _).
+Name = analytics_dashboard, Category = dashboard ;
+Name = sales_report, Category = report ;
+Name = data_explorer, Category = explorer ;
+Name = presentation_slides, Category = presentation ;
+...
+```
+
+### Template Categories
+
+| Category | Templates | Description |
+|----------|-----------|-------------|
+| `dashboard` | `analytics_dashboard`, `executive_dashboard`, `ops_dashboard` | Real-time monitoring layouts |
+| `report` | `sales_report`, `financial_report`, `quarterly_summary` | Print-ready report layouts |
+| `explorer` | `data_explorer`, `log_viewer`, `metrics_explorer` | Interactive data browsing |
+| `presentation` | `presentation_slides`, `chart_gallery` | Slide-based presentations |
+
+### Defining Dashboard Templates
+
+```prolog
+% Define dashboard template
+template(my_dashboard, dashboard, [
+    title("My Analytics Dashboard"),
+    layout(grid),
+    regions([
+        region(header, [row(1), col_span(3)]),
+        region(sidebar, [row(2), col(1)]),
+        region(main, [row(2), col_span(2)]),
+        region(footer, [row(3), col_span(3)])
+    ]),
+    components([
+        place(header, [nav_bar, theme_toggle]),
+        place(sidebar, [filters, legend]),
+        place(main, [chart, data_table]),
+        place(footer, [export_controls, status])
+    ])
+]).
+```
+
+### Code Generation
+
+```prolog
+% Generate complete template
+?- generate_template(analytics_dashboard, Code).
+
+% Generate template layout CSS
+?- generate_template_css(analytics_dashboard, CSS).
+
+% Generate template component
+?- generate_template_component(analytics_dashboard, Component).
+
+% Customize template
+?- customize_template(analytics_dashboard, [
+       title("Sales Dashboard"),
+       primary_color('#10b981')
+   ], CustomCode).
+```
+
+### Generated Dashboard Component
+
+```typescript
+// Generated: AnalyticsDashboard.tsx
+import React from 'react';
+import styles from './AnalyticsDashboard.module.css';
+
+interface DashboardProps {
+  title?: string;
+  data?: unknown;
+}
+
+export const AnalyticsDashboard: React.FC<DashboardProps> = ({
+  title = "Analytics Dashboard",
+  data
+}) => {
+  return (
+    <div className={styles.dashboard}>
+      <header className={styles.header}>
+        <h1>{title}</h1>
+        <ThemeToggle />
+      </header>
+      <aside className={styles.sidebar}>
+        <FilterPanel />
+        <Legend />
+      </aside>
+      <main className={styles.main}>
+        <Chart data={data} />
+        <DataTable data={data} />
+      </main>
+      <footer className={styles.footer}>
+        <ExportControls />
+        <Status />
+      </footer>
+    </div>
+  );
+};
+```
+
+## Performance Generators
+
+The performance modules provide tools for handling large datasets efficiently.
+
+### Lazy Loading Generator
+
+Provides pagination, infinite scroll, and chunked loading patterns.
+
+```prolog
+:- use_module('src/unifyweaver/glue/lazy_loading_generator').
+
+% Generate pagination hook
+?- generate_pagination_hook([page_size(20)], Hook).
+
+% Generate infinite scroll component
+?- generate_infinite_scroll([threshold(200), batch_size(50)], Component).
+
+% Generate lazy loader for images/components
+?- generate_lazy_loader([placeholder(skeleton)], Loader).
+
+% Generate chunked data fetcher
+?- generate_chunked_fetcher([chunk_size(1000)], Fetcher).
+```
+
+### Generated Pagination Hook
+
+```typescript
+// Generated: usePagination.ts
+export const usePagination = <T>(
+  items: T[],
+  pageSize: number = 20
+) => {
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const totalPages = Math.ceil(items.length / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const currentItems = items.slice(startIndex, endIndex);
+
+  const goToPage = (page: number) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  };
+
+  return {
+    currentItems,
+    currentPage,
+    totalPages,
+    goToPage,
+    goToNext: () => goToPage(currentPage + 1),
+    goToPrev: () => goToPage(currentPage - 1),
+    hasNext: currentPage < totalPages,
+    hasPrev: currentPage > 1,
+  };
+};
+```
+
+### Virtual Scroll Generator
+
+Provides efficient rendering for large lists, tables, and grids.
+
+```prolog
+:- use_module('src/unifyweaver/glue/virtual_scroll_generator').
+
+% Generate virtual scroll hook
+?- generate_virtual_scroll_hook([item_height(40), overscan(5)], Hook).
+
+% Generate virtual list component
+?- generate_virtual_list([height(400), item_height(40)], List).
+
+% Generate virtual table with columns
+?- generate_virtual_table([
+       columns([name, email, role, status]),
+       row_height(48)
+   ], Table).
+
+% Generate virtual grid
+?- generate_virtual_grid([
+       cell_width(200),
+       cell_height(200),
+       gap(16)
+   ], Grid).
+```
+
+### Generated Virtual List
+
+```typescript
+// Generated: VirtualList.tsx
+export const VirtualList = <T,>({
+  items,
+  height,
+  itemHeight,
+  renderItem,
+  overscan = 5,
+}: VirtualListProps<T>) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scrollTop, setScrollTop] = useState(0);
+
+  const totalHeight = items.length * itemHeight;
+  const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
+  const endIndex = Math.min(
+    items.length - 1,
+    Math.ceil((scrollTop + height) / itemHeight) + overscan
+  );
+
+  const visibleItems = items.slice(startIndex, endIndex + 1);
+  const offsetY = startIndex * itemHeight;
+
+  return (
+    <div
+      ref={containerRef}
+      style={{ height, overflow: 'auto' }}
+      onScroll={(e) => setScrollTop(e.currentTarget.scrollTop)}
+    >
+      <div style={{ height: totalHeight, position: 'relative' }}>
+        <div style={{ transform: `translateY(${offsetY}px)` }}>
+          {visibleItems.map((item, i) => (
+            <div key={startIndex + i} style={{ height: itemHeight }}>
+              {renderItem(item, startIndex + i)}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+```
+
+### WebWorker Generator
+
+Generates WebWorker scripts for background data processing.
+
+```prolog
+:- use_module('src/unifyweaver/glue/webworker_generator').
+
+% Generate data processing worker
+?- generate_worker(data_processor, [
+       operations([sort, filter, aggregate, transform])
+   ], Worker).
+
+% Generate chart calculation worker
+?- generate_worker(chart_calculator, [
+       operations([interpolate, smooth, downsample, statistics])
+   ], Worker).
+
+% Generate worker hook for React
+?- generate_worker_hook(data_processor, Hook).
+
+% Generate worker pool for parallel processing
+?- generate_worker_pool([pool_size(4)], Pool).
+```
+
+### Generated Worker
+
+```typescript
+// Generated: dataProcessor.worker.ts
+self.onmessage = (event: MessageEvent) => {
+  const { type, data, options } = event.data;
+
+  switch (type) {
+    case 'sort':
+      const sorted = [...data].sort((a, b) => {
+        const aVal = a[options.key];
+        const bVal = b[options.key];
+        return options.desc ? bVal - aVal : aVal - bVal;
+      });
+      self.postMessage({ type: 'sorted', data: sorted });
+      break;
+
+    case 'filter':
+      const filtered = data.filter((item: any) =>
+        options.predicate(item)
+      );
+      self.postMessage({ type: 'filtered', data: filtered });
+      break;
+
+    case 'aggregate':
+      const aggregated = aggregate(data, options);
+      self.postMessage({ type: 'aggregated', data: aggregated });
+      break;
+
+    case 'statistics':
+      const stats = calculateStatistics(data, options.field);
+      self.postMessage({ type: 'statistics', data: stats });
+      break;
+  }
+};
+```
+
+### Generated Worker Hook
+
+```typescript
+// Generated: useDataProcessor.ts
+export const useDataProcessor = () => {
+  const workerRef = useRef<Worker | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [result, setResult] = useState<unknown>(null);
+
+  useEffect(() => {
+    workerRef.current = new Worker(
+      new URL('./dataProcessor.worker.ts', import.meta.url)
+    );
+
+    workerRef.current.onmessage = (event) => {
+      setResult(event.data.data);
+      setIsProcessing(false);
+    };
+
+    return () => workerRef.current?.terminate();
+  }, []);
+
+  const process = useCallback((type: string, data: unknown[], options?: unknown) => {
+    if (workerRef.current) {
+      setIsProcessing(true);
+      workerRef.current.postMessage({ type, data, options });
+    }
+  }, []);
+
+  return { process, result, isProcessing };
+};
+```
+
 ## Testing
 
 The integration tests verify all visualization glue modules:
@@ -1161,7 +1698,7 @@ The integration tests verify all visualization glue modules:
 swipl -g "run_tests" -t halt tests/integration/glue/test_visualization_glue.pl
 
 # Expected output:
-# Results: 246/246 tests passed
+# Results: 478/478 tests passed
 # All tests passed!
 ```
 
@@ -1186,6 +1723,13 @@ swipl -g "run_tests" -t halt tests/integration/glue/test_visualization_glue.pl
 | interaction_generator | 25 | Pan/zoom, brush, tooltips, drill-down |
 | export_generator | 22 | SVG/PNG/PDF/JSON/CSV export, hooks, menus |
 | live_preview_generator | 23 | Dev server, hot-reload, state sync, preview app |
+| data_binding_generator | 29 | Reactive bindings, computed properties, WebSocket |
+| theme_generator | 25 | Theme definitions, CSS variables, inheritance |
+| animation_presets | 22 | Entry/exit/attention/chart animation presets |
+| template_library | 24 | Dashboard/report/explorer templates |
+| lazy_loading_generator | 26 | Pagination, infinite scroll, chunked loading |
+| virtual_scroll_generator | 28 | Virtual list, table, grid components |
+| webworker_generator | 25 | Data processing, chart calculation workers |
 
 ## Best Practices
 
@@ -1246,8 +1790,14 @@ The visualization glue modules provide:
 - **Interactions** - Pan/zoom, brush selection, tooltips, drill-down navigation
 - **Export capabilities** - SVG, PNG, PDF, JSON, CSV with configurable options
 - **Live preview** - Vite dev server with WebSocket hot-reload
+- **Theme system** - Centralized themes with CSS custom properties and inheritance
+- **Animation presets** - Curated library of entry, exit, attention, and chart animations
+- **Template library** - Pre-built dashboard, report, explorer, and presentation templates
+- **Lazy loading** - Pagination, infinite scroll, chunked loading for large datasets
+- **Virtual scrolling** - Efficient rendering for lists, tables, and grids with thousands of items
+- **WebWorkers** - Background data processing and chart calculations
 - **Consistent patterns** - Same workflow as other UnifyWeaver glue modules
-- **Full test coverage** - 246 integration tests across all modules
+- **Full test coverage** - 478 integration tests across all modules
 
 ## What's Next?
 
