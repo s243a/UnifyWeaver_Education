@@ -41,6 +41,9 @@ This chapter covers the declarative glue modules that generate visualization cod
 - **virtual_scroll_generator.pl** - Efficient rendering for large lists/tables/grids
 - **webworker_generator.pl** - Background data processing and chart calculations
 
+**Validation:**
+- **spec_validation.pl** - Specification validation with error reporting
+
 ## Overview
 
 The visualization glue modules follow the UnifyWeaver pattern of declarative specifications that generate target-language code. Instead of manually writing React components or Python plotting scripts, you define your data and configuration in Prolog, then generate the complete implementation.
@@ -1698,7 +1701,7 @@ The integration tests verify all visualization glue modules:
 swipl -g "run_tests" -t halt tests/integration/glue/test_visualization_glue.pl
 
 # Expected output:
-# Results: 478/478 tests passed
+# Results: 570/570 tests passed
 # All tests passed!
 ```
 
@@ -1797,7 +1800,7 @@ The visualization glue modules provide:
 - **Virtual scrolling** - Efficient rendering for lists, tables, and grids with thousands of items
 - **WebWorkers** - Background data processing and chart calculations
 - **Consistent patterns** - Same workflow as other UnifyWeaver glue modules
-- **Full test coverage** - 478 integration tests across all modules
+- **Full test coverage** - 570 integration tests across all modules
 
 ## What's Next?
 
