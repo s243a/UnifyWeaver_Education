@@ -195,6 +195,72 @@ edge_stream
 
 For more comprehensive examples including recursive predicates and different targets, see [Book 2: Bash Target](../book-02-bash-target/).
 
+## Incremental Compilation
+
+UnifyWeaver includes an **optional incremental compilation** system that caches compiled code to avoid recompiling unchanged predicates. This significantly speeds up iterative development.
+
+### How It Works
+
+```
+┌──────────────────┐
+│ Predicate Source │
+└────────┬─────────┘
+         │
+         ▼
+┌──────────────────┐     ┌─────────────┐
+│ Content Hasher   │────►│ Hash Match? │
+│ (term_hash/2)    │     └──────┬──────┘
+└──────────────────┘            │
+                         Yes    │    No
+                    ┌───────────┴───────────┐
+                    │                       │
+                    ▼                       ▼
+            ┌───────────────┐       ┌───────────────┐
+            │ Return Cached │       │ Compile Fresh │
+            │    Code       │       │ & Store Cache │
+            └───────────────┘       └───────────────┘
+```
+
+### Key Features
+
+- **Predicate Hashing** - Detects source changes via `term_hash/2` with variable normalization
+- **Dependency Tracking** - Automatically invalidates dependent predicates when a dependency changes
+- **Multi-Target Support** - Independent caching for all 20 compilation targets
+- **Disk Persistence** - Cache survives restarts (saved to `.unifyweaver_cache/`)
+- **~11x Speedup** - Measured speedup from cache hits in benchmarks
+
+### Usage
+
+```prolog
+% Use incremental compilation
+?- use_module(unifyweaver(incremental/incremental_compiler)).
+
+% Compile with caching (default)
+?- compile_incremental(edge/2, bash, [], Code).
+
+% Force fresh compilation (bypass cache)
+?- compile_incremental(edge/2, bash, [incremental(false)], Code).
+
+% View cache statistics
+?- incremental_stats.
+
+% Save cache to disk
+?- save_cache.
+
+% Clear all caches
+?- clear_all_cache.
+```
+
+### Disabling Incremental Compilation
+
+Incremental compilation is **optional** and can be disabled at multiple levels:
+
+| Level | Method |
+|-------|--------|
+| Per-call | `[incremental(false)]` option |
+| Per-session | `set_prolog_flag(unifyweaver_incremental, false)` |
+| Environment | `UNIFYWEAVER_CACHE=0` |
+
 ## Next Steps
 
 With an understanding of the architecture and having seen compilation in action, you are ready to explore specific targets in depth. Book 2 covers the Bash target with complete examples, while later books cover Python, Go, Rust, and C# targets.
