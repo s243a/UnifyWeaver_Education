@@ -487,4 +487,4 @@ swipl janus_demo.pl
 
 ---
 
-**←** [Previous: Pyodide & Python Variants](20_pyodide_python_variants.md) | **→**
+**←** [Previous: Pyodide & Python Variants](20_pyodide_python_variants.md) | **→** [Next: Python Bridges with RPyC](22_python_bridges_rpyc.md)
