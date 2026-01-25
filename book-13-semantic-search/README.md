@@ -139,7 +139,29 @@ This book covers building intelligent semantic agents using UnifyWeaver's Python
 - Per-tree Procrustes transformations with softmax routing
 - Multi-account paths with cross-account boundaries
 - Fast inference (~30ms) with cached embeddings
-- Pearltrees use case: 72% Recall@1 on tree retrieval
+- Pearltrees use case: 93% Recall@1 with federated model
+
+### [Chapter 16: Bookmark Filing Assistant](16_bookmark_filing.md)
+- Semantic search + LLM combining for intelligent filing
+- Multi-LLM support: Claude CLI, Gemini CLI, OpenAI, Anthropic, Ollama
+- Merged tree output for hierarchical context
+- MCP server for tool integration
+- Slash command `/file-bookmark` for quick filing
+
+### [Chapter 17: Fuzzy Logic DSL](17_fuzzy_logic_dsl.md)
+- Prolog-based fuzzy logic for probabilistic scoring
+- Core operations: f_and, f_or, f_dist_or, f_union, f_not
+- Optional operator syntax: `&` for AND, `v` for OR
+- Hierarchical filters: child_of, descendant_of, near
+- Mathematical foundations: product t-norm, probabilistic sum
+- Non-distributivity of fuzzy AND over OR
+
+### [Chapter 18: Fuzzy Logic Python Code Generation](18_fuzzy_python_codegen.md)
+- Compiling Prolog fuzzy expressions to Python
+- NumPy-based runtime with scalar and batch operations
+- Filter predicate translation to Python lambdas
+- Vectorized batch processing for efficiency
+- Bookmark filing integration example
 
 ## The Semantic Runtime
 
@@ -214,6 +236,10 @@ After completing this book, you'll be able to:
 - ✅ Tune HNSW M parameter for recall vs memory tradeoffs
 - ✅ Protect against adversarial nodes (outlier rejection, collision detection, trust)
 - ✅ Run comprehensive integration tests for all federation features
+- ✅ Use fuzzy logic DSL for probabilistic scoring and boosting
+- ✅ Combine fuzzy AND/OR with hierarchical filters
+- ✅ Compile fuzzy expressions to Python with NumPy vectorization
+- ✅ Use batch operations for efficient processing of large datasets
 
 ## Integration Tests
 

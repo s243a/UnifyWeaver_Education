@@ -218,8 +218,21 @@ By completing this book, you will be able to:
 - CSnakes for .NET 8+ (source generators)
 - JPype for JVM (shared memory NumPy)
 - jpy for bi-directional Java↔Python
+- PyO3 for Rust (in-process)
+- PyCall.rb for Ruby (CPython embedding)
+- Rust FFI for Go/Node/Lua (universal bridge via cdylib)
 - Code generation for all bridges
 - Decision matrix and tested configurations
+
+**23. Declarative Visualization Glue** (`23_visualization_glue.md`)
+- Graph visualization with Cytoscape.js (React/TypeScript)
+- Curve plotting with Chart.js (React/TypeScript)
+- Python matplotlib code generation
+- NumPy expression generation
+- Runtime curve evaluation
+- Integration with Express and React generators
+- **Export system** - SVG, PNG, PDF, JSON, CSV export with scaling and templates
+- **Live preview** - Vite dev server with WebSocket hot-reload and state sync
 
 ### Part 9: Reference (Chapters 13-14)
 
@@ -265,7 +278,8 @@ By completing this book, you will be able to:
 | 19 | WASM Visualization | Cytoscape.js, Chart.js, browser pipelines |
 | 20 | Pyodide & Python Variants | Numba, Cython, Nuitka, Pyodide, secure browser |
 | 21 | Janus In-Process | SWI-Prolog Python integration, NumPy, bidirectional |
-| 22 | Python Bridges + RPyC | Python.NET, CSnakes, JPype, jpy, cross-runtime |
+| 22 | Python Bridges + RPyC | Python.NET, CSnakes, JPype, jpy, PyO3, PyCall.rb, Rust FFI |
+| 23 | Visualization Glue | Cytoscape.js, Chart.js, matplotlib, export, live preview |
 
 ## Implementation Status
 

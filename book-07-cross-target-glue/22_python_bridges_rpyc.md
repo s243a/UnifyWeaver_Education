@@ -7,11 +7,11 @@ This documentation is dual-licensed under MIT and CC-BY-4.0.
 
 # Chapter 22: Cross-Runtime Python Bridges with RPyC
 
-Embedding CPython in .NET and JVM runtimes to access RPyC's live object proxies.
+Embedding CPython in .NET, JVM, Rust, Ruby, and Go runtimes to access RPyC's live object proxies.
 
 ## Overview
 
-This chapter covers four Python bridge technologies that embed real CPython, enabling access to RPyC from non-Python runtimes:
+This chapter covers seven Python bridge technologies that embed real CPython, enabling access to RPyC from non-Python runtimes:
 
 | Bridge | Runtime | Approach | Status |
 |--------|---------|----------|--------|
@@ -19,6 +19,9 @@ This chapter covers four Python bridge technologies that embed real CPython, ena
 | **CSnakes** | .NET 8+ | Source generators | Documented |
 | **JPype** | JVM | Dynamic execution | Tested |
 | **jpy** | JVM | Bi-directional | Tested |
+| **PyO3** | Rust | In-process | Tested |
+| **PyCall.rb** | Ruby | CPython embedding | Tested |
+| **Rust FFI** | Go/Node/Lua | Via Rust cdylib | Tested (Go) |
 
 ### Why Embed CPython?
 
@@ -451,13 +454,270 @@ conn.close()
 
 ---
 
-## 22.9 Architecture
+## 22.9 PyO3 (Rust)
+
+PyO3 provides first-class Rust-Python integration, enabling Rust to call Python code efficiently.
+
+### Installation
+
+```toml
+# Cargo.toml
+[dependencies]
+pyo3 = { version = "0.22", features = ["auto-initialize"] }
+```
+
+### Basic Usage
+
+```rust
+use pyo3::prelude::*;
+use pyo3::types::PyModule;
+
+fn main() -> PyResult<()> {
+    Python::with_gil(|py| {
+        // Import RPyC
+        let rpyc = PyModule::import_bound(py, "rpyc")?;
+        let classic = rpyc.getattr("classic")?;
+
+        // Connect
+        let conn = classic.call_method1("connect", ("localhost", 18812))?;
+
+        // Call remote function
+        let modules = conn.getattr("modules")?;
+        let math = modules.get_item("math")?;
+        let result: f64 = math.call_method1("sqrt", (16.0,))?.extract()?;
+
+        println!("sqrt(16) = {}", result);  // 4.0
+
+        conn.call_method0("close")?;
+        Ok(())
+    })
+}
+```
+
+### Code Generation
+
+```prolog
+?- generate_pyo3_rpyc_client([host("localhost"), port(18812)], Code).
+```
+
+---
+
+## 22.10 PyCall.rb (Ruby)
+
+PyCall.rb embeds CPython in Ruby, enabling Ruby applications to use Python libraries.
+
+### Installation
+
+```bash
+gem install pycall
+pip install rpyc
+```
+
+### Basic Usage
+
+```ruby
+require 'pycall/import'
+include PyCall::Import
+
+# Import RPyC
+pyimport :rpyc
+
+# Connect to server
+conn = rpyc.classic.connect('localhost', 18812)
+
+# Use remote module
+np = conn.modules.numpy
+arr = np.array([1, 2, 3, 4, 5])
+puts "Mean: #{np.mean(arr)}"  # 3.0
+
+conn.close
+```
+
+### Code Generation
+
+```prolog
+?- generate_pycall_rb_rpyc_client([host("localhost"), port(18812)], Code).
+```
+
+---
+
+## 22.11 Rust FFI Bridge (Go, Node.js, Lua)
+
+For languages without mature CPython embedding (Go, Node.js, Lua), we use Rust as a **universal bridge layer**. This approach is fully tested for Go and designed to be extensible to other FFI-capable languages.
+
+### Why Rust as Bridge?
+
+Go's CPython embedding options have limitations:
+- **go-python3** (DataDog): Archived since 2021, complex GIL management
+- **go-embed-python** (kluctl): Uses subprocess, loses live proxy benefit
+
+Rust's PyO3 is mature, actively maintained, and handles GIL correctly. By building a Rust cdylib, any FFI-capable language can access Python.
+
+### Architecture
+
+```
+┌────────────────────────────────────────────────────────┐
+│ Go Application                                         │
+│ ┌────────────────────────────────────────────────────┐ │
+│ │ CGO (C FFI)                                        │ │
+│ │ ┌────────────────────────────────────────────────┐ │ │
+│ │ │ Rust cdylib (librpyc_bridge.so)                │ │ │
+│ │ │ ┌────────────────────────────────────────────┐ │ │ │
+│ │ │ │ PyO3 (CPython embedding)                   │ │ │ │
+│ │ │ │ ┌────────────────────────────────────────┐ │ │ │ │
+│ │ │ │ │ RPyC Client                            │ │ │ │ │
+│ │ │ │ └────────────────────────────────────────┘ │ │ │ │
+│ │ │ └────────────────────────────────────────────┘ │ │ │
+│ │ └────────────────────────────────────────────────┘ │ │
+│ └────────────────────────────────────────────────────┘ │
+└────────────────────────────────────────────────────────┘
+                              │
+                              │ TCP (live proxies)
+                              ▼
+┌────────────────────────────────────────────────────────┐
+│ RPyC Server (Python)                                   │
+│ - NumPy, SciPy, pandas, scikit-learn, PyTorch         │
+│ - Custom ML services                                   │
+└────────────────────────────────────────────────────────┘
+```
+
+### Building the Rust Bridge
+
+```toml
+# Cargo.toml
+[package]
+name = "rpyc_bridge"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.22", features = ["auto-initialize"] }
+```
+
+The bridge exports C-compatible functions:
+
+```rust
+// src/lib.rs
+#[no_mangle]
+pub extern "C" fn rpyc_init() { ... }
+
+#[no_mangle]
+pub extern "C" fn rpyc_connect(host: *const c_char, port: i32) -> i32 { ... }
+
+#[no_mangle]
+pub extern "C" fn rpyc_call(
+    module: *const c_char,
+    function: *const c_char,
+    args_json: *const c_char
+) -> *mut c_char { ... }
+
+#[no_mangle]
+pub extern "C" fn rpyc_disconnect() { ... }
+```
+
+### Go Usage
+
+```go
+package main
+
+/*
+#cgo LDFLAGS: -L${SRCDIR} -lrpyc_bridge
+#include "rpyc_bridge.h"
+#include <stdlib.h>
+*/
+import "C"
+import (
+    "encoding/json"
+    "fmt"
+    "unsafe"
+)
+
+func main() {
+    // Initialize Python runtime
+    C.rpyc_init()
+
+    // Connect to RPyC server
+    host := C.CString("localhost")
+    defer C.free(unsafe.Pointer(host))
+
+    if C.rpyc_connect(host, 18812) != 0 {
+        panic("Failed to connect")
+    }
+    defer C.rpyc_disconnect()
+
+    // Call numpy.mean([1, 2, 3, 4, 5])
+    result := callPython("numpy", "mean", []interface{}{[]int{1, 2, 3, 4, 5}})
+    fmt.Printf("numpy.mean([1,2,3,4,5]) = %v\n", result)  // 3.0
+}
+
+func callPython(module, function string, args []interface{}) interface{} {
+    argsJSON, _ := json.Marshal(args)
+
+    moduleC := C.CString(module)
+    funcC := C.CString(function)
+    argsC := C.CString(string(argsJSON))
+    defer C.free(unsafe.Pointer(moduleC))
+    defer C.free(unsafe.Pointer(funcC))
+    defer C.free(unsafe.Pointer(argsC))
+
+    resultC := C.rpyc_call(moduleC, funcC, argsC)
+    if resultC == nil {
+        return nil
+    }
+    defer C.rpyc_free_string(resultC)
+
+    var result interface{}
+    json.Unmarshal([]byte(C.GoString(resultC)), &result)
+    return result
+}
+```
+
+### Code Generation
+
+```prolog
+% Generate Rust bridge library
+?- generate_rust_ffi_bridge([host("localhost"), port(18812)], RustCode).
+
+% Generate Go client wrapper
+?- generate_go_ffi_client([lib_name(rpyc_bridge)], GoCode).
+
+% Generate Node.js client wrapper
+?- generate_node_ffi_client([lib_name(rpyc_bridge)], NodeCode).
+```
+
+### Building and Running
+
+```bash
+# 1. Build Rust library
+cd examples/python-bridges/rust-ffi-go
+cargo build --release
+cp target/release/librpyc_bridge.so .
+
+# 2. Build Go example
+CGO_ENABLED=1 go build -o rpyc_example main.go
+
+# 3. Start RPyC server
+python examples/rpyc-integration/rpyc_server.py &
+
+# 4. Run Go example
+LD_LIBRARY_PATH=. ./rpyc_example
+```
+
+### Expected Output
+
+```
+Go + Rust FFI + RPyC Integration
+=========================
+All bridges follow a similar architecture pattern:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ Host Application (.NET or JVM)                              │
+│ Host Application (.NET, JVM, Rust, Go, Ruby)                │
 │ ┌─────────────────────────────────────────────────────────┐ │
-│ │ Bridge (Python.NET / CSnakes / JPype / jpy)             │ │
+│ │ Bridge (Python.NET / JPype / PyO3 / Rust FFI / PyCall)  │ │
 │ │ ┌─────────────────────────────────────────────────────┐ │ │
 │ │ │ Embedded CPython                                    │ │ │
 │ │ │ ┌─────────────────────────────────────────────────┐ │ │ │
@@ -482,7 +742,7 @@ conn.close()
 
 ---
 
-## 22.10 Decision Matrix
+## 22.14 Decision Matrix
 
 | Scenario | Recommended Bridge |
 |----------|--------------------|
@@ -492,22 +752,32 @@ conn.close()
 | Java↔Python bi-directional | **jpy** |
 | Need .NET 6/7 compatibility | **Python.NET** |
 | Don't have Maven | **JPype** |
+| Rust project, in-process Python | **PyO3** |
+| Ruby project | **PyCall.rb** |
+| Go project (no CGO alternatives) | **Rust FFI** |
+| Node.js project | **Rust FFI + koffi** |
+| Full-stack JS with Python ML | **Rust FFI + Express + React** |
+| Multi-language FFI from single lib | **Rust FFI** |
 
 ---
 
-## 22.11 Tested Configurations
+## 22.15 Tested Configurations
 
-These configurations have been verified (2025-12-27):
+These configurations have been verified (2025-12-29):
 
 | Bridge | Runtime Version | Python | RPyC Tests |
 |--------|-----------------|--------|------------|
 | Python.NET | .NET Core 9.0 | 3.8.10 | math, NumPy |
 | JPype | Java 11.0.27 | 3.8.10 | math, NumPy |
 | jpy | Java 11.0.27 | 3.8.10 | math, NumPy, ArrayList |
+| PyO3 | Rust/Cargo | 3.8.10 | math, NumPy |
+| PyCall.rb | Ruby 3.0+ | 3.8.10 | math, NumPy |
+| Rust FFI (Go) | Go 1.21+ | 3.8.10 | math, numpy.mean, math.pi |
+| Rust FFI (Node.js) | Node.js 18+ | 3.8.10 | math, numpy.mean, math.pi |
 
 ---
 
-## 22.12 Example Projects
+## 22.16 Example Projects
 
 See `examples/python-bridges/` for complete working examples:
 
@@ -526,14 +796,35 @@ examples/python-bridges/
 │   ├── rpyc_client.py
 │   ├── RPyCClient.java
 │   └── build.gradle
-└── jpy/
-    ├── rpyc_client.py
+├── jpy/
+│   ├── rpyc_client.py
+│   └── README.md
+├── pyo3/
+│   ├── src/main.rs
+│   └── Cargo.toml
+├── pycall-rb/
+│   ├── rpyc_client.rb
+│   └── Gemfile
+├── rust-ffi-go/
+│   ├── src/lib.rs
+│   ├── Cargo.toml
+│   ├── rpyc_bridge.h
+│   ├── main.go
+│   └── README.md
+└── rust-ffi-node/
+    ├── src/
+    │   ├── rpyc_bridge.ts
+    │   ├── server.ts
+    │   └── test.ts
+    ├── frontend/
+    │   └── src/App.tsx
+    ├── package.json
     └── README.md
 ```
 
 ---
 
-## 22.13 Exercises
+## 22.17 Exercises
 
 ### Exercise 1: Python.NET NumPy Pipeline
 
@@ -559,9 +850,42 @@ Design a system where:
 3. NumPy performs ML inference
 4. Results returned to web client
 
+### Exercise 4: Rust FFI Bridge for Go
+
+Build a Go application using the Rust FFI bridge:
+1. Build the Rust library with `cargo build --release`
+2. Connect to RPyC server from Go
+3. Use NumPy for statistical calculations
+4. Display results in Go
+
+### Exercise 5: Multi-Language Pipeline
+
+Create a pipeline using multiple bridges:
+1. Go reads data (via Rust FFI bridge)
+2. Python processes with NumPy
+3. Results stored in database
+4. Use cross_runtime_pipeline.pl for orchestration
+
+### Exercise 6: Node.js Full-Stack Application
+
+Build a full-stack JavaScript application:
+1. Run the rust-ffi-node example
+2. Add a new API endpoint for `statistics.median`
+3. Update the React UI to include median calculation
+4. Add the new function to the security whitelist
+5. Test with various input arrays
+
+### Exercise 7: Declarative Security Rules
+
+Define security rules in Prolog:
+1. Create whitelisting rules: `allowed_module(Module, Functions)`
+2. Generate TypeScript validation code from these rules
+3. Compare with manual approach in server.ts
+4. Consider how preferences/firewall could control this
+
 ---
 
-## Summary
+## 22.18 Summary
 
 | Concept | Key Point |
 |---------|-----------|
@@ -569,6 +893,10 @@ Design a system where:
 | **CSnakes** | Source generator, compile-time wrappers |
 | **JPype** | JVM Python with NumPy shared memory |
 | **jpy** | True bi-directional Java↔Python |
+| **PyO3** | Rust-native CPython embedding |
+| **PyCall.rb** | Ruby CPython embedding |
+| **Rust FFI** | Universal bridge for Go/Node/Lua via cdylib |
+| **Node.js + React** | Full-stack JS with security whitelisting |
 | **RPyC** | Live object proxies over network |
 | **CPython required** | Reimplementations (IronPython, Jython) won't work |
 | **Auto-detection** | `detect_all_bridges/1` finds available bridges |
@@ -576,6 +904,13 @@ Design a system where:
 | **Preferences** | Bridge order via `preferences_default/1` |
 | **Firewall** | Deny/allow bridges via `rule_firewall/2` |
 | **Fallback chains** | `[fallback([jpy, jpype])]` for resilience |
+| **Code generation** | `generate_*_rpyc_client/2` for all bridges |
+| **Declarative security** | `rpyc_security.pl` - whitelisting in Prolog |
+| **Declarative API** | `express_generator.pl` - endpoints from specs |
+| **Declarative UI** | `react_generator.pl` - components from specs |
+| **Full-stack generation** | `full_pipeline.pl` - 20 files from one spec |
+| **Context-aware config** | `typescript_glue_config.pl` - preferences integration |
+| **Generation contexts** | production, development, testing modes |
 
 ---
 
