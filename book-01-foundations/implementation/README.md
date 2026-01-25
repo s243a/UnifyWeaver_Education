@@ -14,6 +14,7 @@ This folder contains detailed implementation documentation for each chapter in B
 | File | Chapter | Key Topics |
 |------|---------|------------|
 | `03_architecture_impl.md` | Ch 3: Architecture | Constraint analyzer, template system, caching |
+| `03_architecture_questions.md` | Ch 3: Architecture | Q&A companion with 20 questions |
 
 ## Purpose
 

@@ -14,6 +14,7 @@ This folder contains detailed implementation documentation for each chapter in B
 | File | Chapter | Key Topics |
 |------|---------|------------|
 | `06_transformer_distillation_impl.md` | Ch 6: Transformer Distillation | Givens rotations, angle supervision, rotation transformer |
+| `06_transformer_distillation_questions.md` | Ch 6: Transformer Distillation | Q&A companion with 21 questions |
 
 ## Purpose
 

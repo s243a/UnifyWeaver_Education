@@ -23,14 +23,30 @@ Each book in the UnifyWeaver Education Series contains an `implementation/` subf
 education/
 ├── book-01-foundations/
 │   └── implementation/
-│       ├── 01_foundations_impl.md
-│       ├── 02_first_predicates_impl.md
-│       └── ...
-├── book-02-bash-target/
+│       ├── 03_architecture_impl.md       # Implementation details
+│       ├── 03_architecture_questions.md  # Q&A companion
+│       └── README.md
+├── book-14-ai-training/
 │   └── implementation/
-│       └── ...
+│       ├── 06_transformer_distillation_impl.md
+│       ├── 06_transformer_distillation_questions.md
+│       └── README.md
 └── ...
 ```
+
+## Document Types
+
+### Implementation Docs (`*_impl.md`)
+- Function-level API documentation
+- Algorithm explanations with code
+- Mathematical derivations
+- Edge cases and limitations
+
+### Questions Docs (`*_questions.md`)
+- Q&A pairs linking to impl sections
+- Unique anchor IDs (e.g., `b01c03-q-...`) for concatenation
+- Suitable for NotebookLM and training data
+- Question index for navigation
 
 ## For RAG Systems
 
