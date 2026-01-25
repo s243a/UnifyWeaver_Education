@@ -13,6 +13,10 @@ This folder contains detailed implementation documentation for each chapter in B
 
 | File | Chapter | Key Topics |
 |------|---------|------------|
+| `01_introduction_impl.md` | Ch 1: Introduction | Installation, project structure, targets |
+| `01_introduction_questions.md` | Ch 1: Introduction | Q&A companion with 13 questions |
+| `02_prolog_fundamentals_impl.md` | Ch 2: Prolog Fundamentals | Terms, unification, modules, file I/O |
+| `02_prolog_fundamentals_questions.md` | Ch 2: Prolog Fundamentals | Q&A companion with 22 questions |
 | `03_architecture_impl.md` | Ch 3: Architecture | Constraint analyzer, template system, caching |
 | `03_architecture_questions.md` | Ch 3: Architecture | Q&A companion with 20 questions |
 
