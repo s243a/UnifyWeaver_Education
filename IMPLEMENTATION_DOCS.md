@@ -84,13 +84,13 @@ When adding implementation docs:
 
 ## Books with Implementation Docs
 
-| Book | Status |
-|------|--------|
-| Book 1: Foundations | In Progress |
-| Book 2: Bash Target | Planned |
-| Book 3: C# Target | Planned |
-| Book 4: Rust Target | Planned |
-| Book 5: Python Target | Planned |
-| Book 6: Go Target | Planned |
-| Book 7: Cross-Target Glue | Planned |
-| Book 14: AI Training | Started |
+| Book | Status | Chapters |
+|------|--------|----------|
+| Book 1: Foundations | Complete | Ch 1-3 (55 questions) |
+| Book 2: Bash Target | In Progress | Ch 1-3 (31 questions) |
+| Book 3: C# Target | Planned | |
+| Book 4: Workflows | Planned | |
+| Book 5: Python Target | In Progress | Ch 3 (14 questions) |
+| Book 6: Go Target | Planned | |
+| Book 7: Cross-Target Glue | Planned | |
+| Book 14: AI Training | In Progress | Ch 6 (21 questions) |
