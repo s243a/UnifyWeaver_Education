@@ -3,381 +3,367 @@ SPDX-License-Identifier: MIT AND CC-BY-4.0
 Copyright (c) 2025 John William Creighton (s243a)
 -->
 
-# Chapter 1 Implementation: Your First UnifyWeaver Program
+# Chapter 1: Your First Program - Implementation Details
 
-**Detailed function documentation for RAG systems**
+This document provides function-level documentation for the Bash target compilation workflow.
 
-This document provides implementation details for the compilation workflow demonstrated in the first program tutorial.
-
----
-
-## Table of Contents
-
-1. [Compilation Workflow](#compilation-workflow)
-2. [compile_recursive/3](#compile_recursive3)
-3. [compile_facts/4](#compile_facts4)
-4. [Generated Script Structure](#generated-script-structure)
-5. [Test Runner Generation](#test-runner-generation)
-
----
-
-## Compilation Workflow
-
-The complete workflow from Prolog to executable Bash:
-
-```
-1. Load init.pl        → Set up module paths
-2. Load family_tree.pl → Load facts and rules
-3. compile_facts       → Generate base fact script
-4. compile_recursive   → Generate recursive rule script
-5. Save to files       → Write .sh files
-6. Source and run      → Execute generated scripts
-```
-
-### Step-by-Step Commands
-
-```prolog
-% 1. Initialize environment
-?- ['education/init'].
-
-% 2. Load compilers
-?- use_module(unifyweaver(core/recursive_compiler)).
-?- use_module(unifyweaver(core/stream_compiler)).
-
-% 3. Load predicates
-?- ['education/family_tree'].
-
-% 4. Compile facts
-?- stream_compiler:compile_facts(parent, 2, [], BashCode).
-
-% 5. Compile recursive rule
-?- compile_recursive(ancestor/2, [], BashCode).
-
-% 6. Save to file
-?- open('output/script.sh', write, S), write(S, Code), close(S).
-```
+**Source**: `src/unifyweaver/core/recursive_compiler.pl`, `src/unifyweaver/core/stream_compiler.pl`
 
 ---
 
 ## compile_recursive/3
 
+Compiles a recursive Prolog predicate to Bash code with fixpoint evaluation.
+
+### Signature
+
 ```prolog
-compile_recursive(+Pred/Arity, +Options, -BashCode)
+compile_recursive(+Predicate/Arity, +Options, -BashCode)
 ```
 
-**Purpose**: Compiles a recursive predicate to optimized Bash code.
-
-**Parameters**:
+### Parameters
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `Pred/Arity` | `atom/integer` | Predicate indicator (e.g., `ancestor/2`) |
+| `Predicate/Arity` | `atom/integer` | The recursive predicate to compile |
 | `Options` | `list` | Compilation options |
-| `BashCode` | `string` | Generated Bash code |
+| `BashCode` | `string` | Generated Bash script |
 
-**Options**:
+### Algorithm
+
+1. **Collect clauses**: Gather all clauses for `Predicate/Arity`
+2. **Analyze recursion**: Identify base case and recursive case
+3. **Generate fixpoint loop**: Create Bash while loop with visited tracking
+4. **Generate rule application**: Create functions for each clause
+
+### Example
+
+```prolog
+% Define recursive predicate
+ancestor(A, D) :- parent(A, D).
+ancestor(A, D) :- parent(A, P), ancestor(P, D).
+
+% Compile
+?- compile_recursive(ancestor/2, [], BashCode).
+```
+
+### Generated Bash Structure
+
+```bash
+#!/bin/bash
+declare -A _visited_ancestor
+
+ancestor() {
+    local arg1="$1"
+    local arg2="$2"
+    local key="${arg1}:${arg2}"
+
+    # Base case: check visited
+    [[ -n "${_visited_ancestor[$key]}" ]] && return 0
+    _visited_ancestor[$key]=1
+
+    # Apply rules
+    _ancestor_rule_1 "$arg1" "$arg2"
+    _ancestor_rule_2 "$arg1" "$arg2"
+}
+
+_ancestor_rule_1() {
+    # Base: ancestor(A, D) :- parent(A, D)
+    parent "$1" "$2" && echo "$1:$2"
+}
+
+_ancestor_rule_2() {
+    # Recursive: ancestor(A, D) :- parent(A, P), ancestor(P, D)
+    while IFS=: read -r a p; do
+        ancestor "$p" "$2"
+    done < <(parent "$1")
+}
+```
+
+### Options
 
 | Option | Values | Default | Description |
 |--------|--------|---------|-------------|
-| `unique(Bool)` | `true`, `false` | `true` | Deduplicate results |
-| `unordered(Bool)` | `true`, `false` | `true` | Allow reordering |
-
-**Example**:
-
-```prolog
-?- compile_recursive(ancestor/2, [], Code).
-% Code contains complete BFS implementation
-
-?- compile_recursive(ancestor/2, [unique(false)], Code).
-% Code without deduplication
-```
-
-**Algorithm**:
-
-1. Classify predicate pattern (tail, linear, tree, mutual recursion)
-2. Fetch constraints from `constraint_analyzer`
-3. Select appropriate template
-4. Render template with predicate details
-5. Return complete Bash script
+| `dedup(Mode)` | `sort_u`, `hash`, `none` | `hash` | Deduplication strategy |
+| `output_format(F)` | `colon`, `tab`, `json` | `colon` | Output field separator |
 
 ---
 
 ## compile_facts/4
 
+Compiles Prolog facts to a Bash lookup function.
+
+### Signature
+
 ```prolog
-stream_compiler:compile_facts(+Name, +Arity, +Options, -BashCode)
+stream_compiler:compile_facts(+Predicate, +Arity, +Options, -BashCode)
 ```
 
-**Purpose**: Compiles fact predicates to Bash associative arrays.
-
-**Parameters**:
+### Parameters
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `Name` | `atom` | Predicate name |
-| `Arity` | `integer` | Predicate arity |
+| `Predicate` | `atom` | The fact predicate name |
+| `Arity` | `integer` | Number of arguments |
 | `Options` | `list` | Compilation options |
-| `BashCode` | `string` | Generated Bash code |
+| `BashCode` | `string` | Generated Bash script |
 
-**Generated Functions**:
+### Algorithm
 
-| Function | Purpose |
-|----------|---------|
-| `{name}_data` | Associative array holding facts |
-| `{name}()` | Point lookup function |
-| `{name}_stream()` | Stream all facts |
+1. **Collect facts**: Query all `Predicate/Arity` facts from database
+2. **Generate associative array**: Create `declare -A` with key-value pairs
+3. **Generate lookup function**: Create function for querying facts
 
-**Example**:
+### Example
 
 ```prolog
-?- stream_compiler:compile_facts(parent, 2, [], Code).
+% Define facts
+parent(abraham, ishmael).
+parent(abraham, isaac).
+parent(sarah, isaac).
+
+% Compile
+?- stream_compiler:compile_facts(parent, 2, [], BashCode).
 ```
 
-**Generated Bash**:
+### Generated Bash
 
 ```bash
-declare -A parent_data=(
+#!/bin/bash
+declare -A _facts_parent=(
     ["abraham:ishmael"]=1
     ["abraham:isaac"]=1
     ["sarah:isaac"]=1
 )
 
 parent() {
-    local key="$1:$2"
-    [[ -n "${parent_data[$key]}" ]] && echo "$key"
-}
+    local arg1="$1"
+    local arg2="$2"
 
-parent_stream() {
-    for key in "${!parent_data[@]}"; do
-        echo "$key"
-    done
+    if [[ -n "$arg1" && -n "$arg2" ]]; then
+        # Both args: membership test
+        [[ -n "${_facts_parent[$arg1:$arg2]}" ]]
+    elif [[ -n "$arg1" ]]; then
+        # First arg only: find matching pairs
+        for key in "${!_facts_parent[@]}"; do
+            [[ "$key" == "$arg1:"* ]] && echo "$key"
+        done
+    else
+        # No args: enumerate all
+        for key in "${!_facts_parent[@]}"; do
+            echo "$key"
+        done
+    fi
 }
+```
+
+### Query Modes
+
+| Arguments | Behavior | Example |
+|-----------|----------|---------|
+| Both | Membership test (returns 0/1) | `parent abraham isaac && echo "yes"` |
+| First only | Stream matching pairs | `parent abraham` → `abraham:ishmael`, `abraham:isaac` |
+| None | Stream all facts | `parent` → all pairs |
+
+---
+
+## Compilation Workflow
+
+### Complete End-to-End Process
+
+```
+┌─────────────────────────────┐
+│  1. Initialize Environment  │
+│  ['education/init']         │
+└──────────────┬──────────────┘
+               │
+               ▼
+┌─────────────────────────────┐
+│  2. Load Compiler Modules   │
+│  use_module(recursive_...)  │
+│  use_module(stream_...)     │
+└──────────────┬──────────────┘
+               │
+               ▼
+┌─────────────────────────────┐
+│  3. Load User Predicates    │
+│  ['family_tree.pl']         │
+└──────────────┬──────────────┘
+               │
+               ▼
+┌─────────────────────────────┐
+│  4. Compile Facts           │
+│  compile_facts(parent, 2..) │
+└──────────────┬──────────────┘
+               │
+               ▼
+┌─────────────────────────────┐
+│  5. Compile Recursive Rules │
+│  compile_recursive(anc...)  │
+└──────────────┬──────────────┘
+               │
+               ▼
+┌─────────────────────────────┐
+│  6. Save to Files           │
+│  open(..., write, Stream)   │
+└──────────────┬──────────────┘
+               │
+               ▼
+┌─────────────────────────────┐
+│  7. Execute in Bash         │
+│  source parent.sh           │
+│  source ancestor.sh         │
+│  ancestor abraham           │
+└─────────────────────────────┘
+```
+
+### Session Commands
+
+```prolog
+% Step 1: Initialize
+?- ['education/init'].
+
+% Step 2: Load compilers
+?- use_module(unifyweaver(core/recursive_compiler)).
+?- use_module(unifyweaver(core/stream_compiler)).
+
+% Step 3: Load predicates
+?- ['education/family_tree'].
+
+% Step 4: Compile and save facts
+?- stream_compiler:compile_facts(parent, 2, [], Code),
+   open('output/parent.sh', write, S),
+   write(S, Code),
+   close(S).
+
+% Step 5: Compile and save recursive
+?- compile_recursive(ancestor/2, [], Code),
+   open('output/ancestor.sh', write, S),
+   write(S, Code),
+   close(S).
 ```
 
 ---
 
-## Generated Script Structure
+## Dependency Handling
 
-### Facts Script (`parent.sh`)
+### Fact Dependencies
 
-```bash
-#!/bin/bash
-# parent - fact lookup
+Recursive predicates depend on base facts. The `ancestor/2` predicate depends on `parent/2`:
 
-# Data storage
-declare -A parent_data=(
-    ["abraham:ishmael"]=1
-    ["abraham:isaac"]=1
-    # ...
-)
-
-# Point lookup
-parent() {
-    local key="$1:$2"
-    [[ -n "${parent_data[$key]}" ]] && echo "$key"
-}
-
-# Stream all facts
-parent_stream() {
-    for key in "${!parent_data[@]}"; do
-        echo "$key"
-    done
-}
+```prolog
+ancestor(A, D) :- parent(A, D).      % Uses parent
+ancestor(A, D) :- parent(A, P), ...  % Uses parent
 ```
 
-### Recursive Script (`ancestor.sh`)
+### Sourcing Order
+
+Scripts must be sourced in dependency order:
 
 ```bash
-#!/bin/bash
-# ancestor - transitive closure of parent
+# CORRECT: Base facts first
+source parent.sh
+source ancestor.sh
+ancestor abraham
 
-# Dependency lookup
-parent_get_stream() {
-    if declare -f parent_stream >/dev/null 2>&1; then
-        parent_stream
-    elif declare -f parent >/dev/null 2>&1; then
-        parent
-    else
-        echo "Error: parent not found" >&2
-        return 1
-    fi
-}
+# WRONG: Missing dependency
+source ancestor.sh
+ancestor abraham  # Error: parent: command not found
+```
 
-# BFS implementation
-ancestor_all() {
-    local start="$1"
-    declare -A visited
-    local queue_file="/tmp/ancestor_queue_$$"
-    local next_queue="/tmp/ancestor_next_$$"
+---
 
-    trap "rm -f $queue_file $next_queue" EXIT
+## Visited Tracking
 
-    echo "$start" > "$queue_file"
-    visited["$start"]=1
+### Purpose
 
-    while [[ -s "$queue_file" ]]; do
-        > "$next_queue"
-        while IFS= read -r current; do
-            while IFS=":" read -r from to; do
-                if [[ "$from" == "$current" && -z "${visited[$to]}" ]]; then
-                    visited["$to"]=1
-                    echo "$to" >> "$next_queue"
-                    echo "$start:$to"
-                fi
-            done < <(parent_get_stream | grep "^$current:")
-        done < "$queue_file"
-        mv "$next_queue" "$queue_file"
-    done
-}
+Recursive predicates use visited tracking to:
+1. **Prevent infinite loops** - Don't re-process same arguments
+2. **Implement memoization** - Cache computed results
+3. **Ensure termination** - Fixpoint when no new facts
 
-# Check specific relationship
-ancestor_check() {
-    local start="$1"
-    local target="$2"
-    ancestor_all "$start" | grep -q "^$start:$target$"
-}
+### Implementation
 
-# Main entry point
+```bash
+declare -A _visited_ancestor
+
 ancestor() {
-    local start="$1"
-    local target="$2"
+    local key="${1}:${2}"
 
-    if [[ -z "$target" ]]; then
-        ancestor_all "$start" | sort -u
-    else
-        ancestor_check "$start" "$target" && echo "$start:$target"
-    fi
+    # Skip if already visited
+    [[ -n "${_visited_ancestor[$key]}" ]] && return 0
+
+    # Mark as visited
+    _visited_ancestor[$key]=1
+
+    # Continue with rule application...
 }
 ```
 
----
+### Clearing State
 
-## Test Runner Generation
-
-### generate_test_runner_inferred/2
-
-```prolog
-generate_test_runner_inferred(+OutputFile, +Options)
-```
-
-**Purpose**: Automatically generates test cases by analyzing script signatures.
-
-**Process**:
-
-1. Scan output directory for `.sh` files
-2. Extract function signatures
-3. Infer test cases from signatures
-4. Generate test runner script
-
-**Example**:
-
-```prolog
-?- use_module('src/unifyweaver/core/advanced/test_runner_inference').
-?- generate_test_runner_inferred('output/test_runner.sh', [output_dir('output')]).
-```
-
-**Generated Test Runner**:
+For multiple queries, clear the visited array:
 
 ```bash
-#!/bin/bash
-# Auto-generated test runner
-
-source parent.sh
 source ancestor.sh
 
-echo "=== Running inferred tests ==="
-
-# Test parent_stream
-echo -n "Testing parent_stream... "
-result=$(parent_stream | head -1)
-[[ -n "$result" ]] && echo "PASS" || echo "FAIL"
-
-# Test ancestor
-echo -n "Testing ancestor abraham... "
-result=$(ancestor abraham | head -3)
-[[ -n "$result" ]] && echo "PASS" || echo "FAIL"
-
-echo "=== Tests complete ==="
-```
-
----
-
-## Script Dependencies
-
-Generated recursive scripts depend on base fact scripts:
-
-```
-ancestor.sh
-    └── depends on → parent.sh
-```
-
-**Loading order matters**:
-
-```bash
-# Correct order
-source parent.sh
-source ancestor.sh
-
-# Wrong order - will fail
-source ancestor.sh  # ERROR: parent_stream not found
-source parent.sh
+ancestor abraham  # Computes all
+unset _visited_ancestor
+declare -A _visited_ancestor
+ancestor isaac    # Fresh computation
 ```
 
 ---
 
 ## Troubleshooting
 
-### "Unknown procedure" Error
+### Unknown Procedure Error
 
 ```prolog
 ?- compile_recursive(my_pred/2, [], Code).
 ERROR: Unknown procedure: my_pred/2
 ```
 
-**Fix**: Load your predicate file first:
+**Cause**: Predicate not loaded or wrong arity.
+
+**Fix**:
 ```prolog
-?- ['my_predicates.pl'].
+?- listing(my_pred).  % Check what's loaded
+?- ['my_predicates.pl'].  % Load file
 ```
 
-### "source_sink does not exist" Error
+### Source Sink Error
 
 ```prolog
 ?- use_module(unifyweaver(core/recursive_compiler)).
 ERROR: source_sink `unifyweaver(...)' does not exist
 ```
 
-**Fix**: Load init.pl first:
+**Cause**: Library path not initialized.
+
+**Fix**:
 ```prolog
-?- ['education/init'].
+?- ['education/init'].  % Load init first
 ```
 
-### Empty Output from Script
+### Empty Output
 
 **Possible causes**:
-1. Base facts not loaded
-2. Wrong source order
-3. Predicate has no facts
+1. Facts not loaded before compilation
+2. Base fact script not sourced
+3. Wrong predicate arity
 
-**Debug**:
+**Fix**: Ensure correct sourcing order:
 ```bash
-# Check if functions exist
-declare -f parent_stream
-declare -f ancestor_all
-
-# Test base facts
-parent_stream | head -5
+source parent.sh   # Base facts FIRST
+source ancestor.sh
+ancestor abraham
 ```
 
 ---
 
-## Source Files
+## Related Documentation
 
-- `src/unifyweaver/core/recursive_compiler.pl`
-- `src/unifyweaver/core/stream_compiler.pl`
-- `src/unifyweaver/core/advanced/test_runner_inference.pl`
-
-## See Also
-
-- Chapter 1: Your First Program (tutorial)
-- Chapter 2: Stream Compilation (non-recursive predicates)
-- Chapter 6: Advanced Recursion (recursion patterns)
+- [Book 2 Chapter 2: Stream Compilation](../02_stream_compilation.md)
+- [Recursive Compiler Source](../../../../src/unifyweaver/core/recursive_compiler.pl)
+- [Stream Compiler Source](../../../../src/unifyweaver/core/stream_compiler.pl)

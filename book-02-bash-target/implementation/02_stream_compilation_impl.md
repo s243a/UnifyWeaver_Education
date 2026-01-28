@@ -3,72 +3,64 @@ SPDX-License-Identifier: MIT AND CC-BY-4.0
 Copyright (c) 2025 John William Creighton (s243a)
 -->
 
-# Chapter 2 Implementation: Stream Compilation
+# Chapter 2: Stream Compilation - Implementation Details
 
-**Detailed function documentation for RAG systems**
+This document provides function-level documentation for non-recursive predicate compilation.
 
-This document provides implementation details for stream compilation of non-recursive predicates.
-
----
-
-## Table of Contents
-
-1. [Stream Compilation Philosophy](#stream-compilation-philosophy)
-2. [compile_stream/3](#compile_stream3)
-3. [Join Operations](#join-operations)
-4. [Outer Joins](#outer-joins)
-5. [Multiple Rules (OR)](#multiple-rules-or)
-6. [compile_predicate/3](#compile_predicate3)
+**Source**: `src/unifyweaver/core/stream_compiler.pl`
 
 ---
 
-## Stream Compilation Philosophy
+## Overview: Stream Processing Philosophy
 
-The `stream_compiler` treats Prolog logic as a blueprint for Unix-style data pipelines:
+The stream compiler treats Prolog logic as a blueprint for Unix pipelines:
 
 ```
-Data Source → Filter → Transform → Join → Filter → Output
+Prolog Rule → Bash Pipeline
 ```
 
-**Benefits**:
-- Memory efficient (streaming, not buffering)
-- Composable with Unix tools
-- Natural fit for shell environments
-
-**Applicable to**: Non-recursive predicates (no self-calls).
+Data flows line-by-line, avoiding memory issues with large datasets.
 
 ---
 
 ## compile_stream/3
 
+Compiles non-recursive predicates to streaming Bash pipelines.
+
+### Signature
+
 ```prolog
-compile_stream(+Pred/Arity, +Options, -BashCode)
+compile_stream(+Predicate/Arity, +Options, -BashCode)
 ```
 
-**Purpose**: Compiles non-recursive predicates to streaming Bash pipelines.
-
-**Parameters**:
+### Parameters
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `Pred/Arity` | `atom/integer` | Predicate indicator |
+| `Predicate/Arity` | `atom/integer` | Non-recursive predicate to compile |
 | `Options` | `list` | Compilation options |
 | `BashCode` | `string` | Generated Bash code |
 
-**Example**:
+### Algorithm
 
-```prolog
-?- compile_stream(grandparent/2, [], Code).
-```
+1. **Collect clauses** - Gather all rules for the predicate
+2. **Analyze goals** - Identify joins, filters, projections
+3. **Generate pipeline** - Create Unix-style data flow
+4. **Add deduplication** - Append `sort -u` if needed
 
-**For the Prolog rule**:
+---
+
+## Stream Join Pattern
+
+### Prolog Source
+
 ```prolog
 grandparent(GP, GC) :-
     parent(GP, P),
     parent(P, GC).
 ```
 
-**Generated Bash**:
+### Generated Bash
 
 ```bash
 parent_join() {
@@ -86,82 +78,70 @@ grandparent() {
 }
 ```
 
+### How It Works
+
+1. `parent_stream` outputs all `parent:child` pairs
+2. Each line flows through `parent_join`
+3. For each line `(a:b)`, check all parent entries `(c:d)`
+4. If `b == c` (child matches parent), output `a:d`
+5. `sort -u` removes duplicates
+
 ---
 
-## Join Operations
+## Multiple Rules (OR Handling)
 
-### Inner Join
+### Prolog Source
 
-The most common join: combines rows where keys match.
-
-**Prolog**:
 ```prolog
-grandparent(GP, GC) :-
-    parent(GP, P),    % First relation
-    parent(P, GC).    % Second relation (P joins)
+child(C) :- parent(M, C), female(M).
+child(C) :- parent(F, C), male(F).
 ```
 
-**Join Logic**:
-```
-parent(GP, P) × parent(P, GC) where P matches
-```
-
-**Generated Bash**:
+### Generated Bash
 
 ```bash
-parent_join() {
-    while IFS= read -r input; do
-        IFS=":" read -r a b <<< "$input"  # a=GP, b=P
-        for key in "${!parent_data[@]}"; do
-            IFS=":" read -r c d <<< "$key"  # c=Parent, d=Child
-            [[ "$b" == "$c" ]] && echo "$a:$d"  # If P matches, output GP:GC
+child_stream() {
+    {
+        # Rule 1: mother
+        parent_stream | while IFS=: read -r m c; do
+            female_check "$m" && echo "$c"
         done
-    done
+
+        # Rule 2: father
+        parent_stream | while IFS=: read -r f c; do
+            male_check "$f" && echo "$c"
+        done
+    } | sort -u
 }
 ```
 
-**Data Flow**:
-```
-parent_stream       parent_join              Output
----------------     ------------------       ------
-abraham:isaac  -->  check all parents  -->   abraham:jacob
-                    isaac:jacob matches      abraham:esau
-                    output abraham:jacob
-```
+### Explanation
+
+- Both rules are evaluated independently
+- Results are concatenated with `{ ... }`
+- `sort -u` ensures each result appears once (set semantics)
 
 ---
 
-## Outer Joins
+## Outer Join Patterns
 
 ### LEFT OUTER JOIN
 
-Returns all left-side records, with matched right-side or `null`.
-
-**Prolog Pattern**:
 ```prolog
 employee_dept(Emp, Dept) :-
     employee(Emp, DeptId),
     (department(DeptId, Dept) ; Dept = null).
 ```
 
-The `(Goal ; Var = null)` pattern triggers LEFT JOIN detection.
+**Detection Pattern**: `(Goal ; Var = null)` in rule body
 
-**Generated Bash** (conceptual):
-
+**Generated Bash**:
 ```bash
 employee_dept() {
-    declare -A dept_lookup
-    # Build hashtable for right side
-    for key in "${!department_data[@]}"; do
-        IFS=":" read -r id name <<< "$key"
-        dept_lookup["$id"]="$name"
-    done
-
-    # Stream left side, join with null fallback
-    for key in "${!employee_data[@]}"; do
-        IFS=":" read -r emp dept_id <<< "$key"
-        if [[ -n "${dept_lookup[$dept_id]}" ]]; then
-            echo "$emp:${dept_lookup[$dept_id]}"
+    employee_stream | while IFS=: read -r emp deptid; do
+        dept=$(department_lookup "$deptid")
+        if [[ -n "$dept" ]]; then
+            echo "$emp:$dept"
         else
             echo "$emp:null"
         fi
@@ -171,150 +151,157 @@ employee_dept() {
 
 ### RIGHT OUTER JOIN
 
-Returns all right-side records.
-
-**Prolog Pattern**:
 ```prolog
 dept_employee(Emp, Dept) :-
     (employee(Emp, DeptId) ; Emp = null),
     department(DeptId, Dept).
 ```
 
+Swaps the left/right roles in the generated code.
+
 ### FULL OUTER JOIN
 
-Returns all records from both sides.
-
-**Prolog Pattern**:
 ```prolog
 full_join(Emp, Dept) :-
     (employee(Emp, DeptId) ; Emp = null),
     (department(DeptId, Dept) ; Dept = null).
 ```
 
----
-
-## Multiple Rules (OR)
-
-When a predicate has multiple rules, Prolog treats them as OR:
-
-**Prolog**:
-```prolog
-child(C) :- parent(M, C), female(M).  % Rule 1: has mother
-child(C) :- parent(F, C), male(F).    % Rule 2: has father
-```
-
-**Compilation Strategy**:
-
-1. Generate pipeline for each rule
-2. Concatenate outputs
-3. Apply `sort -u` to merge and deduplicate
-
-**Generated Bash**:
-
-```bash
-child_stream() {
-    {
-        # Rule 1: children with mothers
-        parent_stream | while IFS=":" read -r p c; do
-            female "$p" >/dev/null 2>&1 && echo "$c"
-        done
-
-        # Rule 2: children with fathers
-        parent_stream | while IFS=":" read -r p c; do
-            male "$p" >/dev/null 2>&1 && echo "$c"
-        done
-    } | sort -u
-}
-```
-
-**Why `sort -u`?**
-- Implements logical OR
-- Removes duplicates (same child from both rules)
-- Matches Prolog semantics
+Generates code with match tracking for both sides.
 
 ---
 
 ## compile_predicate/3
 
-```prolog
-compile_predicate(+Pred/Arity, +Options, -BashCode)
-```
+Wrapper that auto-selects the correct compiler.
 
-**Purpose**: Automatically selects the correct compiler based on predicate analysis.
-
-**Algorithm**:
-
-1. Analyze predicate for recursion
-2. If recursive → use `compile_recursive/3`
-3. If non-recursive → use `compile_stream/3`
-
-**Example**:
+### Signature
 
 ```prolog
-% Automatically uses stream_compiler (non-recursive)
-?- compile_predicate(grandparent/2, [], Code).
-
-% Automatically uses recursive_compiler (recursive)
-?- compile_predicate(ancestor/2, [], Code).
+compile_predicate(+Predicate/Arity, +Options, -BashCode)
 ```
 
-**Recommendation**: Use `compile_predicate/3` unless you need specific compiler features.
+### Behavior
+
+```prolog
+compile_predicate(P/A, Opts, Code) :-
+    (   is_recursive(P/A)
+    ->  compile_recursive(P/A, Opts, Code)
+    ;   compile_stream(P/A, Opts, Code)
+    ).
+```
+
+### Example
+
+```prolog
+?- compile_predicate(grandparent/2, [], Code).  % Uses stream_compiler
+?- compile_predicate(ancestor/2, [], Code).     % Uses recursive_compiler
+```
 
 ---
 
-## Variable Scope in Joins
+## Pipeline Building Blocks
 
-Variables in the `while` loop are local to the pipeline:
+### Source: parent_stream
 
 ```bash
-parent_join() {
-    while IFS= read -r input; do
-        IFS=":" read -r a b <<< "$input"  # a, b are local
-        # ...
+parent_stream() {
+    for key in "${!parent_data[@]}"; do
+        echo "$key"
     done
 }
 ```
 
-**Safe because**: We're transforming each line, not accumulating state.
+### Filter: Selection
 
-**See Chapter 4** for cases where variable scope matters.
+```bash
+# Prolog: adult(P) :- age(P, A), A >= 18.
+while IFS=: read -r person age; do
+    [[ "$age" -ge 18 ]] && echo "$person"
+done
+```
+
+### Transform: Projection
+
+```bash
+# Prolog: name(N) :- person(N, _, _).
+while IFS=: read -r name age city; do
+    echo "$name"
+done
+```
+
+### Combine: Join
+
+```bash
+# Prolog: gp(GP, GC) :- parent(GP, P), parent(P, GC).
+while IFS=: read -r gp p; do
+    parent "$p" | while IFS=: read -r _ gc; do
+        echo "$gp:$gc"
+    done
+done
+```
 
 ---
 
-## Generated Function Signatures
+## Variable Scope Notes
 
-For a predicate `foo/2`:
+### Safe Pattern (No State Accumulation)
 
-| Function | Purpose |
-|----------|---------|
-| `foo()` | Main entry point |
-| `foo_stream()` | Stream all results |
-| `foo_check()` | Test specific relationship |
-| `{dep}_join()` | Join helper for dependencies |
+```bash
+parent_stream | while IFS=: read -r a b; do
+    # Variables a, b are local to this iteration
+    # No state carried between lines
+    echo "$a:$b"
+done
+```
+
+### Caution: Subshell Variables
+
+```bash
+# WRONG: count won't be updated outside pipe
+count=0
+parent_stream | while read -r line; do
+    ((count++))  # Updates subshell variable only
+done
+echo "$count"  # Still 0!
+
+# CORRECT: Use process substitution
+count=0
+while read -r line; do
+    ((count++))
+done < <(parent_stream)
+echo "$count"  # Correct value
+```
+
+See [Book 2 Chapter 4](../04_variable_scope_and_process_substitution.md) for details.
 
 ---
 
 ## Performance Characteristics
 
-| Operation | Complexity | Memory |
-|-----------|------------|--------|
-| Fact lookup | O(1) | O(n) for hashtable |
-| Stream | O(n) | O(1) streaming |
-| Inner join | O(n × m) | O(1) streaming |
-| Outer join | O(n + m) | O(m) for hashtable |
-| sort -u | O(n log n) | O(n) buffering |
+### Streaming Advantages
 
-**Note**: `sort -u` buffers all data. For very large outputs, consider `[unique(false)]` constraint.
+| Aspect | Streaming | In-Memory |
+|--------|-----------|-----------|
+| Memory | O(1) per line | O(n) total |
+| Start latency | Immediate | Load all first |
+| Large datasets | Handles any size | May OOM |
+| Parallelism | Natural with pipes | Requires coordination |
+
+### Join Complexity
+
+| Join Type | Complexity | Notes |
+|-----------|------------|-------|
+| Nested loop | O(n × m) | Simple, works always |
+| Hash join | O(n + m) | Requires building hash first |
+| Sort-merge | O(n log n + m log m) | Good for sorted data |
+
+The stream compiler uses nested loop joins by default for simplicity.
 
 ---
 
-## Source Files
+## Related Documentation
 
-- `src/unifyweaver/core/stream_compiler.pl`
-- `src/unifyweaver/core/compiler_driver.pl`
-
-## See Also
-
-- Chapter 2: Stream Compilation (tutorial)
-- Chapter 3: Advanced Constraints (controlling deduplication)
-- Chapter 4: Variable Scope (pipeline gotchas)
+- [Book 2 Chapter 1: Your First Program](./01_first_program_impl.md)
+- [Book 2 Chapter 3: Constraints](../03_advanced_constraints.md)
+- [Stream Compiler Source](../../../../src/unifyweaver/core/stream_compiler.pl)

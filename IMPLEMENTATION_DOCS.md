@@ -26,10 +26,10 @@ education/
 │       ├── 03_architecture_impl.md       # Implementation details
 │       ├── 03_architecture_questions.md  # Q&A companion
 │       └── README.md
-├── book-14-ai-training/
+├── book-06-go-target/
 │   └── implementation/
-│       ├── 06_transformer_distillation_impl.md
-│       ├── 06_transformer_distillation_questions.md
+│       ├── 02_basic_compilation_impl.md
+│       ├── 02_basic_compilation_questions.md
 │       └── README.md
 └── ...
 ```
@@ -86,11 +86,41 @@ When adding implementation docs:
 
 | Book | Status | Chapters |
 |------|--------|----------|
-| Book 1: Foundations | Complete | Ch 1-3 (55 questions) |
-| Book 2: Bash Target | In Progress | Ch 1-3 (31 questions) |
-| Book 3: C# Target | Planned | |
-| Book 4: Workflows | Planned | |
+| Book 1: Foundations | In Progress | Ch 3 (12 questions) |
+| Book 2: Bash Target | In Progress | Ch 1-2 (19 questions) |
+| Book 3: C# Target | In Progress | Ch 3 (12 questions) |
+| Book 4: Workflows | In Progress | Ch 3 (11 questions) |
 | Book 5: Python Target | In Progress | Ch 3 (14 questions) |
-| Book 6: Go Target | Planned | |
-| Book 7: Cross-Target Glue | Planned | |
-| Book 14: AI Training | In Progress | Ch 6 (21 questions) |
+| Book 6: Go Target | In Progress | Ch 2 (9 questions) |
+| Book 7: Cross-Target Glue | In Progress | Ch 4 (11 questions) |
+| Book 8: Security & Firewall | In Progress | Ch 2 (12 questions) |
+| Book 9: Rust Target | In Progress | Ch 2 (10 questions) |
+| Book 10: SQL Target | In Progress | Ch 3 (11 questions) |
+| Book 11: Prolog Target | In Progress | Ch 2 (10 questions) |
+| Book 12: PowerShell Target | In Progress | Ch 2 (12 questions) |
+| Book 13: Semantic Search | In Progress | Ch 2 (12 questions) |
+| Book 14: AI Training | In Progress | Ch 6 (12 questions) |
+| Book 15: Perl Target | In Progress | Ch 2 (10 questions) |
+| Book 16: Ruby Target | In Progress | Ch 2 (10 questions) |
+| Book AWK Target | In Progress | Overview (10 questions) |
+
+### Other Books (other-books/)
+
+| Book | Status | Chapters |
+|------|--------|----------|
+| C Target | In Progress | Ch 2 (10 questions) |
+| C++ Target | In Progress | Ch 2 (10 questions) |
+| Clojure Target | In Progress | Ch 2 (10 questions) |
+| F# Target | In Progress | Ch 3 (10 questions) |
+| GUI Generation | In Progress | Ch 2 (10 questions) |
+| Haskell Target | In Progress | Ch 2 (10 questions) |
+| Java Target | In Progress | Ch 2 (10 questions) |
+| Jython Target | In Progress | Ch 2 (10 questions) |
+| Kotlin Target | In Progress | Ch 2 (10 questions) |
+| LLVM Target | In Progress | Ch 2 (10 questions) |
+| Scala Target | In Progress | Ch 2 (10 questions) |
+| TypeScript Target | In Progress | Ch 2 (10 questions) |
+| VB.NET Target | In Progress | Ch 3 (10 questions) |
+| WASM Target | In Progress | Ch 2 (10 questions) |
+
+## Total Questions: 337

@@ -5,403 +5,236 @@ Copyright (c) 2025 John William Creighton (s243a)
 
 # Chapter 6: Transformer Distillation - Questions
 
-**Q&A companion to [06_transformer_distillation_impl.md](./06_transformer_distillation_impl.md)**
-
-This document contains questions about rotation-based transformer distillation. Each question links to the relevant section in the implementation documentation.
-
----
-
-<a id="b14c06-q-what-is-givens-rotation"></a>
-## Q: What is a Givens rotation?
-
-A Givens rotation is a rotation in n-dimensional space that only affects two coordinates (i, j) while leaving all others unchanged.
-
-**Properties**:
-- Orthogonal: G^T G = I (preserves norms)
-- Determinant 1 (proper rotation)
-- Composable: Multiple rotations compose
-- Sparse: Only 4 non-trivial entries
-
-**Matrix form**:
-```
-G[i,i] = cos(θ)
-G[j,j] = cos(θ)
-G[i,j] = -sin(θ)
-G[j,i] = sin(θ)
-```
-
-**Reference**: [Givens Rotation Mathematics](./06_transformer_distillation_impl.md#givens-rotation-mathematics)
-
----
-
-<a id="b14c06-q-why-givens-rotations"></a>
-## Q: Why use Givens rotations for distillation?
-
-Any orthogonal matrix can be decomposed into Givens rotations. By selecting k < n(n-1)/2 rotation planes, we create a constrained rotation manifold that:
-
-1. Has fewer parameters (k angles vs n² matrix entries)
-2. Is always valid (no need to enforce orthogonality)
-3. Provides interpretable transformations (angles are meaningful)
-
-**Reference**: [Givens Rotation Mathematics](./06_transformer_distillation_impl.md#givens-rotation-mathematics)
-
----
-
-<a id="b14c06-q-optimal-angle-formula"></a>
-## Q: How do you compute the optimal Givens rotation angle?
-
-For source (x_i, x_j) and target (y_i, y_j):
-
-```
-θ = atan2(y_j, y_i) - atan2(x_j, x_i)
-```
-
-The angle is normalized to [-π, π] to avoid discontinuities.
-
-**Reference**: [compute_optimal_givens_angle()](./06_transformer_distillation_impl.md#compute_optimal_givens_angle)
-
----
-
-<a id="b14c06-q-angle-normalization"></a>
-## Q: Why is angle normalization important?
-
-Angles wrap around at ±π. Without normalization:
-- θ = 3π and θ = -π are the same rotation
-- Gradient descent can oscillate around the wrap point
-
-**Normalization**:
-```python
-while theta > math.pi:
-    theta -= 2 * math.pi
-while theta < -math.pi:
-    theta += 2 * math.pi
-```
-
-**Reference**: [Angle Normalization](./06_transformer_distillation_impl.md#angle-normalization)
-
----
-
-<a id="b14c06-q-optimal-rotation-params"></a>
-## Q: How does `compute_optimal_rotation_params()` work?
-
-Uses a **greedy sequential** approach:
-
-1. Start with input vector
-2. For each plane (i, j) in order:
-   - Compute optimal angle to rotate toward target
-   - Apply rotation
-   - Record angle
-3. Compute scale factor: `||target|| / ||rotated||`
-
-**Why sequential?** Joint optimization is non-convex and expensive. Sequential is fast (O(k × d)) and always converges.
-
-**Reference**: [compute_optimal_rotation_params()](./06_transformer_distillation_impl.md#compute_optimal_rotation_params)
-
----
-
-<a id="b14c06-q-plane-selection"></a>
-## Q: How are rotation planes selected?
-
-The GivensRotationLayer uses an **interleaved** strategy:
-
-```python
-for k in range(num_planes):
-    i = (2 * k) % embed_dim
-    j = (2 * k + 1) % embed_dim
-```
-
-Creates pairs: (0,1), (2,3), (4,5), ... then wraps around to cover the embedding space.
-
-**Reference**: [GivensRotationLayer](./06_transformer_distillation_impl.md#givensrotationlayer)
-
----
-
-<a id="b14c06-q-non-inplace-rotation"></a>
-## Q: Why does GivensRotationLayer use non-in-place operations?
-
-PyTorch autograd cannot track gradients through in-place operations on tensors needed for backward pass.
-
-**Solution**: Use `unbind` and `stack`:
-```python
-cols = list(x.unbind(dim=1))  # Split into columns
-# ... modify cols[i], cols[j] with new tensors ...
-return torch.stack(cols, dim=1)  # Reassemble
-```
-
-**Reference**: [GivensRotationLayer](./06_transformer_distillation_impl.md#givensrotationlayer)
-
----
-
-<a id="b14c06-q-rotation-transformer-architecture"></a>
-## Q: What is the RotationTransformer architecture?
-
-A transformer that predicts rotation parameters instead of output vectors:
-
-```
-Input → Input Projection → Transformer Encoder → Rotation Head
-                                                      ↓
-                                            angles [k] + scale [1]
-                                                      ↓
-                                            Apply GivensRotationLayer
-                                                      ↓
-                                                   Output
-```
-
-**Output dimension**: 65 parameters (64 angles + 1 scale) vs 384 for direct prediction.
-
-**Reference**: [RotationTransformer](./06_transformer_distillation_impl.md#rotationtransformer)
-
----
-
-<a id="b14c06-q-scaling-modes"></a>
-## Q: What scaling modes does RotationTransformer support?
-
-Three modes:
-
-| Mode | Description | Output params |
-|------|-------------|---------------|
-| `uniform` | Single scale for all dims | k + 1 |
-| `per_dim` | One scale per dimension | k + d |
-| `none` | No scaling (scale = 1) | k |
-
-**Recommended**: `uniform` - maintains geometric constraint.
-
-**Reference**: [RotationTransformer](./06_transformer_distillation_impl.md#rotationtransformer)
-
----
-
-<a id="b14c06-q-standard-vs-minimal"></a>
-## Q: What's the difference between standard and minimal transform projection?
-
-**Standard** blends output vectors:
-```
-output = Σ wᵢ × answer_embᵢ
-```
-Can produce outputs **anywhere** in embedding space.
-
-**Minimal** blends rotation parameters:
-```
-angles = Σ wᵢ × anglesᵢ
-scale = Σ wᵢ × scaleᵢ
-output = scale × R(angles) @ input
-```
-Output is **always** a valid rotation of input.
-
-**Reference**: [MinimalTransformProjection](./06_transformer_distillation_impl.md#minimaltransformprojection)
-
----
-
-<a id="b14c06-q-minimal-projection-example"></a>
-## Q: Can you show an example of why minimal projection matters?
-
-**Standard interpolation**:
-```
-head_1_output = [1, 0, 0]
-head_2_output = [0, 1, 0]
-interpolated = 0.5 * [1,0,0] + 0.5 * [0,1,0] = [0.5, 0.5, 0]
-```
-Result is NOT a rotation of input.
-
-**Minimal interpolation**:
-```
-head_1_angles = [θ₁, θ₂, ...]
-head_2_angles = [φ₁, φ₂, ...]
-blended_angles = 0.5 * [θ₁, ...] + 0.5 * [φ₁, ...]
-output = R(blended_angles) @ input  # Always valid rotation
-```
-
-**Reference**: [MinimalTransformProjection](./06_transformer_distillation_impl.md#minimaltransformprojection)
-
----
-
-<a id="b14c06-q-add-head"></a>
-## Q: How do I add heads to a MinimalTransformProjection?
-
-Use `add_head()` with centroid and transformation parameters:
-
-```python
-proj.add_head(
-    centroid=centroid_vector,     # [embed_dim]
-    angles=rotation_angles,        # [num_planes]
-    scale=scale_factor             # float
-)
-```
-
-Or create from LDA data with `from_lda_heads()`.
-
-**Reference**: [MinimalTransformProjection](./06_transformer_distillation_impl.md#minimaltransformprojection)
-
----
-
-<a id="b14c06-q-angle-supervised-training"></a>
-## Q: What is angle-supervised training?
-
-Instead of only supervising on output vectors, directly supervise on rotation angles:
-
-```
-L = w_output × L_output + w_angle × L_angle + w_scale × L_scale
-```
-
-Where:
-- `L_output` = MSE + cosine loss on output vectors
-- `L_angle` = circular distance² on angles
-- `L_scale` = MSE on scale factor
-
-**Reference**: [train_rotation_distillation_angle_supervised()](./06_transformer_distillation_impl.md#train_rotation_distillation_angle_supervised)
-
----
-
-<a id="b14c06-q-circular-loss-problem"></a>
-## Q: Why does standard MSE fail for angle loss?
-
-Angles wrap at ±π. Standard MSE gives wrong distances:
-
-```
-pred = -π + 0.1
-target = π - 0.1
-MSE = (pred - target)² ≈ 37  # Wrong!
-Actual angular distance: 0.2 rad
-```
-
-**Reference**: [Circular Angle Loss](./06_transformer_distillation_impl.md#circular-angle-loss)
-
----
-
-<a id="b14c06-q-circular-loss-solution"></a>
-## Q: How does circular angle loss work?
-
-Use `atan2` to compute shortest path around the circle:
-
-```python
-def circular_mse_loss(pred_angles, target_angles):
-    diff = pred_angles - target_angles
-    circular_diff = torch.atan2(torch.sin(diff), torch.cos(diff))
-    return (circular_diff ** 2).mean()
-```
-
-`atan2(sin(θ), cos(θ)) = θ` for θ ∈ [-π, π], wraps correctly otherwise.
-
-**Reference**: [Circular Angle Loss](./06_transformer_distillation_impl.md#circular-angle-loss)
-
----
-
-<a id="b14c06-q-recommended-hyperparams"></a>
-## Q: What are the recommended hyperparameters for angle-supervised training?
-
-| Parameter | Recommended | Notes |
-|-----------|-------------|-------|
-| output_weight | 0.5 | Balance with angle supervision |
-| angle_weight | 0.5 | Direct geometric supervision |
-| scale_weight | 0.1 | Scale is less critical |
-| cosine_weight | 0.7 | Cosine ensures direction |
-| learning_rate | 1e-4 | Standard for transformers |
-| num_epochs | 100-200 | Until convergence |
-
-**Reference**: [train_rotation_distillation_angle_supervised()](./06_transformer_distillation_impl.md#train_rotation_distillation_angle_supervised)
-
----
-
-<a id="b14c06-q-test-results"></a>
-## Q: What accuracy does rotation distillation achieve?
-
-Synthetic data test (8 heads, 64 rotation planes, 100 epochs):
-
-| Metric | Result |
-|--------|--------|
-| Mean Cosine Similarity | **0.9997 ± 0.0001** |
-| Mean MSE | 0.000001 |
-| Min Cosine | 0.9991 |
-| Max Cosine | 1.0000 |
-| Mean angle | 28.91° |
-| Max angle | 113.66° |
-
-**Reference**: [06_transformer_distillation.md](../06_transformer_distillation.md#validation-results-synthetic-data)
-
----
-
-<a id="b14c06-q-when-use-rotation"></a>
-## Q: When should I use rotation-based distillation?
-
-**Use rotation approach when**:
-- Interpretability matters (angles are meaningful)
-- Want constrained geometric transformations
-- Need output to stay "close" to input
-
-**Stay with standard when**:
-- Transformations aren't naturally rotational
-- Need maximum expressivity
-- Simpler training preferred
-
-**Reference**: [06_transformer_distillation.md](../06_transformer_distillation.md#when-to-use-rotation-based-distillation)
-
----
-
-<a id="b14c06-q-parameter-efficiency"></a>
-## Q: How does rotation distillation reduce parameters?
-
-**Standard output**: 384 parameters (full embedding dimension)
-
-**Rotation output**: 65 parameters
-- 64 rotation angles
-- 1 scale factor
-
-**Reduction**: 384 → 65 = **83% fewer output parameters**
-
-The geometric constraint acts as a strong prior.
-
-**Reference**: [RotationTransformer](./06_transformer_distillation_impl.md#rotationtransformer)
-
----
-
-<a id="b14c06-q-sequential-limitations"></a>
-## Q: What are the limitations of sequential angle computation?
-
-- Order of planes matters (different orders give different angles)
-- May not find globally optimal solution
-- Assumes planes are pre-selected (not optimized)
-
-However, in practice:
-- Works well when planes cover embedding space
-- Fast: O(k × d) complexity
-- Always converges (each step improves alignment)
-
-**Reference**: [compute_optimal_rotation_params()](./06_transformer_distillation_impl.md#compute_optimal_rotation_params)
-
----
-
-<a id="b14c06-q-gradient-flow"></a>
-## Q: Does circular loss have well-defined gradients?
-
-Yes, everywhere except exactly at ±π (measure zero).
-
-The gradient correctly points toward the shorter path around the circle, enabling smooth optimization.
-
-**Reference**: [Circular Angle Loss](./06_transformer_distillation_impl.md#circular-angle-loss)
+Q&A companion for [06_transformer_distillation_impl.md](./06_transformer_distillation_impl.md).
 
 ---
 
 ## Question Index
 
-| ID | Topic |
-|----|-------|
-| [b14c06-q-what-is-givens-rotation](#b14c06-q-what-is-givens-rotation) | Givens rotation definition |
-| [b14c06-q-why-givens-rotations](#b14c06-q-why-givens-rotations) | Why use Givens rotations |
-| [b14c06-q-optimal-angle-formula](#b14c06-q-optimal-angle-formula) | Optimal angle formula |
-| [b14c06-q-angle-normalization](#b14c06-q-angle-normalization) | Angle normalization |
-| [b14c06-q-optimal-rotation-params](#b14c06-q-optimal-rotation-params) | compute_optimal_rotation_params |
-| [b14c06-q-plane-selection](#b14c06-q-plane-selection) | Plane selection strategy |
-| [b14c06-q-non-inplace-rotation](#b14c06-q-non-inplace-rotation) | Non-in-place operations |
-| [b14c06-q-rotation-transformer-architecture](#b14c06-q-rotation-transformer-architecture) | RotationTransformer architecture |
-| [b14c06-q-scaling-modes](#b14c06-q-scaling-modes) | Scaling modes |
-| [b14c06-q-standard-vs-minimal](#b14c06-q-standard-vs-minimal) | Standard vs minimal projection |
-| [b14c06-q-minimal-projection-example](#b14c06-q-minimal-projection-example) | Minimal projection example |
-| [b14c06-q-add-head](#b14c06-q-add-head) | Adding projection heads |
-| [b14c06-q-angle-supervised-training](#b14c06-q-angle-supervised-training) | Angle-supervised training |
-| [b14c06-q-circular-loss-problem](#b14c06-q-circular-loss-problem) | Why MSE fails for angles |
-| [b14c06-q-circular-loss-solution](#b14c06-q-circular-loss-solution) | Circular loss solution |
-| [b14c06-q-recommended-hyperparams](#b14c06-q-recommended-hyperparams) | Recommended hyperparameters |
-| [b14c06-q-test-results](#b14c06-q-test-results) | Test results |
-| [b14c06-q-when-use-rotation](#b14c06-q-when-use-rotation) | When to use rotation distillation |
-| [b14c06-q-parameter-efficiency](#b14c06-q-parameter-efficiency) | Parameter efficiency |
-| [b14c06-q-sequential-limitations](#b14c06-q-sequential-limitations) | Sequential algorithm limitations |
-| [b14c06-q-gradient-flow](#b14c06-q-gradient-flow) | Gradient flow |
+1. [What is the H^L = N equivalence?](#b14c06-q-hl-equivalence)
+2. [Why is H=4 recommended?](#b14c06-q-why-h4)
+3. [What does optimal_architecture do?](#b14c06-q-optimal-architecture)
+4. [What is the ProjectionTransformer architecture?](#b14c06-q-projection-transformer)
+5. [What is the loss function for distillation?](#b14c06-q-loss-function)
+6. [Why is cosine loss essential?](#b14c06-q-why-cosine)
+7. [What does train_distillation do?](#b14c06-q-train-distillation)
+8. [What validation metrics should I expect?](#b14c06-q-validation-metrics)
+9. [What is the latency crossover point?](#b14c06-q-latency-crossover)
+10. [When should I use transformer vs LDA?](#b14c06-q-when-transformer)
+11. [How do I run transformer distillation?](#b14c06-q-run-distillation)
+12. [What are the key hyperparameters?](#b14c06-q-hyperparameters)
+
+---
+
+## Questions and Answers
+
+### <a id="b14c06-q-hl-equivalence"></a>Q1: What is the H^L = N equivalence?
+
+**Answer**: A transformer with H attention heads per layer and L layers has routing capacity equivalent to H^L flat LDA heads:
+
+| H | L | Equivalent Flat Heads |
+|---|---|----------------------|
+| 4 | 2 | 4² = 16 |
+| 4 | 3 | 4³ = 64 |
+| 4 | 4 | 4⁴ = 256 |
+
+Each layer routes through H attention patterns, and layers compose sequentially: H × H × ... = H^L combinations.
+
+**See**: [Overview: H^L = N Equivalence](./06_transformer_distillation_impl.md#overview-hl--n-equivalence)
+
+---
+
+### <a id="b14c06-q-why-h4"></a>Q2: Why is H=4 recommended?
+
+**Answer**: Mathematical analysis shows optimal H ≈ e ≈ 2.718, but practical constraints favor powers of 2. H=4 balances:
+
+1. **Parallelization efficiency** - Power of 2 fits GPU architectures
+2. **Minimal parameters** - H × L is minimized
+3. **Close to theoretical optimum** - Good approximation
+
+**See**: [Why H=4?](./06_transformer_distillation_impl.md#why-h4)
+
+---
+
+### <a id="b14c06-q-optimal-architecture"></a>Q3: What does optimal_architecture do?
+
+**Answer**: Selects H and L given target N flat heads:
+
+```python
+def optimal_architecture(n_flat_heads, prefer_h=4):
+    # Solve H^L = N for L
+    l_exact = math.log(n_flat_heads) / math.log(prefer_h)
+    # Pick floor or ceiling based on closer approximation
+    ...
+    return (H, L)
+```
+
+Examples:
+- `optimal_architecture(18)` → (4, 2) = 16 heads
+- `optimal_architecture(100)` → (4, 3) = 64 heads
+
+**See**: [optimal_architecture Function](./06_transformer_distillation_impl.md#optimal_architecture-function)
+
+---
+
+### <a id="b14c06-q-projection-transformer"></a>Q4: What is the ProjectionTransformer architecture?
+
+**Answer**: A transformer encoder with:
+
+1. **Input projection** - Linear layer (embed_dim → embed_dim)
+2. **Transformer encoder** - H heads × L layers with GELU activation
+3. **Output projection** - Linear layer (embed_dim → embed_dim)
+
+```python
+transformer = ProjectionTransformer(
+    embed_dim=384,
+    num_heads=4,      # H
+    num_layers=2,     # L
+    ff_dim=512
+)
+```
+
+**See**: [ProjectionTransformer Class](./06_transformer_distillation_impl.md#projectiontransformer-class)
+
+---
+
+### <a id="b14c06-q-loss-function"></a>Q5: What is the loss function for distillation?
+
+**Answer**: Combined MSE and cosine loss:
+
+```
+L = (1 - λ) × MSE(pred, target) + λ × (1 - cosine_sim(pred, target))
+```
+
+Recommended: λ = 0.7 (cosine-weighted)
+
+**See**: [Loss Function](./06_transformer_distillation_impl.md#loss-function)
+
+---
+
+### <a id="b14c06-q-why-cosine"></a>Q6: Why is cosine loss essential?
+
+**Answer**: MSE alone achieves low error but **wrong direction**. A prediction with low MSE might still point in a different direction than the target.
+
+Cosine loss ensures **directional alignment** - the transformer learns to output vectors pointing the same direction as LDA outputs, not just vectors with similar magnitudes.
+
+**See**: [Loss Function](./06_transformer_distillation_impl.md#loss-function)
+
+---
+
+### <a id="b14c06-q-train-distillation"></a>Q7: What does train_distillation do?
+
+**Answer**: Trains the transformer to match LDA outputs:
+
+```python
+history = train_distillation(
+    transformer=transformer,      # Student
+    lda_projection=lda,          # Teacher
+    query_embeddings=train_data,
+    num_epochs=200,
+    cosine_weight=0.7
+)
+```
+
+Returns training history with loss, MSE, and cosine metrics per epoch.
+
+**See**: [train_distillation Function](./06_transformer_distillation_impl.md#train_distillation-function)
+
+---
+
+### <a id="b14c06-q-validation-metrics"></a>Q8: What validation metrics should I expect?
+
+**Answer**: With proper training (N=18, H=4, L=2):
+
+| Metric | Expected Value |
+|--------|----------------|
+| Mean Cosine Similarity | > 0.99 |
+| Min Cosine Similarity | > 0.98 |
+| Standard Deviation | < 0.01 |
+
+**99.28% cosine similarity** validates the H^L = N conjecture.
+
+**See**: [Validation Metrics](./06_transformer_distillation_impl.md#validation-metrics)
+
+---
+
+### <a id="b14c06-q-latency-crossover"></a>Q9: What is the latency crossover point?
+
+**Answer**: At N=18 heads:
+
+| Scenario | Slowdown | Crossover Point |
+|----------|----------|-----------------|
+| Single query | 24x slower | >400 heads |
+| Batched (32) | 1.5x slower | ~27 heads |
+
+At small scale, LDA wins due to GPU kernel overhead. Transformer benefits emerge at larger scale.
+
+**See**: [Latency Analysis](./06_transformer_distillation_impl.md#latency-analysis)
+
+---
+
+### <a id="b14c06-q-when-transformer"></a>Q10: When should I use transformer vs LDA?
+
+**Answer**:
+
+**Use Transformer when:**
+- N > 400 heads (single) or N > 30 (batched)
+- Memory constrained (mobile/edge)
+- GPU available
+
+**Stay with LDA when:**
+- N < 400 heads (most cases)
+- Interpretability matters
+- Clusters change frequently
+- CPU-only inference
+
+**See**: [When to Use Each Approach](./06_transformer_distillation_impl.md#when-to-use-each-approach)
+
+---
+
+### <a id="b14c06-q-run-distillation"></a>Q11: How do I run transformer distillation?
+
+**Answer**: Use the command line script:
+
+```bash
+python3 scripts/test_transformer_distillation.py \
+    --db playbooks/lda-training-data/lda.db \
+    --epochs 200 \
+    --cosine-weight 0.7
+```
+
+Or programmatically:
+```python
+from projection_transformer import ProjectionTransformer, train_distillation
+transformer = ProjectionTransformer(384, 4, 2, 512)
+train_distillation(transformer, lda, data)
+```
+
+**See**: [Command Line Usage](./06_transformer_distillation_impl.md#command-line-usage)
+
+---
+
+### <a id="b14c06-q-hyperparameters"></a>Q12: What are the key hyperparameters?
+
+**Answer**:
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `num_epochs` | 200 | Training epochs |
+| `cosine_weight` | 0.7 | λ in loss function |
+| `learning_rate` | 1e-4 | Optimizer LR |
+| `num_heads` | 4 | H (heads per layer) |
+| `num_layers` | 2 | L (number of layers) |
+| `ff_dim` | 512 | Feed-forward dimension |
+
+**See**: [train_distillation Function](./06_transformer_distillation_impl.md#train_distillation-function)
+
+---
+
+## Summary
+
+Transformer distillation provides:
+- H^L = N equivalence for architecture selection
+- Combined MSE + cosine loss for directional alignment
+- 99%+ cosine similarity with proper training
+- Crossover at >400 heads (single) or ~27 (batched)

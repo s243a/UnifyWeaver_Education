@@ -5,110 +5,83 @@ Copyright (c) 2025 John William Creighton (s243a)
 
 # Chapter 2: Stream Compilation - Questions
 
-**Q&A companion to [02_stream_compilation_impl.md](./02_stream_compilation_impl.md)**
+Q&A companion for [02_stream_compilation_impl.md](./02_stream_compilation_impl.md).
 
 ---
 
-<a id="b02c02-q-stream-philosophy"></a>
-## Q: What is the stream compilation philosophy?
+## Question Index
 
-Treat Prolog logic as a blueprint for Unix-style pipelines:
-
-```
-Data Source → Filter → Transform → Join → Output
-```
-
-Benefits: Memory efficient, composable, natural for shell.
-
-**Reference**: [Stream Compilation Philosophy](./02_stream_compilation_impl.md#stream-compilation-philosophy)
+1. [What is the stream compiler's philosophy?](#b02c02-q-philosophy)
+2. [What does compile_stream/3 do?](#b02c02-q-compile-stream)
+3. [How are stream joins implemented?](#b02c02-q-stream-join)
+4. [How are multiple rules (OR) handled?](#b02c02-q-or-handling)
+5. [What is a LEFT OUTER JOIN pattern?](#b02c02-q-left-outer)
+6. [What does compile_predicate/3 do?](#b02c02-q-compile-predicate)
+7. [What are the pipeline building blocks?](#b02c02-q-building-blocks)
+8. [What is the variable scope issue with pipes?](#b02c02-q-variable-scope)
+9. [What are the performance characteristics?](#b02c02-q-performance)
+10. [When should I use streaming vs in-memory?](#b02c02-q-when-streaming)
 
 ---
 
-<a id="b02c02-q-compile-stream"></a>
-## Q: How do I use compile_stream/3?
+## Questions and Answers
+
+### <a id="b02c02-q-philosophy"></a>Q1: What is the stream compiler's philosophy?
+
+**Answer**: The stream compiler treats Prolog logic as a blueprint for Unix pipelines. Data flows line-by-line through the pipeline, which:
+- Avoids loading large datasets into memory
+- Processes data one line at a time
+- Uses standard Unix tools (pipes, while loops)
+
+This is efficient for large datasets that don't fit in memory.
+
+**See**: [Overview: Stream Processing Philosophy](./02_stream_compilation_impl.md#overview-stream-processing-philosophy)
+
+---
+
+### <a id="b02c02-q-compile-stream"></a>Q2: What does compile_stream/3 do?
+
+**Answer**: `compile_stream/3` compiles non-recursive predicates to Bash pipelines:
 
 ```prolog
-?- compile_stream(grandparent/2, [], Code).
+compile_stream(+Predicate/Arity, +Options, -BashCode)
 ```
 
-Compiles non-recursive predicates to streaming pipelines.
+Algorithm:
+1. Collect all clauses for the predicate
+2. Analyze goals (joins, filters, projections)
+3. Generate Unix-style pipeline
+4. Add `sort -u` for deduplication if needed
 
-**Reference**: [compile_stream/3](./02_stream_compilation_impl.md#compile_stream3)
+**See**: [compile_stream/3](./02_stream_compilation_impl.md#compile_stream3)
 
 ---
 
-<a id="b02c02-q-inner-join"></a>
-## Q: How does inner join work in stream compilation?
+### <a id="b02c02-q-stream-join"></a>Q3: How are stream joins implemented?
 
-For `grandparent(GP, GC) :- parent(GP, P), parent(P, GC)`:
+**Answer**: Joins use nested loop pattern:
 
 ```bash
 parent_join() {
     while IFS= read -r input; do
-        IFS=":" read -r a b <<< "$input"  # a=GP, b=P
+        IFS=":" read -r a b <<< "$input"
         for key in "${!parent_data[@]}"; do
             IFS=":" read -r c d <<< "$key"
-            [[ "$b" == "$c" ]] && echo "$a:$d"  # Join on P
+            [[ "$b" == "$c" ]] && echo "$a:$d"
         done
     done
 }
 ```
 
-**Reference**: [Join Operations](./02_stream_compilation_impl.md#join-operations)
+For each input line (a:b), iterate over all facts (c:d) and output matches where the join condition holds.
+
+**See**: [Stream Join Pattern](./02_stream_compilation_impl.md#stream-join-pattern)
 
 ---
 
-<a id="b02c02-q-left-join"></a>
-## Q: How do I write a LEFT OUTER JOIN in Prolog?
+### <a id="b02c02-q-or-handling"></a>Q4: How are multiple rules (OR) handled?
 
-Use the `(Goal ; Var = null)` pattern:
-
-```prolog
-employee_dept(Emp, Dept) :-
-    employee(Emp, DeptId),
-    (department(DeptId, Dept) ; Dept = null).
-```
-
-This returns all employees, with null for unmatched departments.
-
-**Reference**: [Outer Joins](./02_stream_compilation_impl.md#outer-joins)
-
----
-
-<a id="b02c02-q-right-join"></a>
-## Q: How do I write a RIGHT OUTER JOIN?
-
-```prolog
-dept_employee(Emp, Dept) :-
-    (employee(Emp, DeptId) ; Emp = null),
-    department(DeptId, Dept).
-```
-
-Returns all departments, with null for empty ones.
-
-**Reference**: [Outer Joins](./02_stream_compilation_impl.md#outer-joins)
-
----
-
-<a id="b02c02-q-full-join"></a>
-## Q: How do I write a FULL OUTER JOIN?
-
-```prolog
-full_join(Emp, Dept) :-
-    (employee(Emp, DeptId) ; Emp = null),
-    (department(DeptId, Dept) ; Dept = null).
-```
-
-Returns all records from both sides.
-
-**Reference**: [Outer Joins](./02_stream_compilation_impl.md#outer-joins)
-
----
-
-<a id="b02c02-q-multiple-rules"></a>
-## Q: How does stream compiler handle multiple rules (OR)?
-
-Generates pipeline for each rule, concatenates, deduplicates:
+**Answer**: Multiple rules generate separate pipelines that are concatenated:
 
 ```bash
 child_stream() {
@@ -121,64 +94,132 @@ child_stream() {
 }
 ```
 
-**Reference**: [Multiple Rules (OR)](./02_stream_compilation_impl.md#multiple-rules-or)
+The `{ ... }` groups outputs from all rules, and `sort -u` removes duplicates to maintain set semantics.
+
+**See**: [Multiple Rules (OR Handling)](./02_stream_compilation_impl.md#multiple-rules-or-handling)
 
 ---
 
-<a id="b02c02-q-compile-predicate"></a>
-## Q: What is compile_predicate/3?
+### <a id="b02c02-q-left-outer"></a>Q5: What is a LEFT OUTER JOIN pattern?
 
-Auto-selects the right compiler:
+**Answer**: The compiler detects `(Goal ; Var = null)` patterns:
 
 ```prolog
-?- compile_predicate(grandparent/2, [], Code).  % Uses stream_compiler
-?- compile_predicate(ancestor/2, [], Code).      % Uses recursive_compiler
+employee_dept(Emp, Dept) :-
+    employee(Emp, DeptId),
+    (department(DeptId, Dept) ; Dept = null).
 ```
 
-**Recommendation**: Use this unless you need specific compiler features.
+This generates code that outputs all employees, with their department if found or `null` if not:
 
-**Reference**: [compile_predicate/3](./02_stream_compilation_impl.md#compile_predicate3)
+```bash
+if [[ -n "$dept" ]]; then
+    echo "$emp:$dept"
+else
+    echo "$emp:null"
+fi
+```
 
----
-
-<a id="b02c02-q-generated-functions"></a>
-## Q: What functions are generated for a predicate?
-
-For `foo/2`:
-- `foo()` - Main entry point
-- `foo_stream()` - Stream all results
-- `foo_check()` - Test specific relationship
-- `{dep}_join()` - Join helpers
-
-**Reference**: [Generated Function Signatures](./02_stream_compilation_impl.md#generated-function-signatures)
+**See**: [Outer Join Patterns](./02_stream_compilation_impl.md#outer-join-patterns)
 
 ---
 
-<a id="b02c02-q-performance"></a>
-## Q: What's the performance of stream operations?
+### <a id="b02c02-q-compile-predicate"></a>Q6: What does compile_predicate/3 do?
 
-| Operation | Time | Memory |
-|-----------|------|--------|
-| Fact lookup | O(1) | O(n) |
-| Stream | O(n) | O(1) |
-| Inner join | O(n×m) | O(1) |
-| sort -u | O(n log n) | O(n) |
+**Answer**: It's a wrapper that automatically selects the correct compiler:
 
-**Reference**: [Performance Characteristics](./02_stream_compilation_impl.md#performance-characteristics)
+```prolog
+compile_predicate(P/A, Opts, Code) :-
+    (   is_recursive(P/A)
+    ->  compile_recursive(P/A, Opts, Code)
+    ;   compile_stream(P/A, Opts, Code)
+    ).
+```
+
+Use this instead of calling `compile_stream` or `compile_recursive` directly.
+
+**See**: [compile_predicate/3](./02_stream_compilation_impl.md#compile_predicate3)
 
 ---
 
-## Question Index
+### <a id="b02c02-q-building-blocks"></a>Q7: What are the pipeline building blocks?
 
-| ID | Topic |
-|----|-------|
-| [b02c02-q-stream-philosophy](#b02c02-q-stream-philosophy) | Stream philosophy |
-| [b02c02-q-compile-stream](#b02c02-q-compile-stream) | compile_stream/3 |
-| [b02c02-q-inner-join](#b02c02-q-inner-join) | Inner join |
-| [b02c02-q-left-join](#b02c02-q-left-join) | LEFT OUTER JOIN |
-| [b02c02-q-right-join](#b02c02-q-right-join) | RIGHT OUTER JOIN |
-| [b02c02-q-full-join](#b02c02-q-full-join) | FULL OUTER JOIN |
-| [b02c02-q-multiple-rules](#b02c02-q-multiple-rules) | Multiple rules (OR) |
-| [b02c02-q-compile-predicate](#b02c02-q-compile-predicate) | compile_predicate/3 |
-| [b02c02-q-generated-functions](#b02c02-q-generated-functions) | Generated functions |
-| [b02c02-q-performance](#b02c02-q-performance) | Performance |
+**Answer**: Four main building blocks:
+
+1. **Source** - `parent_stream` generates data
+2. **Filter (Selection)** - `[[ condition ]]` keeps matching lines
+3. **Transform (Projection)** - Extract/reorder fields
+4. **Combine (Join)** - Nested loops matching on join key
+
+These compose into complex pipelines via `|`.
+
+**See**: [Pipeline Building Blocks](./02_stream_compilation_impl.md#pipeline-building-blocks)
+
+---
+
+### <a id="b02c02-q-variable-scope"></a>Q8: What is the variable scope issue with pipes?
+
+**Answer**: Variables modified in a pipe subshell don't persist:
+
+```bash
+# WRONG
+count=0
+data | while read line; do ((count++)); done
+echo "$count"  # Still 0!
+
+# CORRECT: Use process substitution
+count=0
+while read line; do ((count++)); done < <(data)
+echo "$count"  # Correct value
+```
+
+For stateless line-by-line processing (most stream compilation), this isn't an issue.
+
+**See**: [Variable Scope Notes](./02_stream_compilation_impl.md#variable-scope-notes)
+
+---
+
+### <a id="b02c02-q-performance"></a>Q9: What are the performance characteristics?
+
+**Answer**:
+
+| Aspect | Streaming | In-Memory |
+|--------|-----------|-----------|
+| Memory | O(1) per line | O(n) total |
+| Start latency | Immediate | Load all first |
+| Large datasets | Handles any size | May OOM |
+
+Join complexity: O(n × m) for nested loop joins.
+
+**See**: [Performance Characteristics](./02_stream_compilation_impl.md#performance-characteristics)
+
+---
+
+### <a id="b02c02-q-when-streaming"></a>Q10: When should I use streaming vs in-memory?
+
+**Answer**:
+
+**Use Streaming when:**
+- Dataset is large or unbounded
+- Memory is constrained
+- Processing can start immediately
+- Natural pipeline structure
+
+**Use In-Memory when:**
+- Dataset fits easily in RAM
+- Need random access to data
+- Complex multi-pass algorithms
+- Latency-sensitive applications
+
+**See**: [Performance Characteristics](./02_stream_compilation_impl.md#performance-characteristics)
+
+---
+
+## Summary
+
+Stream compilation provides:
+- Unix pipeline-based code generation
+- Line-by-line processing (O(1) memory)
+- Nested loop joins
+- Outer join support (LEFT, RIGHT, FULL)
+- Automatic compiler selection via `compile_predicate/3`

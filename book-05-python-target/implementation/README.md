@@ -3,54 +3,26 @@ SPDX-License-Identifier: MIT AND CC-BY-4.0
 Copyright (c) 2025 John William Creighton (s243a)
 -->
 
-# Book 5: Implementation Documentation
+# Book 5: Python Target - Implementation Documentation
 
-**Deep-dive technical documentation for RAG systems**
+This folder contains detailed technical documentation for Python target compilation.
 
-This folder contains detailed implementation documentation for Book 5: Python Target.
+## Documents
 
-## Available Docs
+### Chapter 3: Generator Mode
 
-| File | Chapter | Key Topics |
-|------|---------|------------|
-| `03_generator_mode_impl.md` | Ch 3: Generator Mode | Semi-naive evaluation, FrozenDict, fixpoint |
-| `03_generator_mode_questions.md` | Ch 3: Generator Mode | Q&A companion with 14 questions |
+| Document | Description |
+|----------|-------------|
+| [03_generator_mode_impl.md](./03_generator_mode_impl.md) | Function-level docs for semi-naive fixpoint, FrozenDict |
+| [03_generator_mode_questions.md](./03_generator_mode_questions.md) | 14 Q&A pairs (b05c03-q-*) |
 
-## Purpose
+## Question Count
 
-These implementation docs are designed for:
+| Chapter | Questions |
+|---------|-----------|
+| Chapter 3 | 14 |
+| **Total** | **14** |
 
-1. **RAG Systems** - Atomic, self-contained sections for retrieval
-2. **ML Engineers** - Understanding fixpoint evaluation
-3. **Python Developers** - Generator-based data processing
+## For RAG Systems
 
-## Key Concepts
-
-### Semi-Naive Evaluation
-
-Unlike Bash's BFS approach, Python generator mode uses Datalog-style semi-naive fixpoint evaluation:
-
-1. Maintain `total` (all facts) and `delta` (new facts)
-2. Apply rules only to `delta` facts
-3. Iterate until fixpoint (no new facts)
-
-### FrozenDict
-
-Python dicts are unhashable. `FrozenDict` provides:
-- Immutability for set membership
-- O(1) hash-based lookup
-- Dictionary-like interface
-
-## Source Files
-
-- `src/unifyweaver/targets/python_target.pl`
-- `src/unifyweaver/targets/python_runtime/`
-
-## Contributing
-
-When adding implementation docs:
-
-1. Document Python-specific patterns
-2. Include type hints in examples
-3. Compare with other targets where useful
-4. Add performance characteristics
+Chunk at H2 headers. Each question has a unique anchor ID starting with `b05c03-` for safe concatenation.
