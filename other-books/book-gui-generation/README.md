@@ -21,6 +21,7 @@ A guide to generating complete frontend applications from declarative Prolog spe
 6. [Accessibility](06_accessibility.md) - ARIA, keyboard navigation
 7. [Responsive Design](07_responsive_design.md) - Breakpoints, adaptive layouts
 8. [Theming](08_theming.md) - Colors, typography, dark mode
+9. [Visualization Modules](09_visualization_modules.md) - Self-contained HTML generation (Cytoscape.js, Chart.js, Pyodide)
 
 ## Prerequisites
 
@@ -57,6 +58,7 @@ A guide to generating complete frontend applications from declarative Prolog spe
 - **Reactive Data Binding**: Connect Prolog facts to UI state
 - **Accessibility Built-in**: ARIA attributes and keyboard navigation
 - **Responsive**: Breakpoint-based adaptive layouts
+- **Visualization Modules**: Self-contained Prolog modules that generate complete HTML apps with Cytoscape.js, Chart.js, or Pyodide
 
 ## See Also
 

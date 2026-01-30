@@ -112,7 +112,7 @@ When adding implementation docs:
 | C++ Target | In Progress | Ch 2 (10 questions) |
 | Clojure Target | In Progress | Ch 2 (10 questions) |
 | F# Target | In Progress | Ch 3 (10 questions) |
-| GUI Generation | In Progress | Ch 2 (10 questions) |
+| GUI Generation | In Progress | Ch 2, 9 (20 questions) |
 | Haskell Target | In Progress | Ch 2 (10 questions) |
 | Java Target | In Progress | Ch 2 (10 questions) |
 | Jython Target | In Progress | Ch 2 (10 questions) |
@@ -123,4 +123,4 @@ When adding implementation docs:
 | VB.NET Target | In Progress | Ch 3 (10 questions) |
 | WASM Target | In Progress | Ch 2 (10 questions) |
 
-## Total Questions: 337
+## Total Questions: 347
