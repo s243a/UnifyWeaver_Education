@@ -4,6 +4,11 @@ This folder contains educational materials for additional targets and specialize
 
 ## Available Books
 
+### AI & Agents
+| Book | Topic | Status |
+|------|-------|--------|
+| [book-ai-agents](book-ai-agents/) | AI Agents, Agent Loop, Tool Handling | ✅ Complete |
+
 ### GUI & Frontend Generation
 | Book | Topic | Status |
 |------|-------|--------|
