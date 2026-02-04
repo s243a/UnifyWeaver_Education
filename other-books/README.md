@@ -9,6 +9,11 @@ This folder contains educational materials for additional targets and specialize
 |------|-------|--------|
 | [book-ai-agents](book-ai-agents/) | AI Agents, Agent Loop, Tool Handling | ✅ Complete |
 
+### Specialized Topics
+| Book | Topic | Status |
+|------|-------|--------|
+| [book-semantic-geometry](book-semantic-geometry/) | Metric geometry for semantic search — embeddings, density, trees | 🚧 Initial |
+
 ### GUI & Frontend Generation
 | Book | Topic | Status |
 |------|-------|--------|
