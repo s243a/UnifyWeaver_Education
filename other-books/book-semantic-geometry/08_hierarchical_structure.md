@@ -128,4 +128,4 @@ This suggests that **metric geometry is a natural language for expressing hierar
 
 ---
 
-**Previous**: [Chapter 7: Projection Modes](07_projection_modes.md)
+**Previous**: [Chapter 7: Projection Modes](07_projection_modes.md) | **Next**: [Chapter 9: Consensus Distances](09_consensus_distances.md)

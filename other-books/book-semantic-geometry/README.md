@@ -36,6 +36,7 @@ The central insight: **hierarchy is implicit in metric geometry**. A generic alg
 | 6 | [Fisher Information](06_fisher_information.md) | Sensitivity, curvature, hub geometry |
 | 7 | [Projection Modes](07_projection_modes.md) | SVD, hidden layers, weight space |
 | 8 | [Hierarchical Structure](08_hierarchical_structure.md) | How hierarchy emerges from geometry |
+| 9 | [Consensus Distances](09_consensus_distances.md) | Multi-space blending, product metrics, long branches |
 
 ## Key Features
 
