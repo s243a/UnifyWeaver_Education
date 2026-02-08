@@ -38,6 +38,75 @@ Responsible for:
 - Expanding prompt templates
 - Handling aliases
 
+#### Multi-Line Input
+
+Python's `input()` reads one line at a time. This is a problem when users need to paste code snippets, stack traces, or multi-paragraph prompts. The agent loop handles this with two mechanisms:
+
+**1. Trigger-based modes** — certain patterns on the first line switch to multi-line reading:
+
+| Trigger | Mode | Ends when |
+|---------|------|-----------|
+| ` ``` ` | Code block | Closing ` ``` ` |
+| `<<<` or `<<<MARKER` | Heredoc | Marker line (default: `EOF`) |
+| Trailing `\` | Continuation | Line without trailing `\` |
+| `{`, `[`, `(` | Data structure | Matching closing bracket |
+
+```python
+# Code block: read until closing ```
+if stripped.startswith("```"):
+    lines = [line]
+    while True:
+        next_line = input()
+        lines.append(next_line)
+        if next_line.strip().startswith("```"):
+            break
+    return "\n".join(lines)
+```
+
+**2. Automatic paste detection** — after `input()` returns the first line, `select.select()` checks if more data arrived on stdin within 50ms. Human typing never produces lines that fast; pasted text does.
+
+```python
+import select
+
+def _read_pasted_lines(first_line: str, timeout: float = 0.05) -> str:
+    lines = [first_line]
+    while True:
+        ready, _, _ = select.select([sys.stdin], [], [], timeout)
+        if not ready:
+            break  # No more data — paste is complete
+        line = sys.stdin.readline()
+        if not line:
+            break
+        lines.append(line.rstrip('\n'))
+    return '\n'.join(lines)
+```
+
+Paste detection runs **before** trigger checks. If multiple lines arrive simultaneously, they are returned as a single prompt without trigger processing. This prevents a pasted block with `\` on the first line from being split by the continuation handler.
+
+```python
+def get_input_smart(prompt):
+    line = input(prompt)
+
+    # Paste detection first
+    if sys.stdin.isatty():
+        pasted = _read_pasted_lines(line)
+        if '\n' in pasted:
+            return pasted  # Multi-line paste — return as-is
+
+    # Single line — check triggers
+    if stripped.startswith("```"): ...
+    if stripped.endswith("\\"): ...
+    # ...
+```
+
+The `isatty()` guard ensures paste detection only runs on real terminals. When stdin is piped (`echo "prompt" | python3 agent_loop.py`), it falls back to single-line behavior.
+
+| Approach | Pros | Cons |
+|----------|------|------|
+| Trigger-based | Explicit, no timing dependency | Requires user to know syntax |
+| Paste detection | Automatic, no syntax needed | 50ms latency per input; may miss slow SSH pastes |
+| Bracketed paste (future) | No timing ambiguity | Requires raw terminal mode, kills readline |
+
 ### Agent Router
 
 Determines:
