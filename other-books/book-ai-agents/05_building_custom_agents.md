@@ -387,12 +387,6 @@ python3 agent_loop.py -a full-stack
 - Aliases create shortcuts for workflows
 - Combine everything for powerful domain-specific agents
 
-## What's Next?
+## Next Steps
 
-You now have the knowledge to:
-- Use the agent loop for daily coding tasks
-- Create custom agents for your workflows
-- Extend the system with new backends
-- Build domain-specific AI assistants
-
-Happy coding with your AI agents!
+[Chapter 6](06_cost_tracking.md) covers how API costs are tracked, including automatic pricing lookup from OpenRouter.

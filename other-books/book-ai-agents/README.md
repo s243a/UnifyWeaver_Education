@@ -67,6 +67,28 @@ By completing this book, you will understand:
 - Prompt templates
 - Creating domain-specific agents
 
+### Part 4: Production
+
+**[Chapter 6: Cost Tracking and Pricing](06_cost_tracking.md)**
+- Per-model pricing (input/output per 1M tokens)
+- CostTracker architecture and usage recording
+- OpenRouter pricing auto-fetch with local caching
+- Cost implications of tool-calling iterations
+
+**[Chapter 7: Display and Terminal UX](07_display_system.md)**
+- Animated spinners with tput-based terminal control
+- Status callbacks and permanent line commits
+- Elapsed time display and terminal width truncation
+- Append-only fallback for limited terminals
+- Stream-JSON for live tool progress
+
+**[Chapter 8: Lessons from Production](08_lessons_from_production.md)**
+- The truthiness bug (`context or ContextManager()`)
+- CLI backends and their internal context
+- Trimming minimums and off-by-one errors
+- Testing with extreme values
+- Debug output patterns and observability
+
 ## Implementation
 
 The `implementation/` folder contains working code referenced throughout:

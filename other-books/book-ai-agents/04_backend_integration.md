@@ -299,6 +299,174 @@ class OllamaApiBackend(AgentBackend):
         )
 ```
 
+### Gemini CLI Backend
+
+```python
+class GeminiBackend(AgentBackend):
+    """Google Gemini CLI backend."""
+
+    def __init__(self, command: str = "gemini", model: str = None):
+        self.command = command
+        self.model = model
+
+    def send_message(self, message: str, context: list) -> AgentResponse:
+        prompt = self._format_prompt(message, context)
+
+        cmd = [self.command]
+        if self.model:
+            cmd.extend(["--model", self.model])
+        cmd.append(prompt)
+
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            timeout=300
+        )
+
+        content = self._clean_output(result.stdout)
+        return AgentResponse(content=content)
+```
+
+Gemini also supports stream-json output (`-o stream-json`) for live tool call progress, similar to claude-code's `--output-format stream-json`.
+
+## API Backends (No External Dependencies)
+
+### OpenRouter Backend
+
+OpenRouter provides an OpenAI-compatible API that aggregates hundreds of models. The backend uses Python's `urllib` directly, requiring no pip dependencies:
+
+```python
+class OpenRouterBackend(AgentBackend):
+    """OpenRouter API backend (OpenAI-compatible, no pip deps)."""
+
+    def __init__(
+        self,
+        api_key: str = None,
+        model: str = None,
+        base_url: str = "https://openrouter.ai/api/v1",
+        max_tokens: int = 4096,
+        system_prompt: str = None,
+        tools: list = None,
+    ):
+        # Auto-detect from coro.json if not provided
+        coro_config = self._read_coro_config()
+        self.api_key = (api_key
+                        or os.environ.get('OPENROUTER_API_KEY')
+                        or coro_config.get('api_key'))
+        self.model = model or coro_config.get('model', 'moonshotai/kimi-k2.5')
+        self.base_url = base_url
+        self.max_tokens = max_tokens
+        self.system_prompt = system_prompt or "You are a helpful AI coding assistant."
+        self.tool_schemas = tools  # None = no tools
+
+    def send_message(self, message: str, context: list, **kwargs) -> AgentResponse:
+        on_status = kwargs.get('on_status')
+
+        # Build messages array
+        messages = [{"role": "system", "content": self.system_prompt}]
+        for msg in context:
+            role = msg.get('role')
+            if role in ('user', 'assistant'):
+                messages.append({"role": role, "content": msg['content']})
+        if not context or context[-1].get('content') != message:
+            messages.append({"role": "user", "content": message})
+
+        # Build request body
+        body = {
+            "model": self.model,
+            "messages": messages,
+            "max_tokens": self.max_tokens,
+        }
+        if self.tool_schemas:
+            body["tools"] = self.tool_schemas
+            body["tool_choice"] = "auto"
+
+        # POST using urllib (no pip deps)
+        url = f"{self.base_url.rstrip('/')}/chat/completions"
+        req = Request(
+            url,
+            data=json.dumps(body).encode('utf-8'),
+            headers={
+                'Content-Type': 'application/json',
+                'Authorization': f'Bearer {self.api_key}',
+            },
+            method='POST'
+        )
+
+        with urlopen(req, timeout=300) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+
+        # Parse response
+        choice = data['choices'][0]
+        msg = choice.get('message', {})
+        content = msg.get('content') or ''
+
+        # Parse tool calls (OpenAI format)
+        tool_calls = []
+        for tc in msg.get('tool_calls', []):
+            if tc.get('type') == 'function':
+                func = tc['function']
+                tool_calls.append(ToolCall(
+                    name=func['name'],
+                    arguments=json.loads(func.get('arguments', '{}')),
+                    id=tc.get('id', '')
+                ))
+
+        # Token usage
+        usage = data.get('usage', {})
+        return AgentResponse(
+            content=content,
+            tool_calls=tool_calls,
+            input_tokens=usage.get('prompt_tokens', 0),
+            output_tokens=usage.get('completion_tokens', 0),
+        )
+```
+
+Key design decisions:
+
+| Decision | Rationale |
+|----------|-----------|
+| `urllib` instead of `openai` SDK | No pip dependencies; works in Termux out of the box |
+| Auto-read `~/coro.json` | Shares API key and model config with the coro CLI |
+| Optional `tools` parameter | `None` means no tool schemas sent; model can only reply with text |
+| `tool_choice: "auto"` | Model decides when to call tools vs. respond with text |
+
+The tool schemas use the OpenAI function calling format:
+
+```python
+DEFAULT_TOOL_SCHEMAS = [
+    {
+        "type": "function",
+        "function": {
+            "name": "bash",
+            "description": "Execute a bash command and return its output.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "command": {"type": "string", "description": "The bash command to execute"}
+                },
+                "required": ["command"]
+            }
+        }
+    },
+    # ... read, write, edit follow the same pattern
+]
+```
+
+Usage:
+
+```bash
+# Basic query (no tools)
+python3 agent_loop.py -b openrouter "What is 2+2?"
+
+# With tool calling enabled
+python3 agent_loop.py -b openrouter --auto-tools "List files in the current directory"
+
+# Context limits work because we control the full message array
+python3 agent_loop.py -b openrouter --max-chars 50
+```
+
 ## Backend Factory
 
 Create backends from configuration:
@@ -309,28 +477,25 @@ def create_backend(config: dict) -> AgentBackend:
     backend_type = config.get("backend", "coro")
 
     if backend_type == "coro":
-        return CoroBackend(
-            command=config.get("command", "coro"),
-            model=config.get("model")
-        )
+        return CoroBackend(command=config.get("command", "coro"), model=config.get("model"))
     elif backend_type == "claude":
-        return ClaudeApiBackend(
-            api_key=config.get("api_key"),
-            model=config.get("model", "claude-sonnet-4-20250514")
-        )
+        return ClaudeApiBackend(api_key=config.get("api_key"), model=config.get("model"))
     elif backend_type == "openai":
-        return OpenAiBackend(
+        return OpenAiBackend(api_key=config.get("api_key"), model=config.get("model"))
+    elif backend_type == "openrouter":
+        return OpenRouterBackend(
             api_key=config.get("api_key"),
-            model=config.get("model", "gpt-4o")
+            model=config.get("model"),
+            tools=DEFAULT_TOOL_SCHEMAS if config.get("tools") else None,
         )
+    elif backend_type == "gemini":
+        return GeminiBackend(command=config.get("command", "gemini"), model=config.get("model"))
     elif backend_type == "ollama-api":
         return OllamaApiBackend(
             host=config.get("host", "localhost"),
             port=config.get("port", 11434),
-            model=config.get("model", "codellama")
+            model=config.get("model", "codellama"),
         )
-    # ... other backends
-
     raise ValueError(f"Unknown backend: {backend_type}")
 ```
 
@@ -355,14 +520,28 @@ def run_with_streaming(backend: AgentBackend, message: str, context: list):
         return response
 ```
 
-## Summary
+## Backend Summary
 
-- All backends implement a common interface
-- CLI backends wrap external tools (coro, claude, ollama)
-- API backends call REST endpoints directly
-- A factory creates backends from configuration
+| Backend | Type | Dependencies | Tool Calling | Context Control |
+|---------|------|-------------|--------------|-----------------|
+| `coro` | CLI | coro CLI | Backend handles | Partial (backend has own context) |
+| `claude-code` | CLI | claude CLI | Backend handles | Partial |
+| `gemini` | CLI | gemini CLI | Backend handles | Partial |
+| `ollama-cli` | CLI | ollama CLI | None | Full |
+| `openrouter` | API | None (urllib) | Agent loop handles | Full |
+| `claude` | API | `anthropic` pip | Agent loop handles | Full |
+| `openai` | API | `openai` pip | Agent loop handles | Full |
+| `ollama-api` | API | None (requests) | Agent loop handles | Full |
+
+Key points:
+- All backends implement a common interface (`AgentBackend`)
+- CLI backends wrap external tools; API backends call REST endpoints directly
+- OpenRouter uses only `urllib` (no pip deps), making it ideal for constrained environments
+- CLI backends manage their own context internally; API backends give full control to the agent loop
+- A factory pattern creates backends from YAML/dict configuration
 - Streaming improves UX for supported backends
 
 ## Next Steps
 
 [Chapter 5](05_building_custom_agents.md) shows how to build custom agents for specific domains.
+[Chapter 6](06_cost_tracking.md) covers API cost tracking and pricing.

@@ -116,6 +116,90 @@ context = messages[-5:]  # Last 5 messages
 **Pros**: Balance of context and limits
 **Cons**: May lose important early context
 
+## Context Limits
+
+Beyond message count, the `ContextManager` supports multiple limit dimensions:
+
+| Limit | Flag | Default | Description |
+|-------|------|---------|-------------|
+| `max_tokens` | `--max-tokens` | 100,000 | Estimated token budget (chars / 4 heuristic) |
+| `max_messages` | (sliding mode) | 50 | Maximum number of messages |
+| `max_chars` | `--max-chars` | 0 (unlimited) | Total character budget |
+| `max_words` | `--max-words` | 0 (unlimited) | Total word budget |
+
+Limits are enforced at two points:
+
+**1. On insertion** (`add_message`): After adding each message, trim the oldest messages until all limits are satisfied:
+
+```python
+def _trim_if_needed(self) -> None:
+    # Trim by token count (keep at least 1 message)
+    while self._token_count > self.max_tokens and len(self.messages) > 1:
+        self._remove_oldest()
+
+    # Trim by character count
+    if self.max_chars > 0:
+        while self._char_count > self.max_chars and len(self.messages) > 1:
+            self._remove_oldest()
+
+    # Trim by word count
+    if self.max_words > 0:
+        while self._word_count > self.max_words and len(self.messages) > 1:
+            self._remove_oldest()
+```
+
+The `> 1` minimum is important. An earlier version used `> 2`, which prevented trimming when a single long response exceeded the limit.
+
+**2. On retrieval** (`get_context`): Build the context from newest to oldest, stopping when the budget is exhausted:
+
+```python
+def get_context(self) -> list[dict]:
+    # ...
+    result = []
+    total_chars = 0
+    for msg in reversed(messages):
+        msg_chars = len(msg.content)
+        if self.max_chars > 0 and total_chars + msg_chars > self.max_chars and result:
+            break
+        result.append({"role": msg.role, "content": msg.content})
+        total_chars += msg_chars
+    result.reverse()
+    return result
+```
+
+This dual enforcement ensures that context limits are respected even when a single message is larger than the budget.
+
+### The Truthiness Bug
+
+An early version of the agent loop had a subtle bug that silently defeated all context limits:
+
+```python
+# BROKEN: ContextManager.__len__ returns 0 when empty
+# bool(empty_context_manager) is False, so 'or' always replaces it
+self.context = context or ContextManager()
+```
+
+When `ContextManager` had no messages, Python's `__len__` returned 0, making `bool()` return `False`. The `or` operator then replaced the properly configured context (with `max_chars=50`) with a bare default (with `max_chars=0`).
+
+The fix:
+
+```python
+# FIXED: explicit None check preserves empty but configured contexts
+self.context = context if context is not None else ContextManager()
+```
+
+This is a general Python gotcha: any object implementing `__len__` is falsy when empty. Always use `is not None` when the object might be legitimately empty but should not be replaced.
+
+### Context Deduplication
+
+When sending tool results back to an API backend, the current message might already be the last entry in the context (because it was just added). Without deduplication, the model sees the same message twice:
+
+```python
+# Add current message only if not already the last context message
+if not context or context[-1].get('content') != message:
+    messages.append({"role": "user", "content": message})
+```
+
 ## Context Formats
 
 Different backends expect different formats. The context manager handles conversion:
