@@ -86,6 +86,142 @@ Equivalent in JSON:
 }
 ```
 
+## API Key Resolution
+
+Agent variants in `agents.yaml` define *which* backend to use, but API backends also need credentials. Rather than hardcoding keys in every config, the agent loop resolves API keys through a priority chain.
+
+### The Priority Chain
+
+```
+1. --api-key CLI argument           (highest priority)
+2. Backend-specific env var         (OPENROUTER_API_KEY, ANTHROPIC_API_KEY, etc.)
+3. uwsal.json keys.<backend>        (per-provider key)
+3b. uwsal.json api_key              (top-level fallback)
+4. coro.json api_key                (legacy fallback, skipped with --no-fallback)
+5. Standard file locations          (~/.anthropic/api_key, ~/.openai/api_key)
+```
+
+This means you can set up credentials once and every backend finds them automatically.
+
+### uwsal.json — Primary Config File
+
+`uwsal.json` (Unify Weaver, Simple Agent Loop) is the primary config file. It's searched in the current directory first, then in `~/`:
+
+```json
+{
+  "api_key": "sk-or-...",
+  "model": "moonshotai/kimi-k2.5",
+  "base_url": "https://openrouter.ai/api/v1",
+  "keys": {
+    "openrouter": "sk-or-...",
+    "anthropic": "sk-ant-...",
+    "openai": "sk-..."
+  }
+}
+```
+
+- **Top-level `api_key`** — used by any backend that doesn't have a provider-specific key
+- **`keys` object** — per-provider keys, looked up by backend type
+- **`model`** and **`base_url`** — defaults for API backends
+
+### Config File Search Order
+
+```
+1. CWD/uwsal.json
+2. ~/uwsal.json
+3. CWD/coro.json     (skipped with --no-fallback)
+4. ~/coro.json       (skipped with --no-fallback)
+```
+
+`coro.json` is the legacy config from the coro CLI tool. It's still supported as a fallback so existing setups keep working without changes.
+
+### Implementation
+
+The resolution logic lives in `config.py`:
+
+```python
+def read_config_cascade(no_fallback: bool = False) -> dict:
+    """Read config from uwsal.json, falling back to coro.json."""
+    candidates = ['uwsal.json', os.path.expanduser('~/uwsal.json')]
+    if not no_fallback:
+        candidates += ['coro.json', os.path.expanduser('~/coro.json')]
+    for path in candidates:
+        try:
+            with open(path) as f:
+                return json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            continue
+    return {}
+
+def resolve_api_key(backend_type: str, cli_key: str | None = None,
+                    no_fallback: bool = False) -> str | None:
+    """Resolve API key with full priority chain."""
+    if cli_key:
+        return cli_key
+
+    env_vars = {
+        'openrouter': 'OPENROUTER_API_KEY',
+        'claude': 'ANTHROPIC_API_KEY',
+        'openai': 'OPENAI_API_KEY',
+        'gemini': 'GEMINI_API_KEY',
+    }
+    env_var = env_vars.get(backend_type)
+    if env_var:
+        val = os.environ.get(env_var)
+        if val:
+            return val
+
+    config = read_config_cascade(no_fallback)
+    provider_key = config.get('keys', {}).get(backend_type)
+    if provider_key:
+        return provider_key
+    if config.get('api_key'):
+        return config['api_key']
+
+    # Standard file locations
+    file_locations = {'claude': '~/.anthropic/api_key', 'openai': '~/.openai/api_key'}
+    loc = file_locations.get(backend_type)
+    if loc:
+        try:
+            with open(os.path.expanduser(loc)) as f:
+                return f.read().strip()
+        except FileNotFoundError:
+            pass
+
+    return None
+```
+
+### The `--no-fallback` Flag
+
+By default, the agent loop checks `coro.json` as a fallback for both API keys and model/base_url settings. The `--no-fallback` flag skips `coro.json` entirely — only `uwsal.json` is consulted. This is useful when you want to ensure a clean separation from legacy coro configs:
+
+```bash
+# Uses uwsal.json only — fails if no uwsal.json exists
+python3 agent_loop.py -b openrouter --no-fallback "What is 2+2?"
+
+# Default: checks uwsal.json first, falls back to coro.json
+python3 agent_loop.py -b openrouter "What is 2+2?"
+```
+
+### Design Note: Why Backends Don't Resolve Keys
+
+An earlier version had each backend class discovering its own API key (e.g., `OpenRouterBackend._read_coro_config()`). This scattered the resolution logic across multiple files and made it impossible to enforce `--no-fallback` consistently.
+
+The current design resolves everything in the backend factory *before* constructing the backend. The backend constructor just takes what it's given:
+
+```python
+# Old: backend discovers its own key (scattered logic)
+class OpenRouterBackend:
+    def __init__(self, api_key=None, ...):
+        coro_config = self._read_coro_config()
+        self.api_key = api_key or os.environ.get('OPENROUTER_API_KEY') or coro_config.get('api_key')
+
+# New: factory resolves key, backend just stores it (centralized logic)
+class OpenRouterBackend:
+    def __init__(self, api_key=None, ...):
+        self.api_key = api_key
+```
+
 ## System Prompts
 
 The system prompt defines the agent's behavior and expertise.

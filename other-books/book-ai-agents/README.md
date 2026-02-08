@@ -63,6 +63,7 @@ By completing this book, you will understand:
 
 **[Chapter 5: Building Custom Agents](05_building_custom_agents.md)**
 - Configuration files and agent variants
+- API key resolution: uwsal.json, env vars, and the priority chain
 - Skills and system prompts
 - Prompt templates
 - Creating domain-specific agents

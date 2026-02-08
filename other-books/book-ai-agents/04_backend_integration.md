@@ -349,12 +349,10 @@ class OpenRouterBackend(AgentBackend):
         system_prompt: str = None,
         tools: list = None,
     ):
-        # Auto-detect from coro.json if not provided
-        coro_config = self._read_coro_config()
-        self.api_key = (api_key
-                        or os.environ.get('OPENROUTER_API_KEY')
-                        or coro_config.get('api_key'))
-        self.model = model or coro_config.get('model', 'moonshotai/kimi-k2.5')
+        # API key and model are resolved externally by the backend factory
+        # using resolve_api_key() and read_config_cascade() — see Chapter 5
+        self.api_key = api_key
+        self.model = model or 'moonshotai/kimi-k2.5'
         self.base_url = base_url
         self.max_tokens = max_tokens
         self.system_prompt = system_prompt or "You are a helpful AI coding assistant."
@@ -469,32 +467,39 @@ python3 agent_loop.py -b openrouter --max-chars 50
 
 ## Backend Factory
 
-Create backends from configuration:
+Create backends from configuration. For API backends, API keys are resolved through the unified config cascade (see [Chapter 5](05_building_custom_agents.md#api-key-resolution)):
 
 ```python
-def create_backend(config: dict) -> AgentBackend:
-    """Create a backend from configuration."""
-    backend_type = config.get("backend", "coro")
+from config import resolve_api_key, read_config_cascade
+
+def create_backend(agent_config, no_fallback=False) -> AgentBackend:
+    """Create a backend from agent configuration."""
+    backend_type = agent_config.backend
 
     if backend_type == "coro":
-        return CoroBackend(command=config.get("command", "coro"), model=config.get("model"))
+        return CoroBackend(command=agent_config.command or "coro")
     elif backend_type == "claude":
-        return ClaudeApiBackend(api_key=config.get("api_key"), model=config.get("model"))
+        api_key = resolve_api_key('claude', agent_config.api_key, no_fallback)
+        return ClaudeApiBackend(api_key=api_key, model=agent_config.model)
     elif backend_type == "openai":
-        return OpenAiBackend(api_key=config.get("api_key"), model=config.get("model"))
+        api_key = resolve_api_key('openai', agent_config.api_key, no_fallback)
+        return OpenAiBackend(api_key=api_key, model=agent_config.model)
     elif backend_type == "openrouter":
+        api_key = resolve_api_key('openrouter', agent_config.api_key, no_fallback)
+        cascade = read_config_cascade(no_fallback)
         return OpenRouterBackend(
-            api_key=config.get("api_key"),
-            model=config.get("model"),
-            tools=DEFAULT_TOOL_SCHEMAS if config.get("tools") else None,
+            api_key=api_key,
+            model=agent_config.model or cascade.get('model'),
+            base_url=cascade.get('base_url', 'https://openrouter.ai/api/v1'),
+            tools=DEFAULT_TOOL_SCHEMAS if agent_config.tools else None,
         )
     elif backend_type == "gemini":
-        return GeminiBackend(command=config.get("command", "gemini"), model=config.get("model"))
+        return GeminiBackend(command=agent_config.command or "gemini")
     elif backend_type == "ollama-api":
         return OllamaApiBackend(
-            host=config.get("host", "localhost"),
-            port=config.get("port", 11434),
-            model=config.get("model", "codellama"),
+            host=agent_config.host or "localhost",
+            port=agent_config.port or 11434,
+            model=agent_config.model or "codellama",
         )
     raise ValueError(f"Unknown backend: {backend_type}")
 ```
