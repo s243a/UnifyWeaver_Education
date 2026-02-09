@@ -153,26 +153,101 @@ def confirm_tool(tool: ToolCall) -> bool:
     return response in ('y', 'yes')
 ```
 
-### Command Filtering
+### Command Blocklist
 
-Some commands should never run automatically:
+The agent loop maintains a built-in blocklist of dangerous command patterns. These are checked *before* the confirmation prompt — even with `--auto-tools`, blocked commands are rejected:
 
 ```python
-DANGEROUS_PATTERNS = [
-    r'\brm\s+-rf\s+/',         # rm -rf /
-    r'\bmkfs\b',                # Format filesystem
-    r'\bdd\s+.*of=/dev/',       # Write to device
-    r'>\s*/dev/sd',             # Overwrite disk
-    r'\bcurl.*\|\s*bash',       # Pipe to shell
+_BLOCKED_COMMAND_PATTERNS = [
+    (r'\brm\s+-[rf]*\s+/', "rm with absolute path and force/recursive flags"),
+    (r'\bmkfs\b', "filesystem format"),
+    (r'\bdd\s+.*of=/dev/', "write to block device"),
+    (r'>\s*/dev/sd', "redirect to block device"),
+    (r'\bcurl\b.*\|\s*(?:ba)?sh', "pipe remote script to shell"),
+    (r'\bwget\b.*\|\s*(?:ba)?sh', "pipe remote script to shell"),
+    (r'\bchmod\s+777\b', "world-writable permissions"),
+    (r':\(\)\s*\{\s*:\|:\s*&\s*\}\s*;', "fork bomb"),
+    (r'\b>\s*/etc/', "overwrite system config"),
 ]
 
-def is_dangerous(command: str) -> bool:
-    """Check for dangerous command patterns."""
-    for pattern in DANGEROUS_PATTERNS:
+def is_command_blocked(command, extra_blocked=None, extra_allowed=None):
+    """Return reason if command is blocked, None if allowed."""
+    # Allowlist checked first — explicit allows override blocks
+    if extra_allowed:
+        for pattern in extra_allowed:
+            if re.search(pattern, command, re.IGNORECASE):
+                return None
+    # User-provided extra blocks
+    if extra_blocked:
+        for pattern in extra_blocked:
+            if re.search(pattern, command, re.IGNORECASE):
+                return f"Blocked by config: matches '{pattern}'"
+    # Built-in blocks
+    for pattern, description in _BLOCKED_COMMAND_PATTERNS:
         if re.search(pattern, command, re.IGNORECASE):
-            return True
-    return False
+            return f"Blocked: {description}"
+    return None
 ```
+
+The blocklist is customizable via `uwsal.json` — see [Chapter 5](05_building_custom_agents.md) for configuration details.
+
+### Path Validation
+
+All file operations (read, write, edit) pass through `validate_path()` before execution. This resolves symlinks and `..` components with `os.path.realpath()`, then checks against blocklists:
+
+```python
+_BLOCKED_PATHS = {'/etc/shadow', '/etc/gshadow', '/etc/sudoers'}
+_BLOCKED_PREFIXES = ('/proc/', '/sys/', '/dev/')
+_BLOCKED_HOME_PATTERNS = ('.ssh/', '.gnupg/', '.aws/', '.config/gcloud/', '.env', '.netrc', '.npmrc')
+
+def validate_path(raw_path, working_dir, extra_blocked=None, extra_allowed=None):
+    """Resolve and validate a file path. Returns (resolved, error_or_None)."""
+    resolved = os.path.realpath(
+        raw_path if raw_path.startswith('/') else os.path.join(working_dir, raw_path)
+    )
+    # Check both raw and resolved paths (important on Termux where
+    # /etc -> /system/etc, so realpath differs from the literal)
+    # Allow list checked first, then block list, then built-in defaults
+    ...
+```
+
+The dual-path check matters on Termux and other environments with symlinked system directories. Without it, an LLM could request `/etc/shadow` and bypass the blocklist because `realpath` resolves it to `/system/etc/shadow`.
+
+Like the command blocklist, path blocklists are customizable via `uwsal.json`:
+
+```json
+{
+  "security": {
+    "blocked_paths": ["/data/production/"],
+    "allowed_paths": ["/etc/hosts"]
+  }
+}
+```
+
+### Security Profiles
+
+The path validation and command blocklist are controlled by security profiles:
+
+| Profile | Path validation | Command blocklist | Notes |
+|---------|----------------|-------------------|-------|
+| `open` | Off | Off | No checks — for trusted environments |
+| `cautious` | On | On | **Default** — blocks dangerous paths and commands |
+| `sandboxed` | On | On | Adds proot filesystem isolation (future) |
+| `paranoid` | On | On | Adds audit logging (future) |
+
+```bash
+# Default: cautious (path + command validation)
+python3 agent_loop.py -b openrouter "Read /etc/shadow"
+# → [Security] Blocked: /etc/shadow is a sensitive system file
+
+# Disable all checks
+python3 agent_loop.py -b openrouter --no-security "Read /etc/shadow"
+
+# Explicit profile
+python3 agent_loop.py -b openrouter --security-profile paranoid "..."
+```
+
+The `--no-security` flag is the explicit escape hatch for when validation interferes with a specific workflow. It's equivalent to `--security-profile open`.
 
 ## Tool Execution
 
@@ -339,8 +414,11 @@ LLM: That file doesn't exist. Let me check what config files are available.
 - Tools let agents take real actions (run commands, edit files)
 - Always parse tool calls from potentially messy LLM output
 - Require confirmation for destructive operations
-- Handle errors gracefully - inform the LLM so it can adapt
-- Never auto-execute dangerous patterns
+- Path validation with `realpath()` defeats traversal attacks and blocks credential files
+- Command blocklist catches dangerous patterns before execution
+- Security profiles (open/cautious/sandboxed/paranoid) make checks configurable
+- Blocklists are customizable via `uwsal.json` with allow overriding block
+- Handle errors gracefully — inform the LLM so it can adapt
 
 ## Next Steps
 

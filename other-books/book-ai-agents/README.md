@@ -51,6 +51,7 @@ By completing this book, you will understand:
 - Parsing tool calls from LLM output
 - Safe tool execution with confirmations
 - Built-in tools: bash, read, write, edit
+- Path validation, command blocklist, and security profiles
 - Error handling and recovery
 
 **[Chapter 4: Backend Integration](04_backend_integration.md)**
