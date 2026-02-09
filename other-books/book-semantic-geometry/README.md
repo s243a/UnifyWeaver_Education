@@ -37,6 +37,7 @@ The central insight: **hierarchy is implicit in metric geometry**. A generic alg
 | 7 | [Projection Modes](07_projection_modes.md) | SVD, hidden layers, weight space |
 | 8 | [Hierarchical Structure](08_hierarchical_structure.md) | How hierarchy emerges from geometry |
 | 9 | [Consensus Distances](09_consensus_distances.md) | Multi-space blending, product metrics, long branches |
+| 10 | [Physics Mindmap Builder](10_physics_mindmap_builder.md) | End-to-end app, upward penalty, export |
 
 ## Key Features
 
@@ -50,6 +51,7 @@ The central insight: **hierarchy is implicit in metric geometry**. A generic alg
 - **Density Manifold Explorer** — Browser-based 2D visualization of embedding density with tree overlays
 - **Wikipedia Physics Distance Model** — Neural distance function trained on hierarchical relationships
 - **Organizational Depth Scatter** — Plotly visualization of hierarchy depth in projection space
+- **Physics Mindmap Builder** — Self-contained browser app for building exportable mindmaps from embedding geometry (`examples/physics-mindmap/`)
 
 ## See Also
 

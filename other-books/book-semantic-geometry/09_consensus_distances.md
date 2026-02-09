@@ -147,4 +147,4 @@ Both use the same mathematical family (generalized power means) but with differe
 
 ---
 
-**Previous**: [Chapter 8: Hierarchical Structure](08_hierarchical_structure.md)
+**Previous**: [Chapter 8: Hierarchical Structure](08_hierarchical_structure.md) | **Next**: [Chapter 10: Physics Mindmap Builder](10_physics_mindmap_builder.md)
