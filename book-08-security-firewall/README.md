@@ -59,6 +59,7 @@ TLS configuration, secrets management (Vault, AWS, Azure, GCP), monitoring, aler
 For more detailed coverage, see:
 - [Book 11: Prolog Target](../book-11-prolog-target/README.md) - Chapters 7-8 (Prolog-specific firewall, fallback)
 - [Book 7: Cross-Target Glue](../book-07-cross-target-glue/README.md) - Chapter 15-16 (Production, Cloud)
+- [Agent Loop Security](../../tools/agent-loop/README.md#security) - Runtime enforcement of security policies in the agent loop (path validation, command proxy, allowlist-only mode, audit logging). See also the [security proposal](../../docs/proposals/AGENT_LOOP_SECURITY.md) for architecture details.
 
 ## Quick Example
 
