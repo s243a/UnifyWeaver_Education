@@ -232,8 +232,8 @@ The path validation and command blocklist are controlled by security profiles:
 |---------|----------------|-------------------|-------|
 | `open` | Off | Off | No checks — for trusted environments |
 | `cautious` | On | On | **Default** — blocks dangerous paths and commands |
-| `sandboxed` | On | On | Adds proot filesystem isolation (future) |
-| `paranoid` | On | On | Adds audit logging (future) |
+| `guarded` | On | On + extra blocks | Proxy + detailed audit for semi-autonomous agents |
+| `paranoid` | On | Allowlist-only | Strict proxy + forensic audit for untrusted agents |
 
 ```bash
 # Default: cautious (path + command validation)
@@ -416,7 +416,7 @@ LLM: That file doesn't exist. Let me check what config files are available.
 - Require confirmation for destructive operations
 - Path validation with `realpath()` defeats traversal attacks and blocks credential files
 - Command blocklist catches dangerous patterns before execution
-- Security profiles (open/cautious/sandboxed/paranoid) make checks configurable
+- Security profiles (open/cautious/guarded/paranoid) make checks configurable
 - Blocklists are customizable via `uwsal.json` with allow overriding block
 - Handle errors gracefully — inform the LLM so it can adapt
 
