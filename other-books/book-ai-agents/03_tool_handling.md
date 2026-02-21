@@ -232,8 +232,8 @@ The path validation and command blocklist are controlled by security profiles:
 |---------|----------------|-------------------|-------|
 | `open` | Off | Off | No checks — for trusted environments |
 | `cautious` | On | On | **Default** — blocks dangerous paths and commands |
-| `guarded` | On | On + extra blocks | Proxy + detailed audit for semi-autonomous agents |
-| `paranoid` | On | Allowlist-only | Strict proxy + forensic audit for untrusted agents |
+| `guarded` | On | On + extra blocks | Proxy + detailed audit; safe commands skip confirmation |
+| `paranoid` | On | Allowlist-only | Strict proxy + forensic audit; safe commands skip, others prompt |
 
 ```bash
 # Default: cautious (path + command validation)
@@ -409,6 +409,20 @@ LLM: That file doesn't exist. Let me check what config files are available.
 <tool_call>{"name": "bash", "command": "ls /etc/*.json"}</tool_call>
 ```
 
+### Safe Commands
+
+In `guarded` and `paranoid` profiles, certain read-only commands are classified as **safe** and skip the confirmation prompt entirely. This improves flow without sacrificing security — dangerous variants of these commands (e.g. `echo ... | bash`) are still caught by the blocklist and proxy.
+
+Safe commands include: `ls`, `cat`, `head`, `tail`, `grep`, `echo`, `pwd`, `cd`, `wc`, `sort`, `diff`, `git status/log/diff/show/branch`.
+
+Commands like `find`, `python3`, and `node` are allowed but still prompt for confirmation since they can have side effects.
+
+### Duplicate Tool Call Detection
+
+When a model gets stuck in a loop — repeatedly emitting the same tool call — the agent loop detects the duplicate and breaks the cycle. It sends a nudge message asking the model to respond with text instead, preventing runaway iterations.
+
+This is a defensive measure on top of proper tool result formatting (`role: tool` with `tool_call_id`), which ensures the model recognizes that its tool call was already executed.
+
 ## Summary
 
 - Tools let agents take real actions (run commands, edit files)
@@ -417,6 +431,8 @@ LLM: That file doesn't exist. Let me check what config files are available.
 - Path validation with `realpath()` defeats traversal attacks and blocks credential files
 - Command blocklist catches dangerous patterns before execution
 - Security profiles (open/cautious/guarded/paranoid) make checks configurable
+- Safe commands skip confirmation in guarded/paranoid profiles
+- Duplicate tool call detection breaks model loops
 - Blocklists are customizable via `uwsal.json` with allow overriding block
 - Handle errors gracefully — inform the LLM so it can adapt
 
