@@ -47,9 +47,15 @@ This folder contains educational materials for additional targets and specialize
 | [book-fsharp-target](book-fsharp-target/) | F# | 🚧 Initial |
 | [book-vbnet-target](book-vbnet-target/) | VB.NET | 🚧 Initial |
 
+### Data & Statistical Targets
+| Book | Target | Status |
+|------|--------|--------|
+| [book-r-target](book-r-target/) | R | ✅ Complete |
+
 ### Functional Targets
 | Book | Target | Status |
 |------|--------|--------|
+| [book-elixir-target](book-elixir-target/) | Elixir | ✅ Complete |
 | [book-haskell-target](book-haskell-target/) | Haskell | 🚧 Initial |
 
 ## Contributing
