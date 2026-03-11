@@ -152,9 +152,77 @@ ancestor(sub { $count++; });
 print "Total: $count\n";
 ```
 
+## Advanced Recursion via Multifile Dispatch
+
+Beyond semi-naive iteration for transitive closure, the Perl target registers multifile dispatch clauses with the core recursion analysis modules for tail and linear recursion patterns:
+
+```prolog
+?- compile_tail_recursion(test_sum/3, [target(perl)], Code).
+?- compile_linear_recursion(factorial/2, [target(perl)], Code).
+```
+
+| Pattern | Multifile Predicate | Perl Idiom |
+|---------|-------------------|------------|
+| Tail Recursion | `tail_recursion:compile_tail_pattern/9` | `for my $item (@$items_ref)` loop |
+| Linear Recursion | `linear_recursion:compile_linear_pattern/8` | `List::Util::reduce` + `%memo` hash |
+
+### Tail Recursion
+
+Tail-recursive predicates with accumulators are compiled to simple `for` loops:
+
+```perl
+sub test_sum {
+    my ($items_ref, $acc) = @_;
+    $acc //= 0;
+    for my $item (@$items_ref) {
+        $acc = $acc + $item;
+    }
+    return $acc;
+}
+```
+
+The step operation (e.g., `+ $item`, `* $item`) is extracted from the Prolog clause body and mapped to idiomatic Perl operators via `step_op_to_perl/2`.
+
+### Linear Recursion
+
+Linear recursive predicates are compiled using `List::Util::reduce` for fold-based computation with hash-based memoization:
+
+```perl
+use List::Util qw(reduce);
+
+my %factorial_memo;
+
+sub factorial {
+    my ($n) = @_;
+    return $factorial_memo{$n} if exists $factorial_memo{$n};
+    return 1 if $n == 0;
+    my $result = reduce { $a * $b } 1, reverse(1 .. $n);
+    $factorial_memo{$n} = $result;
+    return $result;
+}
+```
+
+The fold expression translator maps Prolog variables to Perl's `reduce` special variables (`$a` for accumulator, `$b` for current element) via `translate_perl_reduce_term/4`. This is separate from the tail recursion translator which uses `$acc`/`$item` in loop context.
+
+### How It Works
+
+The Perl target registers itself with the core modules:
+
+```prolog
+:- use_module('../core/advanced/tail_recursion').
+:- multifile tail_recursion:compile_tail_pattern/9.
+
+tail_recursion:compile_tail_pattern(perl, PredStr, Arity, ..., Code) :-
+    step_op_to_perl(StepOp, PerlStepExpr),
+    % ... generate Perl code
+```
+
+When the analyzer detects a tail or linear recursion pattern and `target(perl)` is set, Prolog's multifile dispatch routes to the Perl-specific code generator.
+
 ## Roadmap
 
 1. Add aggregation support (`count`, `sum`, `min`, `max`)
 2. Implement outer join patterns
 3. Add numeric comparison operators
 4. Support constant filtering in goals
+5. Add mutual recursion dispatch

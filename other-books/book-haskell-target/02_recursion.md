@@ -146,6 +146,23 @@ All functions compile and run correctly with GHC:
 
 ---
 
+## Multifile Dispatch
+
+The Haskell target registers multifile dispatch clauses with the core recursion analysis modules. This allows the analyzer to automatically detect recursion patterns and generate idiomatic Haskell:
+
+```prolog
+% Automatic pattern detection and dispatch
+?- compile_tail_recursion(test_sum/3, [target(haskell)], Code).
+?- compile_linear_recursion(factorial/2, [target(haskell)], Code).
+```
+
+| Pattern | Multifile Predicate | Haskell Idiom |
+|---------|-------------------|---------------|
+| Tail Recursion | `tail_recursion:compile_tail_pattern/9` | `{-# LANGUAGE BangPatterns #-}` + strict `!acc` |
+| Linear Recursion | `linear_recursion:compile_linear_pattern/8` | `foldl` for numeric, pure recursion for lists |
+
+Haskell's lazy evaluation and GHC's common subexpression elimination provide implicit memoization, so the linear recursion dispatch does not add explicit memo structures.
+
 ## Alternative: Generic Predicate
 
 The `compile_predicate_to_haskell/3` dispatches based on a `type` option:

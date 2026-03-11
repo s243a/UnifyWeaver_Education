@@ -96,3 +96,27 @@ abraham:jacob
 - `linkedSetOf` preserves insertion order
 - `?.forEach` safe navigation for null maps
 - `generateSequence` for stdin processing
+
+## Advanced Recursion Patterns
+
+The Kotlin target also supports tail and linear recursion via multifile dispatch:
+
+```prolog
+?- compile_tail_recursion(test_sum/3, [target(kotlin)], Code).
+?- compile_linear_recursion(factorial/2, [target(kotlin)], Code).
+```
+
+| Pattern | Multifile Predicate | Kotlin Idiom |
+|---------|-------------------|--------------|
+| Tail Recursion | `tail_recursion:compile_tail_pattern/9` | `tailrec fun` keyword |
+| Linear Recursion | `linear_recursion:compile_linear_pattern/8` | `fold` + `mutableMapOf` with `getOrPut` |
+
+### Tail Recursion Example
+
+```kotlin
+tailrec fun test_sum(remaining: List<Int>, acc: Int = 0): Int =
+    if (remaining.isEmpty()) acc
+    else test_sum(remaining.drop(1), acc + remaining.first())
+```
+
+Kotlin's `tailrec` keyword guarantees the compiler will optimize the function into a loop.

@@ -203,9 +203,71 @@ puts "Total: #{results.length}"
 ancestor { |x, y| puts "#{x} -> #{y}" if x == "alice" }
 ```
 
+## Advanced Recursion via Multifile Dispatch
+
+Beyond semi-naive iteration for transitive closure, the Ruby target registers multifile dispatch clauses with the core recursion analysis modules for tail and linear recursion patterns:
+
+```prolog
+?- compile_tail_recursion(test_sum/3, [target(ruby)], Code).
+?- compile_linear_recursion(factorial/2, [target(ruby)], Code).
+```
+
+| Pattern | Multifile Predicate | Ruby Idiom |
+|---------|-------------------|------------|
+| Tail Recursion | `tail_recursion:compile_tail_pattern/9` | `.each` loop with accumulator |
+| Linear Recursion | `linear_recursion:compile_linear_pattern/8` | `.reduce` + `@memo` hash |
+
+### Tail Recursion
+
+Tail-recursive predicates with accumulators compile to Ruby's `.each` iterator:
+
+```ruby
+def test_sum(items)
+  acc = 0
+  items.each do |item|
+    acc = acc + item
+  end
+  acc
+end
+```
+
+### Linear Recursion
+
+Linear recursive predicates use `.reduce` for fold-based computation with instance-variable memoization:
+
+```ruby
+@factorial_memo = {}
+
+def factorial(n)
+  return @factorial_memo[n] if @factorial_memo.key?(n)
+  return 1 if n == 0
+  result = n.downto(1).reduce(1) { |acc, current| current * acc }
+  @factorial_memo[n] = result
+  result
+end
+```
+
+The fold expression is extracted from the Prolog clause body and translated to a Ruby block via `translate_fold_expr_ruby/4`.
+
+### How It Works
+
+The Ruby target registers itself with the core modules:
+
+```prolog
+:- use_module('../core/advanced/tail_recursion').
+:- multifile tail_recursion:compile_tail_pattern/9.
+
+tail_recursion:compile_tail_pattern(ruby, PredStr, Arity, ..., Code) :-
+    step_op_to_ruby(StepOp, RubyStepExpr),
+    % ... generate Ruby code
+```
+
+When the analyzer detects a tail or linear recursion pattern and `target(ruby)` is set, Prolog's multifile dispatch routes to the Ruby-specific code generator.
+
 ## Roadmap
 
 1. Add aggregation support (`count`, `sum`, `min`, `max`)
 2. Implement outer join patterns
 3. Add Enumerator support for lazy evaluation
 4. Support method chaining patterns
+5. Add mutual recursion dispatch

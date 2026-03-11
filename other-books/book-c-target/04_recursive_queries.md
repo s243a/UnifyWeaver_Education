@@ -57,3 +57,50 @@ echo 'abraham:isaac' | ./ancestor abraham
 - Static arrays for BFS queue and visited set
 - Linked list for adjacency edges
 - `strcmp` for string comparison
+
+## Advanced Recursion Patterns
+
+The C target also supports tail and linear recursion via multifile dispatch:
+
+```prolog
+?- compile_tail_recursion(test_sum/3, [target(c)], Code).
+?- compile_linear_recursion(factorial/2, [target(c)], Code).
+```
+
+| Pattern | Multifile Predicate | C Idiom |
+|---------|-------------------|---------|
+| Tail Recursion | `tail_recursion:compile_tail_pattern/9` | `for` loop with accumulator |
+| Linear Recursion | `linear_recursion:compile_linear_pattern/8` | Static array memoization (`#define MAX_MEMO 10000`) |
+
+### Tail Recursion Example
+
+```c
+int test_sum(int* items, int count) {
+    int acc = 0;
+    for (int i = 0; i < count; i++) {
+        acc = acc + items[i];
+    }
+    return acc;
+}
+```
+
+### Linear Recursion Example
+
+```c
+#define MAX_MEMO 10000
+static int memo[MAX_MEMO];
+static int memo_valid[MAX_MEMO];
+
+int factorial(int n) {
+    if (n >= 0 && n < MAX_MEMO && memo_valid[n]) return memo[n];
+    if (n == 0) return 1;
+    int result = 1;
+    for (int current = n; current >= 1; current--) {
+        result = current * result;
+    }
+    if (n >= 0 && n < MAX_MEMO) { memo[n] = result; memo_valid[n] = 1; }
+    return result;
+}
+```
+
+C uses static arrays for memoization since it lacks built-in hash maps. The `MAX_MEMO` bound limits cache size.

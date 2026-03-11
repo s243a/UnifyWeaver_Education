@@ -133,6 +133,57 @@ public static Stream<String[]> stream() {
 }
 ```
 
+## Advanced Recursion Patterns
+
+Beyond transitive closure, the Java target supports tail and linear recursion via multifile dispatch. The core analyzer detects the pattern and generates idiomatic Java:
+
+```prolog
+?- compile_tail_recursion(test_sum/3, [target(java)], Code).
+?- compile_linear_recursion(factorial/2, [target(java)], Code).
+```
+
+| Pattern | Multifile Predicate | Java Idiom |
+|---------|-------------------|------------|
+| Tail Recursion | `tail_recursion:compile_tail_pattern/9` | `for-each` loop with accumulator |
+| Linear Recursion | `linear_recursion:compile_linear_pattern/8` | `HashMap<Integer, Integer>` memoization |
+
+### Tail Recursion Example
+
+```java
+// Generated from test_sum/3 with target(java)
+public class TestSum {
+    public static int test_sum(int[] items) {
+        int acc = 0;
+        for (int item : items) {
+            acc = acc + item;
+        }
+        return acc;
+    }
+}
+```
+
+### Linear Recursion Example
+
+```java
+// Generated from factorial/2 with target(java)
+public class Factorial {
+    private static final HashMap<Integer, Integer> memo = new HashMap<>();
+
+    public static int factorial(int n) {
+        if (memo.containsKey(n)) return memo.get(n);
+        if (n == 0) return 1;
+        int result = 1;
+        for (int current = n; current >= 1; current--) {
+            result = current * result;
+        }
+        memo.put(n, result);
+        return result;
+    }
+}
+```
+
+Java class names are generated in PascalCase from the predicate name (e.g., `test_sum` becomes `TestSum`).
+
 ## Next Steps
 
 - Combine `PARENT.java` and `ANCESTOR.java` for a complete solution

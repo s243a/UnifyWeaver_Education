@@ -4,18 +4,27 @@ This chapter covers recursion patterns for the F# target using functional idioms
 
 ## Recursion Pattern Summary
 
-| Pattern | F# Construct | API |
-|---------|--------------|-----|
-| Tail Recursion | `let rec` + accumulator | `compile_tail_recursion_fsharp/3` |
-| Linear Recursion | Dictionary memo | `compile_linear_recursion_fsharp/3` |
-| Mutual Recursion | `let rec ... and` | `compile_mutual_recursion_fsharp/3` |
+| Pattern | F# Construct | Multifile Dispatch | Legacy API |
+|---------|--------------|-------------------|------------|
+| Tail Recursion | `let rec` + accumulator | `tail_recursion:compile_tail_pattern/9` | `compile_tail_recursion_fsharp/3` |
+| Linear Recursion | Dictionary memo | `linear_recursion:compile_linear_pattern/8` | `compile_linear_recursion_fsharp/3` |
+| Mutual Recursion | `let rec ... and` | `mutual_recursion:compile_mutual_pattern/5` | `compile_mutual_recursion_fsharp/3` |
+
+The F# target registers multifile dispatch clauses with the core recursion analysis modules. When you compile with `target(fsharp)`, the analyzer automatically detects the pattern and dispatches to the F#-specific code generator:
+
+```prolog
+?- compile_tail_recursion(test_sum/3, [target(fsharp)], Code).
+?- compile_linear_recursion(factorial/2, [target(fsharp)], Code).
+```
+
+The legacy target-specific APIs (`compile_tail_recursion_fsharp/3`, etc.) are still available for direct use.
 
 ## Tail Recursion
 
 Tail-recursive predicates compile to `let rec` with inner loop:
 
 ```prolog
-?- compile_tail_recursion_fsharp(sum/2, [], Code).
+?- compile_tail_recursion(sum/3, [target(fsharp)], Code).
 ```
 
 **Generated F#:**
@@ -34,7 +43,7 @@ This achieves O(1) stack space through tail call optimization.
 Linear recursion uses Dictionary memoization with pattern matching:
 
 ```prolog
-?- compile_linear_recursion_fsharp(fib/2, [], Code).
+?- compile_linear_recursion(fib/2, [target(fsharp)], Code).
 ```
 
 **Generated F#:**
@@ -59,7 +68,7 @@ let rec fib n =
 F# natively supports mutual recursion with the `and` keyword:
 
 ```prolog
-?- compile_mutual_recursion_fsharp([is_even/1, is_odd/1], [], Code).
+?- compile_mutual_recursion([is_even/1, is_odd/1], [target(fsharp)], Code).
 ```
 
 **Generated F#:**

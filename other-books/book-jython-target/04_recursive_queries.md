@@ -65,3 +65,19 @@ jython ancestor_query.py abraham < facts.txt
 - Python dict with set values
 - Java interop available
 - Same API as CPython
+
+## Advanced Recursion Patterns
+
+The Jython target also supports tail and linear recursion via multifile dispatch:
+
+```prolog
+?- compile_tail_recursion(test_sum/3, [target(jython)], Code).
+?- compile_linear_recursion(factorial/2, [target(jython)], Code).
+```
+
+| Pattern | Multifile Predicate | Python Idiom |
+|---------|-------------------|--------------|
+| Tail Recursion | `tail_recursion:compile_tail_pattern/9` | `for item in items:` loop |
+| Linear Recursion | `linear_recursion:compile_linear_pattern/8` | `reduce()` + `dict` memoization |
+
+Generated code is Python 2/3 compatible, using `from __future__ import print_function` and `try/except` for `functools.reduce` import.

@@ -53,17 +53,27 @@ The transformation from a Prolog predicate to a Bash script follows a clear pipe
                          │
                          ▼
 ┌──────────────────────────────────┐
+│ Multifile Dispatch (if target≠   │
+│ bash): route to target-specific  │
+│ code generator via multifile     │
+│ predicates                       │
+└────────────────┬─────────────────┘
+                 │
+                 ▼
+┌──────────────────────────────────┐
 │ Analyze Constraints & Options    │ (constraint_analyzer.pl)
 └────────────────┬─────────────────┘
                  │
                  ▼
 ┌──────────────────────────────────┐
-│ Select & Render Template         │ (template_system.pl)
+│ Select & Render Template         │ (template_system.pl / multifile)
 └────────────────┬─────────────────┘
                  │
                  ▼
         ┌────────────────┐
-        │   Bash Script  │
+        │  Target Code   │
+        │ (Bash, Ruby,   │
+        │  Java, C, ...) │
         └────────────────┘
 ```
 
@@ -77,11 +87,13 @@ The transformation from a Prolog predicate to a Bash script follows a clear pipe
 
 4.  **Advanced Pattern Matching:** The advanced compiler attempts to match the predicate against its known patterns in order of specificity: tail recursion, then linear recursion, then graph, then mutual recursion (by detecting Strongly Connected Components).
 
-5.  **Constraint Analysis:** The compiler queries the `constraint_analyzer` to fetch any constraints for the predicate (e.g. `unique(true)`).
+5.  **Multifile Dispatch (Multi-Target):** When `target(T)` is specified and an advanced pattern is detected, the compiler dispatches code generation to the appropriate target via Prolog's **multifile predicates**. Each target registers clauses such as `tail_recursion:compile_tail_pattern/9` and `linear_recursion:compile_linear_pattern/8`. Prolog's first-argument indexing routes to the correct target-specific code generator automatically. This means adding a new target only requires appending multifile clauses — no changes to the core analysis modules.
 
-6.  **Template Rendering:** Based on the analysis, the compiler selects an appropriate Bash code template and uses the `template_system` to generate the final script.
+6.  **Constraint Analysis:** The compiler queries the `constraint_analyzer` to fetch any constraints for the predicate (e.g. `unique(true)`).
 
-7.  **Bash Script:** The final output is a complete, executable Bash script or function.
+7.  **Template Rendering:** For the Bash target, the compiler selects an appropriate code template and uses the `template_system` to generate the final script. For other targets, the multifile dispatch clauses generate idiomatic code directly (e.g., `@tailrec` in Scala, `loop/recur` in Clojure, `tailrec fun` in Kotlin).
+
+8.  **Output:** The final output is executable code in the selected target language — a Bash script, Ruby method, Java class, C function, or any of the 20+ supported targets.
 
 ## The Core Modules
 
@@ -100,7 +112,7 @@ This is the main entry point and **dispatcher**. It performs the initial analysi
 This module manages and analyzes predicate constraints, such as `unique` and `ordered`, which guide the optimization process.
 
 ### 5. `advanced_recursive_compiler.pl`
-This is the orchestrator for complex recursion. It uses several sub-modules (`pattern_matchers.pl`, `scc_detection.pl`, `tail_recursion.pl`, etc.) to identify and compile advanced patterns into highly optimized Bash code, such as converting tail recursion into iterative loops.
+This is the orchestrator for complex recursion. It uses several sub-modules (`pattern_matchers.pl`, `scc_detection.pl`, `tail_recursion.pl`, etc.) to identify and compile advanced patterns. For the Bash target, it generates optimized shell code directly. For all other targets, it uses **multifile dispatch** — each target file registers clauses like `tail_recursion:compile_tail_pattern/9` and `linear_recursion:compile_linear_pattern/8`, and Prolog's first-argument indexing routes code generation to the correct target automatically. This architecture means the core analysis modules never need to change when new targets are added.
 
 ## Structure of the Generated Bash Code
 
