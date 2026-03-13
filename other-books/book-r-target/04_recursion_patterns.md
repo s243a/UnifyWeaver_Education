@@ -4,9 +4,10 @@ Copyright (c) 2025 John William Creighton (s243a)
 -->
 # Chapter 4: Recursion Patterns
 
-The R target supports six recursion patterns, each with memoization. The advanced
-recursive compiler detects the pattern automatically and dispatches to the
-R-specific code generator via multifile predicates.
+The R target supports six recursion patterns. The advanced recursive compiler
+detects the pattern automatically and dispatches to the R-specific code generator
+via multifile predicates. Memoization is enabled by default but can be disabled
+with `memo(false)`, in which case linear recursion compiles to a simple `for` loop.
 
 ## Priority Order
 
@@ -70,10 +71,12 @@ The R target handles two tail recursion shapes:
 | **Ternary** | 3 args (list, acc, result) | `for` loop + accumulator | `sum_list/3` |
 | **Binary** | 2 args (list, result) | `for` loop + counter | `count_items/2` |
 
-## 2. Linear Recursion (Fold-Based)
+## 2. Linear Recursion
 
-Linear recursion (one recursive call per clause) compiles to R's `Reduce()`
-function, which implements a fold.
+Linear recursion (one recursive call per clause) has two compilation modes:
+
+- **Loop-based** (`memo(false)`): Compiles to a `for` loop — no memoization overhead
+- **Fold-based** (default): Compiles to `Reduce()` with memoization
 
 ### Source Prolog
 
@@ -82,7 +85,26 @@ factorial(0, 1).
 factorial(N, F) :- N > 0, N1 is N - 1, factorial(N1, F1), F is N * F1.
 ```
 
-### Generated R
+### Generated R — Loop-Based (memo(false))
+
+```r
+factorial <- function(n) {
+    if (n == 0) return(1)
+    result <- 1
+    for (i in seq(n, 1)) {
+        result <- i * result
+    }
+    return(result)
+}
+```
+
+The compiler extracts the step from `N1 is N - 1` to derive the loop range
+`seq(n, 1)`. For a step of 2 (e.g., `N1 is N - 2`), it generates
+`seq(n, 2, by = -2)`. If the step is not a simple additive constant (e.g.,
+`N1 is N * 2`), the loop-based path fails and the compiler backtracks to try
+other strategies — no silent assumptions are made.
+
+### Generated R — Fold-Based (default)
 
 ```r
 factorial_memo <- new.env(hash=TRUE, parent=emptyenv())
@@ -113,7 +135,7 @@ factorial <- function(n, expected=NULL) {
     }
 
     # Recursive case using Reduce
-    range_vals <- seq(n, 1, by=-1)
+    range_vals <- seq(n, 1)
     result <- Reduce(factorial_op, range_vals, init=1)
 
     factorial_memo[[key]] <- result
@@ -135,18 +157,26 @@ $ Rscript factorial.R 20
 2432902008176640000
 ```
 
-The compiler extracts the fold operation (`N * F1`) and generates a `Reduce()` call
-over the range `n..1`. R's `Reduce()` is equivalent to a left fold.
+The compiler extracts the fold operation (`N * F1`) and the step expression
+(`N1 is N - 1`) to generate the correct range. The loop range is derived from
+the Prolog source, not hardcoded.
 
 ### Numeric vs List Fold
 
 | Input Type | R Strategy | Example |
 |-----------|-----------|---------|
-| Numeric (countdown) | `Reduce(op, seq(n, base, by=-1), init=identity)` | `factorial`, `fibonacci` |
+| Numeric (countdown) | Loop or `Reduce(op, seq(n, base+step), init=identity)` | `factorial` |
 | List (structural) | `Reduce(op, lst, init=identity)` | `list_length`, `sum_list` |
 
 The compiler detects the input type from the base case: if the base case argument
 is `0` or a number, it's numeric. If it's `[]`, it's a list.
+
+### When to Use memo(false)
+
+Memoization is unnecessary for predicates with no repeated subproblems (e.g.,
+factorial, sum). Use `memo(false)` to generate cleaner, faster code. Predicates
+like Fibonacci benefit from memoization since `fib(n-1)` and `fib(n-2)` create
+overlapping subproblems.
 
 ## 3. Tree Recursion
 
@@ -360,7 +390,8 @@ pred_memo <- new.env(hash=TRUE, parent=emptyenv())
 | Pattern | Key Format | Scope |
 |---------|-----------|-------|
 | Tail | N/A (loop, no memo needed) | — |
-| Linear | `as.character(n)` | Per-function |
+| Linear (memo=false) | N/A (loop, no memo needed) | — |
+| Linear (default) | `as.character(n)` | Per-function |
 | Tree | `digest::digest(tree)` | Per-function |
 | Multi-call | `as.character(input)` | Per-function |
 | Mutual | `paste0("func:", n)` | Shared across group |
