@@ -5,11 +5,26 @@ Copyright (c) 2025 John William Creighton (s243a)
 This documentation is dual-licensed under MIT and CC-BY-4.0.
 -->
 
-# Chapter 3: C# Query Runtime - Deep Dive
+# Appendix A: The Non-Parameterized Query Engine
+
+> **Reading Guide**: This appendix covers the original non-parameterized
+> query engine. While superseded by the parameterized engine (Chapter 3),
+> it provides a **simpler introduction to query plan concepts** — how
+> Prolog predicates become IR nodes, how fixpoint iteration works, and
+> how the runtime executes query plans.
+>
+> **We recommend reading this appendix first** if you're new to query
+> engines, then returning to Chapter 3 for the parameterized approach
+> that supports arithmetic (`is/2`), mode declarations, and demand analysis.
+>
+> **Limitation**: This engine cannot handle `is/2` arithmetic in recursive
+> predicates. For example, `Hops is H1 + 1` inside a transitive closure
+> will fail with "variable not bound in body." This limitation motivated
+> the parameterized redesign in Chapter 3.
 
 ## Introduction
 
-The C# Query Runtime uses an **Intermediate Representation (IR)** approach instead of direct source-to-source translation. This chapter explains how the query engine works, breaking down complex concepts into understandable pieces.
+The C# Query Runtime uses an **Intermediate Representation (IR)** approach instead of direct source-to-source translation. This appendix explains how the original (non-parameterized) query engine works, breaking down complex concepts into understandable pieces.
 
 ## Why Query Runtime vs Native Target?
 

@@ -63,20 +63,28 @@ UnifyWeaver provides two C# compilation targets:
 - Semi-naive iteration for recursive predicates
 - Building and running generated code
 
-### Chapter 3: C# Query Runtime
-- IR (Intermediate Representation) concept
-- Query engine architecture
-- Fixpoint iteration for recursion (semi-naive + mutual SCC groups)
-- Plan nodes: `FixpointNode`, `MutualFixpointNode`, `CrossRefNode`
-- Testing with `SKIP_CSHARP_EXECUTION` and manual dotnet builds
+### Chapter 3: The Parameterized Query Engine *(new)*
+- Why parameterized queries? (the `is/2` limitation)
+- Mode declarations (`+` input, `-` output)
+- ParamSeedNode and demand analysis
+- Worked example: `category_ancestor/3` with arithmetic
+- Comparison with old engine (Appendix A)
+- Semi-naive evaluation with parameter seeding
 
-### Chapter 4: Runtime Libraries and Deployment
+### Chapter 4: Performance at Scale — Cross-Target Benchmark *(new)*
+- The effective distance benchmark (Wikipedia category hierarchy)
+- Scaling results: C# overtakes Rust at 1K+ articles
+- Why C# wins: JIT, HashSet, LINQ-inspired architecture
+- Target recommendations by audience
+- The UnifyWeaver value proposition
+
+### Chapter 5: Runtime Libraries and Deployment
 - Shared runtime components
 - Packaging C# projects
 - Cross-platform deployment (.NET 6+)
 - Integration with existing .NET applications
 
-### Chapter 5: Semantic Crawling and Vector Search
+### Chapter 6: Semantic Crawling and Vector Search
 - Semantic Runtime Architecture
 - Embedding with ONNX (`OnnxEmbeddingProvider`)
 - Crawling with `PtCrawler`
@@ -165,12 +173,23 @@ namespace UnifyWeaver.Generated {
 - Building complex relational queries with cross-predicate dependencies
 - Want runtime flexibility
 
+### Chapter 7: PowerShell Semantic
+
+### Appendix A: The Non-Parameterized Query Engine
+- The original, simpler query engine (read first if new to query plans)
+- IR concepts: RelationRef, Selection, Join, Projection
+- Fixpoint iteration basics
+- Why this engine couldn't handle `is/2` (motivating Chapter 3)
+
 ## Learning Path
 
-1. **Start with Chapter 1** - Understand multi-target compilation concepts
-2. **Work through Chapter 2** - Build simple C# programs from Prolog
-3. **Advance to Chapter 3** - Master query runtime for complex cases
-4. **Complete Chapter 4** - Deploy production-ready .NET applications
+1. **Start with Chapter 1** — Understand multi-target compilation concepts
+2. **Work through Chapter 2** — Build simple C# programs from Prolog
+3. **Read Appendix A** *(optional but recommended)* — Simpler query engine
+   as a stepping stone to understanding query plans
+4. **Advance to Chapter 3** — Master the parameterized query engine
+5. **Read Chapter 4** — See the C# engine's performance advantages at scale
+6. **Complete Chapters 5-7** — Deploy and extend
 
 ## Example Projects
 
