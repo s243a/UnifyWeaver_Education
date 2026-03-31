@@ -50,6 +50,27 @@ grandparent/2:
     execute parent/2       % Tail call optimization
 ```
 
+## Compound Body Arguments (`put_structure`)
+
+When a body goal contains a compound term as an argument, the compiler uses `put_structure` followed by `set_value`/`set_constant` to build the term on the heap before the call.
+
+### Prolog
+```prolog
+wrap(X) :- check(pair(X, done)).
+```
+
+### WAM Output
+```wam
+wrap/1:
+    get_variable X1, A1    % Bind X to X1
+    put_structure pair/2, A1  % Begin building pair(X, done) in A1
+    set_value X1           % First sub-arg: X (already in X1)
+    set_constant done      % Second sub-arg: the atom 'done'
+    execute check/1        % Tail call
+```
+
+The `put_structure` instruction allocates a structure cell on the heap. Each subsequent `set_*` instruction appends one sub-argument. After all `N` sub-arguments are set, `Ai` holds a reference to the completed compound term.
+
 ## Recursion and Tail Call Optimization (TCO)
 
 The WAM target automatically identifies the last call in a rule and uses the `execute` instruction instead of `call` + `proceed`.
