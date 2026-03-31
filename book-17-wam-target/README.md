@@ -27,7 +27,7 @@ The WAM target uses a symbolic instruction set based on the original Warren Abst
 
 ```prolog
 ?- use_module('src/unifyweaver/targets/wam_target').
-?- wam_target:compile_predicate_to_wam(ancestor/2, [], Code).
+?- wam_target:compile_predicate_to_wam(user:ancestor/2, [], Code).
 ```
 
 ## Chapters
