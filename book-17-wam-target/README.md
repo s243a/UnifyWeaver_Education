@@ -4,7 +4,7 @@ The WAM (Warren Abstract Machine) target serves as the universal low-level fallb
 
 ## Why WAM?
 
-While other targets like Python, Go, and TypR use "native lowering" to map Prolog clauses to idiomatic language constructs, some Prolog features are difficult to lower efficiently:
+While other targets like Python, Go, and **TypR** (our specialized Typed R target) use "native lowering" to map Prolog clauses to idiomatic language constructs, some Prolog features are difficult to lower efficiently:
 
 - **Non-deterministic choice points**: back-to-back fact matching or rule selection.
 - **Deep structure unification**: matching complex nested terms.
@@ -18,8 +18,8 @@ The WAM target uses a symbolic instruction set based on the original Warren Abst
 
 | Category | Instructions |
 |----------|--------------|
-| **Head Unification** | `get_variable`, `get_constant`, `get_structure`, `unify_variable`, `unify_constant` |
-| **Body Construction** | `put_variable`, `put_constant`, `put_structure` |
+| **Head Unification** | `get_variable`, `get_value`, `get_constant`, `get_structure`, `unify_variable`, `unify_constant` |
+| **Body Construction** | `put_variable`, `put_value`, `put_constant`, `put_structure` |
 | **Control Flow** | `allocate`, `deallocate`, `call`, `execute`, `proceed` |
 | **Choice Points** | `try_me_else`, `retry_me_else`, `trust_me` |
 

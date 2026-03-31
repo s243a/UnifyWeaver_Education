@@ -5,8 +5,8 @@ The UnifyWeaver WAM target generates a subset of the standard WAM instruction se
 ## Registers
 
 - **Ai (Argument Registers)**: Used to pass arguments into a predicate. `A1` is the first argument, `A2` the second, etc.
-- **Xi (Temporary Registers)**: Used within a clause to store intermediate terms or variables that do not survive a `call`.
-- **Yi (Permanent Variables)**: Stored in the environment stack frame. These survive across predicate calls.
+- **Xi (Temporary Registers)**: Used within a clause to store intermediate terms or variables.
+- **Yi (Permanent Variables)**: *Note: Currently, UnifyWeaver uses Xi registers for all variables within a clause. Full permanent variable allocation (Yi) on the environment stack is a planned enhancement.*
 
 ## Core Instructions
 
@@ -15,6 +15,7 @@ Used to match the incoming arguments in `Ai`.
 
 - `get_constant(C, Ai)`: Verifies that argument `Ai` is the constant `C`.
 - `get_variable(Xn, Ai)`: Binds argument `Ai` to temporary register `Xn`.
+- `get_value(Xn, Ai)`: Unifies argument `Ai` with the current value of `Xn`.
 - `get_structure(F/N, Ai)`: Verifies that `Ai` is a structure with functor `F` and arity `N`.
 
 ### 2. Term Construction (Body)
@@ -22,6 +23,7 @@ Used to prepare arguments in `Ai` before calling another predicate.
 
 - `put_constant(C, Ai)`: Loads constant `C` into argument register `Ai`.
 - `put_variable(Xn, Ai)`: Creates a new variable and stores it in `Xn` and `Ai`.
+- `put_value(Xn, Ai)`: Loads the value of `Xn` into `Ai`.
 
 ### 3. Control
 Manages the execution flow and stack frames.

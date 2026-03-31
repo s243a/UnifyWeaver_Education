@@ -25,6 +25,12 @@ Prolog Source
 2.  **WAM to Target Bytecode**: The symbolic instructions are mapped to the instruction set of the specific virtual machine (e.g., WASM stack operations).
 3.  **Execution**: The resulting code is run in its native environment with full Prolog capability.
 
+## Target Backends
+
+- **WAT (WebAssembly Text)**: A text representation of the WebAssembly binary format, suitable for execution in browsers and Node.js.
+- **Jamaica**: A JVM bytecode generator tool (part of the larger JVM family of targets in UnifyWeaver).
+- **Krakatau**: A robust assembler and disassembler for Java bytecode, used alongside Jamaica for high-fidelity JVM targets.
+
 ## Benefits
 
 -   **Uniformity**: We only need to solve "Backtracking in WASM" once by mapping WAM choice points to WASM.

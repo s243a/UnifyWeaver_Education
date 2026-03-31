@@ -28,7 +28,7 @@ L_parent_2_2:
 
 ## Rules and Control Flow
 
-Rules involve argument preparation and predicate calls.
+Rules involve argument preparation and predicate calls. UnifyWeaver uses a simplified register mapping where temporary variables are assigned to `Xn` registers.
 
 ### Prolog
 ```prolog
@@ -38,14 +38,16 @@ grandparent(X, Z) :- parent(X, Y), parent(Y, Z).
 ### WAM Output
 ```wam
 grandparent/2:
-    get_variable X1, A1    % Preserve X
-    get_variable X2, A2    % Preserve Z
-    put_variable X1, A1    % Setup X for first call
-    put_variable X3, A2    % Setup new Y
+    allocate
+    get_variable X1, A1    % Preserve X in X1
+    get_variable X2, A2    % Preserve Z in X2
+    put_value X1, A1       % Setup X for first call
+    put_variable X3, A2    % Setup new Y in X3
     call parent/2, 2
-    put_variable X3, A1    % Setup Y for second call
-    put_variable X2, A2    % Setup Z
-    execute parent/2       % Tail call
+    put_value X3, A1       % Setup Y for second call
+    put_value X2, A2       % Setup Z for second call
+    deallocate
+    execute parent/2       % Tail call optimization
 ```
 
 ## Recursion and Tail Call Optimization (TCO)
@@ -65,12 +67,14 @@ ancestor/2:
     execute parent/2
 L_ancestor_2_2:
     trust_me
+    allocate
     get_variable X1, A1
     get_variable X2, A2
-    put_variable X1, A1
+    put_value X1, A1
     put_variable X3, A2
     call parent/2, 2
-    put_variable X3, A1
-    put_variable X2, A2
+    put_value X3, A1
+    put_value X2, A2
+    deallocate
     execute ancestor/2
 ```
