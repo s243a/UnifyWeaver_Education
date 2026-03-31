@@ -19,7 +19,7 @@ The WAM target uses a symbolic instruction set based on the original Warren Abst
 | Category | Instructions |
 |----------|--------------|
 | **Head Unification** | `get_variable`, `get_value`, `get_constant`, `get_structure`, `unify_variable`, `unify_constant` |
-| **Body Construction** | `put_variable`, `put_value`, `put_constant`, `put_structure` |
+| **Body Construction** | `put_variable`, `put_value`, `put_constant`, `put_structure`, `set_variable`, `set_value`, `set_constant` |
 | **Control Flow** | `allocate`, `deallocate`, `call`, `execute`, `proceed` |
 | **Choice Points** | `try_me_else`, `retry_me_else`, `trust_me` |
 

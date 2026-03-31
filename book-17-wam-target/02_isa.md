@@ -24,6 +24,10 @@ Used to prepare arguments in `Ai` before calling another predicate.
 - `put_constant(C, Ai)`: Loads constant `C` into argument register `Ai`.
 - `put_variable(Xn, Ai)`: Creates a new variable and stores it in `Xn` and `Ai`.
 - `put_value(Xn, Ai)`: Loads the value of `Xn` into `Ai`.
+- `put_structure(F/N, Ai)`: Begins constructing a compound term with functor `F` and arity `N` on the heap, storing a reference in `Ai`. Must be followed by `N` set instructions.
+- `set_variable(Xn)`: Pushes a new unbound variable onto the heap and binds `Xn` to it. Used inside `put_structure` sequences.
+- `set_value(Xn)`: Pushes the current value of `Xn` onto the heap. Used inside `put_structure` sequences.
+- `set_constant(C)`: Pushes constant `C` onto the heap. Used inside `put_structure` sequences.
 
 ### 3. Control
 Manages the execution flow and stack frames.
