@@ -480,4 +480,4 @@ Continue exploring by combining SQL target with other UnifyWeaver targets for fu
 
 ## Navigation
 
-**←** [Previous: Chapter 11: CASE WHEN Expressions](11_case_when) | [📖 Book 10: SQL Target](./) | [Next: Book 11: Prolog Target →](../book-11-prolog-target/)
+**←** [Previous: Chapter 11: CASE WHEN Expressions](11_case_when) | [📖 Book 10: SQL Target](./) | [Next: Chapter 13: Native Clause Lowering →](13_native_clause_lowering)

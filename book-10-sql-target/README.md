@@ -131,6 +131,13 @@ Unlike other targets that produce executable programs, the SQL target generates 
 - ETL query generation
 - Database migration scripts
 
+### Chapter 13: Native Clause Body Lowering
+- Automatic multi-clause → CASE WHEN compilation
+- Three output modes: `case_select`, `create_function`, `case_expression`
+- PL/pgSQL stored function generation with IF/ELSIF
+- When to use native lowering vs explicit `sql_case`
+- SQL as the 28th and final target with native lowering
+
 ## Quick Start Example
 
 ```prolog
@@ -225,6 +232,7 @@ sqlite3 test.db "$(cat generated.sql)"
 4. **Master Chapters 7-8** - CTEs and recursive queries
 5. **Complete Chapters 9-11** - Set operations, functions, CASE WHEN
 6. **Apply in Chapter 12** - Real-world applications
+7. **Explore Chapter 13** - Native clause lowering (auto-compilation)
 
 ## Additional Resources
 
