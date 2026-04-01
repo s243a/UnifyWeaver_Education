@@ -40,6 +40,7 @@ Manages the execution flow and stack frames.
 - `call(P/N, Arity)`: Calls predicate `P/N`. `Arity` is the number of registers to preserve.
 - `execute(P/N)`: Jumps to predicate `P/N` (Tail Call Optimization).
 - `proceed`: Returns from the current predicate (successful unification).
+- `builtin_call(P/N, Arity)`: Evaluates a built-in predicate (e.g., `is/2`, `>/2`, `</2`) using the current argument registers. Does not jump to compiled code — the operation is performed inline by the runtime.
 
 ### 4. Choice Points
 Used for predicates with multiple clauses.
@@ -47,3 +48,8 @@ Used for predicates with multiple clauses.
 - `try_me_else(Label)`: Sets up a choice point, trying the current clause and pointing to `Label` as the alternative.
 - `retry_me_else(Label)`: Updates an existing choice point to the next alternative.
 - `trust_me`: Removes the choice point and tries the final alternative.
+
+### 5. Indexing
+Optimizes clause selection by dispatching on the first argument.
+
+- `switch_on_constant(Key1:Label1, Key2:Label2, ...)`: If A1 matches a key, jump directly to the corresponding label. Falls through if A1 is unbound or not in the table. Generated automatically when all clauses have atomic first arguments.
