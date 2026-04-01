@@ -6,7 +6,7 @@ The UnifyWeaver WAM target generates a subset of the standard WAM instruction se
 
 - **Ai (Argument Registers)**: Used to pass arguments into a predicate. `A1` is the first argument, `A2` the second, etc.
 - **Xi (Temporary Registers)**: Used within a clause to store intermediate terms or variables.
-- **Yi (Permanent Variables)**: *Note: Currently, UnifyWeaver uses Xi registers for all variables within a clause. Full permanent variable allocation (Yi) on the environment stack is a planned enhancement.*
+- **Yi (Permanent Variables)**: Stored in the environment frame on the stack. Used for variables that must survive across `call` instructions (i.e., variables referenced in more than one body goal). The compiler automatically identifies permanent variables and assigns them Yi registers. `allocate` creates the environment frame, and `deallocate` removes it.
 
 ## Core Instructions
 
