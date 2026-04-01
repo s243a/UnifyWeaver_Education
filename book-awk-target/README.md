@@ -41,6 +41,9 @@ Use the `match/2`, `match/3`, and `match/4` predicates for regex operations.
 ### [Chapter 7: Practical Applications](chapters/07-practical-applications.md)
 Real-world examples: log analysis, data transformation, and pipeline integration.
 
+### [Native Clause Body Lowering](02_native_clause_lowering.md)
+Multi-clause predicates → if/else if chains, arithmetic, error handling.
+
 ## Key Features of the AWK Target
 
 | Feature | Description |
