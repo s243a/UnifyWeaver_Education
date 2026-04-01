@@ -396,6 +396,8 @@ In this chapter, you learned:
 
 In Chapter 12, we'll bring it all together with practical, real-world applications and complete projects using the SQL target.
 
+In Chapter 13, we'll explore **native clause body lowering** — where standard multi-clause Prolog predicates are automatically compiled to CASE WHEN expressions or PL/pgSQL stored functions, without needing to write `sql_case(...)` explicitly.
+
 ---
 
 ## Navigation
