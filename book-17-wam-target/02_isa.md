@@ -52,4 +52,6 @@ Used for predicates with multiple clauses.
 ### 5. Indexing
 Optimizes clause selection by dispatching on the first argument.
 
-- `switch_on_constant(Key1:Label1, Key2:Label2, ...)`: If A1 matches a key, jump directly to the corresponding label. Falls through if A1 is unbound or not in the table. Generated automatically when all clauses have atomic first arguments.
+- `switch_on_constant(Key1:Label1, Key2:Label2, ...)`: If A1 matches an atomic key, jump directly to the corresponding label. Falls through if A1 is unbound or not in the table. Generated when all clauses have atomic first arguments.
+- `switch_on_structure(F/N1:Label1, F/N2:Label2, ...)`: If A1 is a compound term matching a functor/arity key, jump to the corresponding label. Generated when all clauses have compound first arguments.
+- `switch_on_term(constant:..., structure:...)`: Type-based dispatch for predicates with mixed first arguments. Dispatches to the appropriate constant or structure index based on A1's type.
