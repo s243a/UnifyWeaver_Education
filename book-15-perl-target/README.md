@@ -71,6 +71,11 @@ By completing this book, you will be able to:
 - I/O and file operations
 - Math functions
 
+**7. Native Clause Body Lowering** (`07_native_clause_lowering.md`)
+- Multi-clause predicates → if/elsif/else chains
+- Ternary `? :` for if-then-else
+- `die` for unmatched clauses
+
 ## Quick Start
 
 ```prolog

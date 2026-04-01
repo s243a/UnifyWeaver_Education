@@ -175,6 +175,11 @@ namespace UnifyWeaver.Generated {
 
 ### Chapter 7: PowerShell Semantic
 
+### Chapter 8: Native Clause Body Lowering
+- Multi-clause predicates → if/else if/else chains
+- PascalCase method names, `Convert.ToInt32()`, `Math.Abs()`
+- Coexists with LINQ pipeline (native tried first)
+
 ### Appendix A: The Non-Parameterized Query Engine
 - The original, simpler query engine (read first if new to query plans)
 - IR concepts: RelationRef, Selection, Join, Projection

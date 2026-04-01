@@ -111,7 +111,12 @@ This table shows the current implementation status of features described in each
 - Class-based design for PowerShell
 - Linear recursion with memoization patterns
 
-**Chapter 8: Active Directory** *(planned)*
+**[Chapter 8: Native Clause Body Lowering](08_native_clause_lowering.md)** - *Implemented*
+- Multi-clause predicates → if/return chains
+- PowerShell operators: `-gt`, `-lt`, `-ge`, `-le`, `-eq`, `-ne`
+- `[Math]::Abs()` and `Write-Error` patterns
+
+**Chapter 9: Active Directory** *(planned)*
 - LDAP queries from Prolog
 - User and group management
 - Permission handling

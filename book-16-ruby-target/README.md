@@ -65,6 +65,11 @@ By completing this book, you will be able to:
 - Pipeline mode
 - Rails service integration
 
+**6. Native Clause Body Lowering** (`06_native_clause_lowering.md`)
+- Multi-clause predicates → if/elsif/else/end chains
+- Implicit returns, ternary `? :`
+- `raise` for unmatched clauses
+
 ## Quick Start
 
 ```prolog
