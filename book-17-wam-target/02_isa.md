@@ -16,10 +16,10 @@ Used to match the incoming arguments in `Ai`.
 - `get_constant(C, Ai)`: Verifies that argument `Ai` is the constant `C`.
 - `get_variable(Xn, Ai)`: Binds argument `Ai` to temporary register `Xn`.
 - `get_value(Xn, Ai)`: Unifies argument `Ai` with the current value of `Xn`.
-- `get_structure(F/N, Ai)`: Verifies that `Ai` is a structure with functor `F` and arity `N`. Must be followed by `unify_*` instructions for each sub-argument.
-- `unify_variable(Xn)`: Inside a `get_structure` sequence, binds the next sub-argument to register `Xn`. Used when the sub-argument hasn't been seen yet.
-- `unify_value(Xn)`: Inside a `get_structure` sequence, unifies the next sub-argument with the existing value of `Xn`. Used when the sub-argument was already bound.
-- `unify_constant(C)`: Inside a `get_structure` sequence, checks that the next sub-argument equals constant `C`.
+- `get_structure(F/N, Ai)`: Operates in two modes. **Read mode**: if `Ai` holds a compound term, verifies functor `F` and arity `N`, then subsequent `unify_*` instructions match sub-arguments. **Write mode**: if `Ai` is unbound, allocates a structure on the heap and subsequent `unify_*` instructions build sub-arguments.
+- `unify_variable(Xn)`: In read mode, binds the next sub-argument to register `Xn`. In write mode, creates a new variable on the heap and binds `Xn` to it.
+- `unify_value(Xn)`: In read mode, checks that the next sub-argument matches `Xn`. In write mode, pushes the value of `Xn` onto the heap.
+- `unify_constant(C)`: In read mode, checks that the next sub-argument equals constant `C`. In write mode, pushes `C` onto the heap.
 
 ### 2. Term Construction (Body)
 Used to prepare arguments in `Ai` before calling another predicate.
