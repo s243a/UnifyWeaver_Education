@@ -248,6 +248,14 @@ By completing this book, you will be able to:
 - High-performance: Go + Rust
 - Microservices: Distributed HTTP pipeline
 
+### Part 10: Cross-Target Compilation
+
+**25. Native Clause Lowering Reference** (`25_native_clause_lowering_reference.md`)
+- Same Prolog predicate compiled to all 28 targets
+- Complete cross-target syntax comparison tables
+- Conditional syntax, error handling, and return mechanisms
+- Covers: C, Rust, Go, Java, Kotlin, Haskell, F#, Elixir, Clojure, Lua, TypeScript, WAT, SQL, TypR, and all others
+
 ## Chapter Summary
 
 | Chapter | Topic | Key Concepts |
