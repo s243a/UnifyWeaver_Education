@@ -16,7 +16,10 @@ Used to match the incoming arguments in `Ai`.
 - `get_constant(C, Ai)`: Verifies that argument `Ai` is the constant `C`.
 - `get_variable(Xn, Ai)`: Binds argument `Ai` to temporary register `Xn`.
 - `get_value(Xn, Ai)`: Unifies argument `Ai` with the current value of `Xn`.
-- `get_structure(F/N, Ai)`: Verifies that `Ai` is a structure with functor `F` and arity `N`.
+- `get_structure(F/N, Ai)`: Verifies that `Ai` is a structure with functor `F` and arity `N`. Must be followed by `unify_*` instructions for each sub-argument.
+- `unify_variable(Xn)`: Inside a `get_structure` sequence, binds the next sub-argument to register `Xn`. Used when the sub-argument hasn't been seen yet.
+- `unify_value(Xn)`: Inside a `get_structure` sequence, unifies the next sub-argument with the existing value of `Xn`. Used when the sub-argument was already bound.
+- `unify_constant(C)`: Inside a `get_structure` sequence, checks that the next sub-argument equals constant `C`.
 
 ### 2. Term Construction (Body)
 Used to prepare arguments in `Ai` before calling another predicate.
