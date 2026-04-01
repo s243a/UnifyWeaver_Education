@@ -70,6 +70,11 @@ By completing this book, you will be able to:
 - Database storage (`upsert_object/3`)
 - LLM integration (`llm_ask/3`)
 
+**6. Native Clause Body Lowering** (`06_native_clause_lowering.md`)
+- Multi-clause predicates → if/elif/else chains
+- Ternary expressions for if-then-else
+- Python-specific: `and`/`or`, `abs()`, `raise ValueError`
+
 ## Key Concepts
 
 ### Two Evaluation Modes

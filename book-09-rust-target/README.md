@@ -47,6 +47,12 @@ This book covers how to use UnifyWeaver to compile Prolog predicates into safe, 
 -   JSON I/O with Serde
 -   Constraints and aggregations
 
+**5. Native Clause Body Lowering** (`05_native_clause_lowering.md`)
+-   Multi-clause predicates → if/else if/else chains
+-   Expression-based returns (no explicit `return`)
+-   If-then-else → nested if/else
+-   Verified: compiles and runs with `rustc`
+
 ## License
 
 This educational content is licensed under CC BY 4.0.

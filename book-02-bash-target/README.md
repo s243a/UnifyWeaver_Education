@@ -124,6 +124,11 @@ This book covers Prolog-to-Bash compilation, stream processing, data source plug
 - Property-based testing
 - Integration testing patterns
 
+**[Native Clause Body Lowering](native_clause_lowering.md)**
+- Multi-clause predicates → if/elif/else/fi chains
+- Four return methods: echo, global, nameref, associative array
+- Arithmetic with `(( ))` and `$(( ))`
+
 ## Additional Resources
 
 - Main repository: https://github.com/s243a/UnifyWeaver

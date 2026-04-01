@@ -95,6 +95,11 @@ By completing this book, you will be able to:
 -   Key strategies (single, composite, hash)
 -   Querying outside generated programs
 
+**10. Native Clause Body Lowering** (`10_native_clause_lowering.md`)
+-   Multi-clause predicates → if/else if/else chains
+-   Uses `interface{}` for generic types
+-   `panic()` for unmatched clauses
+
 ## Related Books
 
 - [Book 13: Semantic Search](../book-13-semantic-search/README.md) - Deep dive into semantic features (Chapter 5)
