@@ -20,6 +20,7 @@ Used to match the incoming arguments in `Ai`.
 - `unify_variable(Xn)`: In read mode, binds the next sub-argument to register `Xn`. In write mode, creates a new variable on the heap and binds `Xn` to it.
 - `unify_value(Xn)`: In read mode, checks that the next sub-argument matches `Xn`. In write mode, pushes the value of `Xn` onto the heap.
 - `unify_constant(C)`: In read mode, checks that the next sub-argument equals constant `C`. In write mode, pushes `C` onto the heap.
+- `get_list(Ai)`: Sugar for `get_structure('./2', Ai)`. Decomposes a list `[H|T]` in read mode, or begins constructing one in write mode. Followed by two `unify_*` instructions for head and tail.
 
 ### 2. Term Construction (Body)
 Used to prepare arguments in `Ai` before calling another predicate.
@@ -31,6 +32,7 @@ Used to prepare arguments in `Ai` before calling another predicate.
 - `set_variable(Xn)`: Pushes a new unbound variable onto the heap and binds `Xn` to it. Used inside `put_structure` sequences.
 - `set_value(Xn)`: Pushes the current value of `Xn` onto the heap. Used inside `put_structure` sequences.
 - `set_constant(C)`: Pushes constant `C` onto the heap. Used inside `put_structure` sequences.
+- `put_list(Ai)`: Sugar for `put_structure('./2', Ai)`. Begins constructing a list `[H|T]` on the heap. Followed by two `set_*` instructions for head and tail.
 
 ### 3. Control
 Manages the execution flow and stack frames.
@@ -55,3 +57,4 @@ Optimizes clause selection by dispatching on the first argument.
 - `switch_on_constant(Key1:Label1, Key2:Label2, ...)`: If A1 matches an atomic key, jump directly to the corresponding label. Falls through if A1 is unbound or not in the table. Generated when all clauses have atomic first arguments.
 - `switch_on_structure(F/N1:Label1, F/N2:Label2, ...)`: If A1 is a compound term matching a functor/arity key, jump to the corresponding label. Generated when all clauses have compound first arguments.
 - `switch_on_term(constant:..., structure:...)`: Type-based dispatch for predicates with mixed first arguments. Dispatches to the appropriate constant or structure index based on A1's type.
+- `switch_on_constant_a2(Key1:Label1, ...)`: Second-argument indexing. Used when first-argument indexing is not possible (e.g., all clauses have variable first arguments) but all second arguments are atomic.
