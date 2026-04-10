@@ -34,6 +34,11 @@ This book covers building intelligent semantic agents using UnifyWeaver's Python
 - LLM integration (Gemini, GPT, Claude)
 - Semantic data pipelines
 - Density-based scoring for result ranking (flux-softmax)
+- Generic semantic interface across 5 target languages
+- Hardware-aware GPU/MPS/CPU code generation
+- Recursive kernel system for native algorithm lowering
+- Minimum semantic distance via Dijkstra and A* kernels
+- Effective semantic distance via power-mean over weighted paths
 
 ## Chapter Overview
 
@@ -163,6 +168,26 @@ This book covers building intelligent semantic agents using UnifyWeaver's Python
 - Vectorized batch processing for efficiency
 - Bookmark filing integration example
 
+### [Chapter 19: Generic Semantic Interface](19_generic_semantic_interface.md)
+- Multifile dispatch architecture (`semantic_dispatch/5`)
+- Five-target support: Python, Go, Rust, C#, Elixir
+- Hardware-aware code generation: CUDA, MPS, DirectML, CPU fallback
+- Per-target providers (transformers, hugot, candle, ONNX, Bumblebee)
+- Inline search options via `semantic_search/4`
+- Vector database sources (`input(vector_db(Path))`)
+- Fuzzy dispatch across all five targets
+- Cross-runtime pipeline integration
+
+### [Chapter 20: Recursive Kernels and Foreign Lowering](20_recursive_kernels.md)
+- Three-tier lowering: native pattern → kernel FFI → WAM
+- Pattern-matched algorithm detection (`weighted_shortest_path3`, `astar_shortest_path4`)
+- Dijkstra and A* kernels for semantic distance
+- A* with dimensionality-aware heuristic `f(n) = g^D + h^D`
+- Effective semantic distance via power-mean aggregation
+- Rust hybrid WAM with foreign function interface
+- Why Python doesn't have a WAM target (yet)
+- Adding new kernels to the system
+
 ## The Semantic Runtime
 
 The Python semantic runtime provides:
@@ -240,6 +265,12 @@ After completing this book, you'll be able to:
 - ✅ Combine fuzzy AND/OR with hierarchical filters
 - ✅ Compile fuzzy expressions to Python with NumPy vectorization
 - ✅ Use batch operations for efficient processing of large datasets
+- ✅ Use the generic semantic interface to compile one Prolog spec to 5 languages
+- ✅ Generate hardware-aware code with automatic GPU/MPS/CPU fallback
+- ✅ Understand the three-tier lowering strategy (native → kernel → WAM)
+- ✅ Recognize when Prolog clause patterns lower to native Dijkstra/A* kernels
+- ✅ Use min/effective semantic distance with precomputed embedding weights
+- ✅ Add new recursive kernels to the foreign function interface system
 
 ## Integration Tests
 
