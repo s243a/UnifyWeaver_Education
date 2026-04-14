@@ -7,6 +7,7 @@ Compile Prolog predicates to type-safe Haskell code.
 1. **[Introduction](01_introduction.md)** - Why Haskell, pattern matching
 2. **[Recursion](02_recursion.md)** - Tail recursion with BangPatterns
 3. **[Parsec](03_parsec.md)** - DCG → Parser Combinators
+4. **[Performance](04_performance.md)** - How the Haskell WAM target beat Rust
 
 ## Prerequisites
 
