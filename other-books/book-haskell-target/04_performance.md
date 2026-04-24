@@ -326,6 +326,105 @@ That's what we *want* to be the bottleneck. We've pushed overhead
 down to "mostly zero" and the remaining time is work that has to
 happen.
 
+## Lesson 7: Know when in-memory stops winning
+
+For most of this chapter, the fix was "give Haskell the right data
+structure and it beats Rust on a graph-analytics workload." At
+somewhere between 1M and 10M edges, that story has a wrinkle worth
+knowing about.
+
+### The abstraction that made this lesson possible
+
+When we added an LMDB backend to the WAM target, we resisted the
+temptation to fork the kernel code. Instead we declared a type:
+
+```haskell
+type EdgeLookup = Int -> [Int]
+```
+
+That's it. Give the kernel a function from node-id to parent-list
+and it doesn't care where the parents live. Two implementations:
+
+```haskell
+-- In-memory: O(log n) IntMap lookup, pure, cache-friendly.
+intMapEdgeLookup :: IM.IntMap [Int] -> EdgeLookup
+intMapEdgeLookup m = \k -> IM.findWithDefault [] k m
+
+-- On-disk: zero-copy mmap via raw LMDB.  unsafePerformIO bridges
+-- the IO boundary because the read transaction is observationally pure.
+lmdbRawEdgeLookup :: MDB_txn -> MDB_dbi' -> EdgeLookup
+lmdbRawEdgeLookup txn dbi k = unsafePerformIO $ ...
+```
+
+Both have the same type. The kernel code (the DFS, the
+transitive-closure step, the FFI entry point) is literally identical
+across backends — a flag at compile time picks which function gets
+passed in.
+
+This is Haskell's quiet advantage for this problem. A language with
+strict evaluation everywhere (say, Rust) would force each backend to
+be a different concrete type; you'd need traits, dynamic dispatch, or
+template specialization to preserve the same API. Here we have a
+plain function type and two ways to inhabit it.
+
+### The measured scaling curve
+
+We ran the same DFS workload at three scales, IntMap vs LMDB-raw:
+
+| Scale | Edges | IntMap | LMDB (warm) | Ratio |
+|-------|------:|-------:|------------:|------:|
+| simplewiki 10k | ~25k | 532 ms | 684 ms | 1.29× IntMap wins |
+| 100k_cats | ~197k | 172,000 ms | 181,263 ms | 1.05× IntMap wins |
+| **enwiki 10k seeds** | **~10M** | **1,656 ms** | **1,593 ms** | **0.96× LMDB wins** |
+
+At 25k edges (simplewiki), IntMap beats LMDB by 29% — the in-memory
+version has no paging, no syscalls, no mmap overhead. At 200k edges
+(a full category-only graph), the ratio has narrowed to 5%. At 10M
+edges (full English Wikipedia), **LMDB is 4% faster**.
+
+Both sides visit identical nodes at the 10M run (50,163 nodes across
+10k random seeds, avg 5 per seed, max depth 3-4) — the comparison is
+apples-to-apples. The DFS algorithm is the same, the seeds are the
+same, the cycle detection is the same. The storage is the only
+variable.
+
+### Why the crossover happens
+
+Two effects accumulate against IntMap as the graph grows:
+
+1. **GC cost.** A 10M-edge `IntMap [Int]` is a sizable structure in
+   the GHC heap. Every major GC traverses it. LMDB's pages live in
+   the OS page cache — they are invisible to the GHC runtime. Large
+   IntMaps pay GC tax; LMDB doesn't.
+2. **Startup cost.** Materializing the IntMap in our benchmark took
+   51 seconds at 10M edges. LMDB's startup is mmapping a file —
+   microseconds. For a long-running process this is amortized, but
+   for short-lived queries it matters.
+
+And one effect that makes LMDB punch above its weight at scale:
+
+3. **mmap + warm page cache ≈ in-memory access.** After the first
+   read from a page, it lives in the kernel's buffer cache. A
+   subsequent `mdb_get'` on that page is a direct memory access
+   guarded by a pointer-chase in the B+ tree — not fundamentally
+   slower than an IntMap lookup.
+
+### What the `EdgeLookup` abstraction buys you
+
+Beyond the raw measurement: the kernel code doesn't have to know
+which backend won. When the next platform appears (SQLite for
+Termux, raw mmap for pre-processed artifacts, a remote fact store
+over gRPC), you add a function of type `EdgeLookup` and a flag to
+select it. The kernel code, the ~6 kernel templates, the purity
+analysis — none of it changes.
+
+This is the lesson for library-scale Haskell: the right type lets
+you postpone the performance question until you have the data.
+`Int -> [Int]` is a small type, but it has opinions about what you
+can swap underneath it. IntMap and LMDB-mmap both inhabit that type
+cleanly. Thinking that way once and encoding it once paid off
+across every kernel the WAM target can emit.
+
 ## Summary: the "skill issue" principle
 
 Every optimization in this chapter was a case where the original code
