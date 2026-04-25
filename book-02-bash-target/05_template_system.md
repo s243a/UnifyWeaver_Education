@@ -134,6 +134,132 @@ Caching can be enabled in the configuration:
 ]).
 ```
 
+## Section Blocks: Conditional Output
+
+So far we've used templates as fill-in-the-blanks: a template is a fixed structure, and we substitute values into named placeholders. But sometimes a template needs *conditional* structure — a block that should appear when one option is set, and disappear when it isn't. Code generation hits this constantly: "if `use_lmdb` is true, emit the LMDB import block; otherwise emit nothing", "if `profiling(true)`, add `-prof -fprof-auto` to the GHC flags". Concatenating strings in Prolog gets messy fast. The template system supports *section blocks* for exactly this case.
+
+### Truthy Sections: `{{#flag}}...{{/flag}}`
+
+The block between `{{#flag}}` and `{{/flag}}` is rendered only when `flag` is **truthy** in the dict. If `flag` is missing or falsy, the entire block (and its markers) is dropped.
+
+```prolog
+?- render_template('Hello{{#shout}}!!!{{/shout}}', [shout=true], R).
+R = "Hello!!!".
+
+?- render_template('Hello{{#shout}}!!!{{/shout}}', [shout=false], R).
+R = "Hello".
+
+?- render_template('Hello{{#shout}}!!!{{/shout}}', [], R).  % missing key
+R = "Hello".
+```
+
+A real example, choosing whether to include a parallel-build flag:
+
+```prolog
+% Template — single source of truth
+Template = 'cabal v2-build {{#parallel}}--jobs={{njobs}}{{/parallel}}',
+
+?- render_template(Template, [parallel=true, njobs=4], R).
+R = "cabal v2-build --jobs=4".
+
+?- render_template(Template, [parallel=false, njobs=4], R).
+R = "cabal v2-build ".
+```
+
+### Inverted Sections: `{{^flag}}...{{/flag}}`
+
+The complement: the block renders only when `flag` is **falsy or missing**. Useful for fallbacks — "show this only when the feature isn't enabled".
+
+```prolog
+?- render_template('Status: {{#online}}up{{/online}}{{^online}}DOWN{{/online}}',
+                   [online=true], R).
+R = "Status: up".
+
+?- render_template('Status: {{#online}}up{{/online}}{{^online}}DOWN{{/online}}',
+                   [online=false], R).
+R = "Status: DOWN".
+```
+
+### What counts as truthy
+
+A flag is truthy when:
+
+1. The key is present in the dict, AND
+2. Its value is **not** one of: `false`, `0`, `""`, `''`, `[]`.
+
+Anything else is truthy. Notable values:
+- `true` — truthy (obvious)
+- `1`, `-1`, any non-zero number — truthy
+- A non-empty atom like `gawk` or `python3.9` — truthy
+- A non-empty list like `[lmdb]` — truthy
+- The atom `false` — falsy
+- The empty list `[]` — falsy (unlike strict mustache, where it'd render zero times under iteration)
+- A missing key — falsy
+
+This wider falsy set is more useful than strict mustache semantics for code generation, where a missing option usually means "the feature is off".
+
+### Nesting
+
+Sections of *different* names nest cleanly:
+
+```prolog
+?- render_template('{{#outer}}({{#inner}}!!!{{/inner}}){{/outer}}',
+                   [outer=true, inner=true], R).
+R = "(!!!)".
+
+?- render_template('{{#outer}}({{#inner}}!!!{{/inner}}){{/outer}}',
+                   [outer=true, inner=false], R).
+R = "()".
+
+?- render_template('{{#outer}}({{#inner}}!!!{{/inner}}){{/outer}}',
+                   [outer=false, inner=true], R).
+R = "".
+```
+
+If `outer` is falsy, the entire block — including the inner section — is stripped without ever evaluating the inner condition. Sections of the *same* name can't nest, though; the first `{{/x}}` always closes the outermost `{{#x}}`. If you find yourself wanting same-name nesting, restructure with two differently-named tags.
+
+### Substitution inside sections
+
+Substitutions inside a section body work as you'd expect — they're rendered when the body is kept and dropped when it isn't:
+
+```prolog
+?- render_template('Hello {{#greet}}{{name}}{{/greet}}!',
+                   [greet=true, name='World'], R).
+R = "Hello World!".
+
+?- render_template('Hello {{#greet}}{{name}}{{/greet}}!',
+                   [greet=false, name='World'], R).
+R = "Hello !".
+```
+
+The `{{name}}` inside the `{{#greet}}` block uses the same flat dict — there's no scoped variable bag the way strict mustache has. This keeps the engine simple, and at the scale of code-generation templates it's the right tradeoff.
+
+### When to use sections vs other techniques
+
+**Use a section block** when you have a chunk of template that should appear or disappear *as a unit* based on a boolean flag. The example above (`use_lmdb` toggling a whole `import LMDB ...` block) is the canonical case.
+
+**Don't use sections for iteration.** The engine doesn't support `{{#list}}...{{/list}}` rendered once per element — for code generation we always have a Prolog loop that builds the repeated content as a single string and substitutes it via `{{key}}`. If list iteration becomes useful later, it'd be added with distinct syntax (e.g. `{{*list}}...{{/list}}`) so truthy-section semantics stay simple.
+
+**Don't use sections for complex conditionals.** Sections are flag-on/flag-off only. If your decision depends on equality with a specific value, do it in Prolog and pass the result as a flag.
+
+```prolog
+% In Prolog, decide first:
+( option(level, Options) == debug
+->  IsDebug = true
+;   IsDebug = false
+),
+render_template(Template, [debug_block=IsDebug, ...], Code).
+```
+
+### Behind the scenes
+
+Rendering happens in two passes:
+
+1. **Section expansion** — walks the template, finds the earliest `{{#tag}}` or `{{^tag}}`, locates its matching `{{/tag}}`, and either keeps the body (recursing on nested constructs) or strips it.
+2. **Substitution** — pure `{{key}}` → value replacement on the section-expanded result. Identical to the original engine's behavior.
+
+This separation means: any template that uses *no* section markers is rendered byte-for-byte identically to how it was rendered before sections existed. The new feature is purely additive.
+
 ## Summary
 
 The modern template system is a significant enhancement that gives you fine-grained control over the generated code.
@@ -143,6 +269,7 @@ The modern template system is a significant enhancement that gives you fine-grai
 -   The **`source_order`** option controls where the system looks for templates.
 -   You can easily **override** built-in templates by creating files with matching names in the `templates/` directory.
 -   This provides a powerful mechanism for **customization and theming** without altering the core compiler logic.
+-   **Section blocks** (`{{#flag}}...{{/flag}}` and `{{^flag}}...{{/flag}}`) let templates include or omit chunks of structure based on dict flags — useful any time you'd otherwise be string-concatenating optional code in Prolog.
 
 ```
 
