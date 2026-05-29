@@ -53,6 +53,23 @@ This book covers how to use UnifyWeaver to compile Prolog predicates into safe, 
 -   If-then-else → nested if/else
 -   Verified: compiles and runs with `rustc`
 
+## Generating Rust Hybrid WAM Code
+
+Use the WAM Rust target for Hybrid WAM projects:
+
+```prolog
+?- use_module('src/unifyweaver/targets/wam_rust_target').
+?- write_wam_rust_project([ancestor/2],
+       [emit_mode(auto), lmdb_materialisation(auto)],
+       'out/wam_rust_ancestor').
+```
+
+The project writer compiles each predicate through the WAM pipeline, detects
+kernel opportunities, and emits Rust runtime code plus any lowered helpers the
+target can safely generate. For a single predicate fragment, use
+`compile_wam_predicate_to_rust/4` after obtaining WAM items or text from
+`wam_target`.
+
 ## Hybrid WAM Role
 
 Rust is the main example for memory-safe WAM state, external fact sources,

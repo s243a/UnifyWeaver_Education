@@ -44,6 +44,23 @@ defmodule Generated.Parent do
 end
 ```
 
+## Generating Elixir Hybrid WAM Code
+
+Use the WAM Elixir target when you want CPS-style WAM execution rather than the
+plain Elixir target:
+
+```prolog
+?- use_module('src/unifyweaver/targets/wam_elixir_target').
+?- write_wam_elixir_project([ancestor/2],
+       [emit_mode(auto), module_name('AncestorWam')],
+       'out/wam_elixir_ancestor').
+```
+
+`emit_mode(auto)` lets the target choose between interpreted WAM data and
+lowered Elixir helpers where supported. Parser-dependent builtins currently
+require capability checks; do not assume `runtime_parser(compiled)` is
+available for Elixir.
+
 ## Hybrid WAM Role
 
 Elixir is useful for explaining CPS-style WAM execution, continuation

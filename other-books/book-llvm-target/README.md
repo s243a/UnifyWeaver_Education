@@ -25,6 +25,22 @@ sudo apt install llvm clang  # Ubuntu/Debian
 | Single architecture | Any LLVM target (x86, ARM, RISC-V) |
 | No C interop | Native C ABI with `dllexport` |
 
+## Generating LLVM Hybrid WAM Code
+
+Use the WAM LLVM target for lowered LLVM IR or WASM-oriented output:
+
+```prolog
+?- use_module('src/unifyweaver/targets/wam_llvm_target').
+?- write_wam_llvm_project([ancestor/2],
+       [emit_mode(functions), foreign_lowering(true)],
+       'out/ancestor.ll').
+```
+
+For browser or sandboxed deployment, use `write_wam_llvm_wasm_project/3` when
+the workflow needs the LLVM-to-WASM variant. `foreign_lowering(true)` lets the
+target recognize supported kernel shapes before falling back to ordinary WAM
+control flow.
+
 ## Hybrid WAM Role
 
 LLVM is the lowered-code perspective on WAM items, control flow, value

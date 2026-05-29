@@ -100,6 +100,23 @@ By completing this book, you will be able to:
 -   Uses `interface{}` for generic types
 -   `panic()` for unmatched clauses
 
+## Generating Go Hybrid WAM Code
+
+Use the WAM Go target when you want the Hybrid WAM runtime rather than the
+older Go-native generator mode:
+
+```prolog
+?- use_module('src/unifyweaver/targets/wam_go_target').
+?- write_wam_go_project([ancestor/2],
+       [emit_mode(auto), package_name(wam)],
+       'out/wam_go_ancestor').
+```
+
+`emit_mode(auto)` lets the target use lowered helpers where it can and keep the
+interpreter/runtime path for predicates that need full WAM behavior. Use Book
+17's symbolic WAM examples as the readable listing, but use `wam_go_target` for
+actual Hybrid WAM Go generation.
+
 ## Hybrid WAM Role
 
 Go is a practical host for explicit WAM state, indexed fact dispatch, and

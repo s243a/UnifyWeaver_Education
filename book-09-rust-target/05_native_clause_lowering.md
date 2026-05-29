@@ -141,6 +141,49 @@ rustc classify.rs -o classify
 
 Verified output: `classify(5)` returns `"small"`, `classify(25)` returns `"large"`.
 
+## How Rust Makes Hybrid WAM Concrete
+
+Rust forces the target to be explicit about ownership and storage. A WAM value
+cannot be an informal blob; it needs a representation such as an enum for
+atoms, integers, variables, lists, and compounds. Runtime state must describe
+who owns registers, heap cells, trail entries, choice points, and external fact
+source handles.
+
+A simplified shape looks like this:
+
+```rust
+enum Value {
+    Var(usize),
+    Atom(AtomId),
+    Int(i64),
+    Compound { functor: AtomId, args: Vec<Value> },
+}
+
+struct WamState {
+    regs: Vec<Value>,
+    trail: Vec<usize>,
+    choice_points: Vec<ChoicePoint>,
+    facts: FactSources,
+}
+```
+
+Hybrid lowering decides which pieces stay in generic WAM state and which can
+become Rust-native structures. A fact-only predicate may become an indexed
+store. A graph predicate may become a kernel call. A deterministic helper may
+be emitted as Rust code that manipulates `WamState` directly.
+
+| Predicate shape | Rust-friendly lowering | Why |
+|---|---|---|
+| Many static facts | `HashMap`/`BTreeMap`/LMDB fact source | Keeps lookup cost tied to bound arguments. |
+| Deterministic arithmetic | direct helper function | Avoids instruction dispatch overhead. |
+| Recursive graph search | native kernel through WAM FFI | Uses optimized Rust algorithm while preserving logic results. |
+| Open-ended backtracking | WAM runtime path | Keeps complete Prolog search semantics. |
+
+The foreign-call boundary is also ownership-sensitive. The runtime must convert
+register values into host inputs, call the Rust function or kernel, then unify
+returned values with WAM variables. That unification step is what keeps a Rust
+kernel from becoming an unrelated side channel.
+
 ## Hybrid WAM Role
 
 Rust should be read as the systems target where Hybrid WAM choices become

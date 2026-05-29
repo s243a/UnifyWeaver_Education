@@ -236,6 +236,32 @@ compile_collect_native_weighted_shortest_path_to_rust(Code) :-
 
 This is a textbook Dijkstra. The Prolog spec said *what* to compute; the kernel says *how*.
 
+## 20.3a What Actually Crosses The Boundary
+
+A recursive kernel is not just a faster function call. It has to preserve the
+logic interface of the predicate it replaces. The WAM side and Rust side agree
+on three things:
+
+1. **Inputs**: which WAM registers or fact-source handles provide the bound
+   arguments and data sources.
+2. **Outputs**: which terms the kernel may bind, stream, or aggregate.
+3. **Failure behavior**: how the kernel reports no answer, one answer, or many
+   answers back to WAM search.
+
+For a shortest-path kernel, the flow is:
+
+```text
+WAM call min_dist(A, B, D)
+  -> read A and B from registers
+  -> run Rust graph search over registered edge source
+  -> produce candidate distance terms
+  -> unify each candidate with D
+  -> create choice points only if more answers are possible
+```
+
+That last step matters. The kernel is allowed to be native Rust internally, but
+to the caller it must still look like a Prolog predicate.
+
 ## 20.4 The WAM Foreign Function Bridge
 
 Once the data is registered and the native handler exists, the WAM dispatches calls through `execute_foreign_predicate`:

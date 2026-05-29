@@ -211,6 +211,18 @@ Throughout Book 3, you'll build:
 - Target implementations: `context/codex/UnifyWeaver/src/unifyweaver/targets/`
 - Documentation: `context/codex/UnifyWeaver/docs/targets/`
 
+## Generating WAM-Backed .NET Code
+
+This C# book focuses on native C# query/runtime generation. It does not present
+a primary `wam_csharp_target` generation path. For WAM-backed .NET-style
+experiments, use the WAM/.NET family documented outside this book, such as the
+ILAsm target, or compare the C# query-runtime output with Book 17's WAM item
+model.
+
+Use this book when the question is "how do I generate C# native query code?"
+Use Book 17 and the WAM-family target docs when the question is "how do I
+generate WAM-shaped runtime code?"
+
 ## Hybrid WAM Boundary
 
 C# target material focuses on native query/runtime techniques. Book 17 should

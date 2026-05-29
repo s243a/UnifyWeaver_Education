@@ -33,6 +33,23 @@ sumTo 0 !acc = acc
 sumTo n !acc = sumTo (n - 1) (acc + n)
 ```
 
+## Generating Haskell Hybrid WAM Code
+
+Use the WAM Haskell target when the chapter is discussing the WAM runtime,
+foreign kernels, or fact-access experiments rather than the older Haskell-native
+examples:
+
+```prolog
+?- use_module('src/unifyweaver/targets/wam_haskell_target').
+?- write_wam_haskell_project([ancestor/2],
+       [emit_mode(auto), lmdb_materialisation(auto)],
+       'out/wam_haskell_ancestor').
+```
+
+The writer partitions predicates between interpreted WAM paths, lowered
+functions, fact layouts, and kernel support according to the target's current
+capabilities and options.
+
 ## Hybrid WAM Role
 
 Haskell demonstrates how a target can keep WAM semantics while experimenting

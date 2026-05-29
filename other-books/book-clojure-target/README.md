@@ -31,6 +31,21 @@ A guide to compiling Prolog predicates to Clojure with lazy sequences and thread
 - **deps.edn** build generation
 - **64 bindings** (Core, Collections, Sequences, Strings, Threading Macros)
 
+## Generating Clojure Hybrid WAM Code
+
+Use the WAM Clojure target for the hybrid runtime path:
+
+```prolog
+?- use_module('src/unifyweaver/targets/wam_clojure_target').
+?- write_wam_clojure_project([ancestor/2],
+       [namespace('generated.wam'), module_name('wam-clojure-generated')],
+       'out/wam_clojure_ancestor').
+```
+
+The target can emit the shared runtime namespace plus core predicate wrappers.
+Lowered WAM support should be treated as target capability, not as a guarantee
+that every predicate becomes direct Clojure code.
+
 ## Hybrid WAM Role
 
 Clojure is useful for explaining persistent data structure tradeoffs and

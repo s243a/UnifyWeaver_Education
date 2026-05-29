@@ -21,6 +21,20 @@ This book covers compiling Prolog predicates to F# using UnifyWeaver's functiona
 - **Pipeline operator** - Natural data flow: `|> Seq.map |> Seq.filter`
 - **Mutual recursion** - Native `and` keyword support
 
+## Generating F# Hybrid WAM Code
+
+Use the WAM F# target for WAM-backed F# generation:
+
+```prolog
+?- use_module('src/unifyweaver/targets/wam_fsharp_target').
+?- write_wam_fsharp_project([ancestor/2],
+       [emit_mode(auto), runtime_parser(off)],
+       'out/wam_fsharp_ancestor').
+```
+
+Use `runtime_parser(compiled)` only for programs that need runtime Prolog term
+parsing. Ordinary recursive predicates do not need to bundle the parser.
+
 ## Hybrid WAM Role
 
 F# is useful for discussing compiled parser support, .NET-friendly WAM state,
