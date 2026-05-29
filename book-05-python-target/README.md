@@ -122,6 +122,13 @@ echo '{"arg0": "a", "arg1": "b"}
 # {"arg0": "a", "arg1": "c"}  ← derived
 ```
 
+## Hybrid WAM Role
+
+Python remains primarily a high-level target in this book. Where WAM appears,
+it should be framed as an optional runtime, parser, or debug path rather than
+the default Python compilation model. Book 17 covers the shared Hybrid WAM
+concepts and explains when a WAM-backed path is appropriate.
+
 ## What's Next?
 
 After completing Book 5, continue to:

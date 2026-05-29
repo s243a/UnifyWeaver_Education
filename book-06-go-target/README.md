@@ -100,6 +100,12 @@ By completing this book, you will be able to:
 -   Uses `interface{}` for generic types
 -   `panic()` for unmatched clauses
 
+## Hybrid WAM Role
+
+Go is a practical host for explicit WAM state, indexed fact dispatch, and
+selective lowered predicates. Book 17 covers the shared model; this book shows
+where Go's maps, slices, structs, and generated functions fit that model.
+
 ## Related Books
 
 - [Book 13: Semantic Search](../book-13-semantic-search/README.md) - Deep dive into semantic features (Chapter 5)

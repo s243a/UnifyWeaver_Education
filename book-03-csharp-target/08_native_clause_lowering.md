@@ -89,6 +89,21 @@ The native lowering coexists with C#'s existing LINQ-based compilation. Native l
 | No match | `throw new ArgumentException("...")` |
 | Naming | PascalCase (`my_func` → `MyFunc`) |
 
+## Hybrid WAM Boundary
+
+The C# target book teaches native lowering and query-runtime design rather
+than a primary WAM runtime. That distinction matters: Hybrid WAM is not a
+requirement that every target implement the same machine. It is a shared
+semantic contract and a set of fallback or acceleration patterns that targets
+adopt where they fit.
+
+- Default generation path in this book: C#-native query/runtime lowering.
+- Symbolic WAM text: useful as a comparison point when explaining what native
+  lowering avoids or replaces.
+- Target-specific emphasis: LINQ/query-runtime techniques, fixed-point
+  execution, and when native lowering should be preferred over WAM-shaped
+  execution.
+
 ## Summary
 
 - Multi-clause predicates compile to C# `if`/`else if`/`else` chains

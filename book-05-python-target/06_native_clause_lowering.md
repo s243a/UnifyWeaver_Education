@@ -119,6 +119,20 @@ small
 large
 ```
 
+## Hybrid WAM Boundary
+
+Python's native target material is best understood as the high-level side of
+the Hybrid WAM boundary. Many examples can stay as procedural or generator
+code. When a workload needs full WAM semantics or a runtime parser, Book 17's
+model explains the alternate path.
+
+- Default generation path in this book: Python-native lowering where the
+  predicate shape is simple enough.
+- Symbolic WAM text: useful for debugging and parser-related tests when using
+  WAM-backed Python paths.
+- Target-specific emphasis: readability, generator-style search, and clear
+  separation between native Python lowering and WAM-backed execution.
+
 ## Summary
 
 - Multi-clause Prolog predicates compile to Python `if`/`elif`/`else`

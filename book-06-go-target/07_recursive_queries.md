@@ -294,6 +294,22 @@ func is_odd(n int) bool {
 
 ---
 
+## Hybrid WAM Role
+
+Go is a useful example of a target that can keep WAM state explicit while
+still lowering selected predicates into ordinary host-language functions.
+The shared Hybrid WAM concepts are covered in Book 17; the Go-specific point
+is that registers, choice points, indexed fact access, and deterministic
+predicate helpers can be represented with simple structs, slices, maps, and
+methods.
+
+- Default generation path: structured WAM items or target-ready WAM data
+  should feed the Go emitter directly.
+- Symbolic WAM text: useful as a readable debug listing, not as the normal
+  internal bridge.
+- Target-specific emphasis: explicit state, indexed dispatch, and selective
+  lowered helpers for deterministic pieces of a larger WAM-shaped program.
+
 ## Navigation
 
 **←** [Previous: Chapter 6: Generator Mode](06_generator_mode) | [📖 Book 6: Go Target](./) | [Next: Book 7: Cross-Target Glue →](../book-07-cross-target-glue/)

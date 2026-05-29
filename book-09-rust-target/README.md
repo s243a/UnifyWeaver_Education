@@ -53,6 +53,13 @@ This book covers how to use UnifyWeaver to compile Prolog predicates into safe, 
 -   If-then-else → nested if/else
 -   Verified: compiles and runs with `rustc`
 
+## Hybrid WAM Role
+
+Rust is the main example for memory-safe WAM state, external fact sources,
+cost-aware materialization, and FFI/kernel dispatch. Book 17 covers the shared
+Hybrid WAM concepts; this book shows how those concepts become concrete in a
+systems language with ownership and explicit storage choices.
+
 ## License
 
 This educational content is licensed under CC BY 4.0.

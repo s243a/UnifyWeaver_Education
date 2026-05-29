@@ -141,6 +141,21 @@ rustc classify.rs -o classify
 
 Verified output: `classify(5)` returns `"small"`, `classify(25)` returns `"large"`.
 
+## Hybrid WAM Role
+
+Rust should be read as the systems target where Hybrid WAM choices become
+explicit: ownership, storage layout, external fact sources, materialization,
+and native kernels all have to be represented safely. Book 17 covers the
+shared architecture; this chapter focuses on why Rust-specific lowering is a
+good fit for memory-safe WAM state and host-native acceleration.
+
+- Default generation path: structured WAM items or target-ready WAM data
+  should feed Rust code generation directly.
+- Symbolic WAM text: useful for explanations, debug dumps, and tests, but not
+  the preferred compiler transport.
+- Target-specific emphasis: ownership-aware WAM state, LMDB or other external
+  fact sources, indexed lookup, and FFI/kernel dispatch.
+
 ## Summary
 
 - Multi-clause Prolog predicates compile to Rust `if`/`else if`/`else` chains

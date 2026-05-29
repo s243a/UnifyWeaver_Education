@@ -211,6 +211,12 @@ Throughout Book 3, you'll build:
 - Target implementations: `context/codex/UnifyWeaver/src/unifyweaver/targets/`
 - Documentation: `context/codex/UnifyWeaver/docs/targets/`
 
+## Hybrid WAM Boundary
+
+C# target material focuses on native query/runtime techniques. Book 17 should
+be consulted when those techniques are compared with WAM-shaped fallback,
+parity, or cross-target execution.
+
 ## Going Further
 
 After completing Book 3, you'll be able to:
