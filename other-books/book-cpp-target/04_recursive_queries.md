@@ -116,3 +116,17 @@ int factorial(int n) {
     return result;
 }
 ```
+
+## Hybrid WAM Role
+
+C++ is useful for explaining the host-runtime side of Hybrid WAM: containers,
+fact-source adapters, parser modes, and native library integration. Book 17
+defines the shared concepts; this chapter should show why C++ can host both
+compact runtime structures and pragmatic bridges to storage or parsing code.
+
+- Default generation path: structured WAM items or target-ready WAM data
+  should feed C++ generation directly.
+- Symbolic WAM text: useful for debug listings and parser-related workflows,
+  not as the preferred internal transport.
+- Target-specific emphasis: runtime containers, parser modes, fact sources,
+  and native/library integration.

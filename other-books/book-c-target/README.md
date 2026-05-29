@@ -32,6 +32,12 @@ A guide to compiling Prolog predicates to C programs for high-performance JSONL 
 - **Makefile/CMake** generation
 - **41 bindings** (stdlib, I/O, strings, cJSON)
 
+## Hybrid WAM Role
+
+C is the low-level memory-layout reference point for WAM state, lifecycle, and
+foreign-call boundaries. Book 17 covers the shared concepts; this book shows
+where those concepts become explicit data structures and ownership rules.
+
 ## See Also
 
 - [NATIVE_TARGET.md](../../../docs/NATIVE_TARGET.md) - Reference documentation

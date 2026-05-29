@@ -234,3 +234,18 @@ clause automatically.
 ---
 
 **←** [Previous: Facts and Rules](02_facts_and_rules.md) | **→** [Next: Pipelines](04_pipelines.md)
+
+## Hybrid WAM Role
+
+Elixir is a good teaching target for continuation-oriented WAM execution.
+The BEAM encourages explicit process and continuation thinking, so Elixir
+examples can explain how recursive logic, choice points, and failure paths
+can be represented without pretending every target shares the same runtime
+shape.
+
+- Default generation path: target-ready WAM data should feed the Elixir
+  emitter directly.
+- Symbolic WAM text: useful as a readable listing, not as the normal internal
+  bridge.
+- Target-specific emphasis: CPS-style control flow, failure handling, and
+  future strategy-menu choices such as BEAM-native parallel search.

@@ -25,6 +25,12 @@ sudo apt install llvm clang  # Ubuntu/Debian
 | Single architecture | Any LLVM target (x86, ARM, RISC-V) |
 | No C interop | Native C ABI with `dllexport` |
 
+## Hybrid WAM Role
+
+LLVM is the lowered-code perspective on WAM items, control flow, value
+representation, and FFI boundaries. Book 17 covers the shared semantic model;
+this book shows how that model can become lower-level IR.
+
 ## Quick Example
 
 ```prolog

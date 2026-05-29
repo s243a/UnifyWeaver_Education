@@ -44,6 +44,12 @@ defmodule Generated.Parent do
 end
 ```
 
+## Hybrid WAM Role
+
+Elixir is useful for explaining CPS-style WAM execution, continuation
+boundaries, and future BEAM-native strategy choices. Book 17 covers the shared
+Hybrid WAM model; this book shows where that model meets BEAM control flow.
+
 ## Why Elixir?
 
 | Feature | Benefit |

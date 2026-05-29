@@ -33,6 +33,12 @@ A guide to compiling Prolog predicates to modern C++ programs using nlohmann/jso
 - **CMake FetchContent** for automatic dependency download
 - **45 bindings** (STL, iostream, algorithms, nlohmann/json)
 
+## Hybrid WAM Role
+
+C++ is useful for explaining runtime containers, parser support, LMDB-style
+fact sources, and compiled/native parser tradeoffs. Book 17 covers the shared
+Hybrid WAM architecture; this book should focus on C++ runtime choices.
+
 ## See Also
 
 - [NATIVE_TARGET.md](../../../docs/NATIVE_TARGET.md) - Reference documentation

@@ -111,3 +111,17 @@ BFS worklist for graph reachability:
 ---
 
 **←** [Previous: Integration](02_integration.md) | [📖 Book: LLVM Target](./)
+
+## Hybrid WAM Role
+
+LLVM is the clearest target for explaining the lowered-emitter idea. The
+shared Hybrid WAM contract is still semantic, but LLVM forces control flow,
+register movement, value representation, and foreign-call boundaries into a
+lower-level form.
+
+- Default generation path: structured WAM items or target-ready lowering data
+  should feed LLVM emission directly.
+- Symbolic WAM text: useful as a compact listing before showing lower-level
+  control-flow shapes.
+- Target-specific emphasis: basic blocks, branches, value layout, and ABI
+  calls.
