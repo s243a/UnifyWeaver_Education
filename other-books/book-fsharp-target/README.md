@@ -21,6 +21,12 @@ This book covers compiling Prolog predicates to F# using UnifyWeaver's functiona
 - **Pipeline operator** - Natural data flow: `|> Seq.map |> Seq.filter`
 - **Mutual recursion** - Native `and` keyword support
 
+## Hybrid WAM Role
+
+F# is useful for discussing compiled parser support, .NET-friendly WAM state,
+and functional update tradeoffs. Book 17 covers the shared Hybrid WAM model;
+this book should show the functional .NET view of those concepts.
+
 ## Quick Example
 
 ```prolog

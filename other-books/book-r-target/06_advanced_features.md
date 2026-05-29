@@ -184,3 +184,17 @@ conventions. The R target's JSONL support (`jsonlite` package) makes this seamle
 ---
 
 **<-** [Previous: Bindings](05_bindings.md)
+
+## Hybrid WAM Role
+
+R is useful for discussing parser and data-analysis boundaries rather than a
+one-size-fits-all WAM implementation. Book 17 explains the shared Hybrid WAM
+contract; this chapter should focus on where R-specific parsing, tabular data,
+and analysis workflows meet WAM-shaped execution.
+
+- Default generation path: R-native lowering should remain the first choice
+  for analysis-shaped code, with WAM-backed paths used when full logic
+  semantics or parser behavior is needed.
+- Symbolic WAM text: useful for parser/debug paths and compact explanations.
+- Target-specific emphasis: native parser support, data-frame boundaries, and
+  analysis workflows.

@@ -31,6 +31,13 @@ A guide to compiling Prolog predicates to Scala with Option, pattern matching, a
 - **SBT** build generation
 - **43 bindings** (Option, Either, Collections, LazyList, Pattern Matching)
 
+## Hybrid WAM Role
+
+Scala is useful for explaining JVM-hosted Hybrid WAM choices with typed
+functional and object-oriented representation options. Book 17 covers the
+shared WAM item and parity contract; this book should focus on Scala's JVM
+representation choices.
+
 ## See Also
 
 - [JVM_TARGET.md](../../../docs/JVM_TARGET.md) - JVM family documentation

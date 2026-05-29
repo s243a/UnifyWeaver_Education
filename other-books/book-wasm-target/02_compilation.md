@@ -79,6 +79,19 @@ ls -la prolog_wasm.wasm
 # 376 bytes
 ```
 
+## Hybrid WAM Role
+
+WASM is best read as a portable execution environment for WAM-shaped code,
+not as the only or default destination for WAM. Book 17 explains why Hybrid
+WAM targets usually prefer structured items internally while still using
+symbolic WAM text for readable listings and debugging.
+
+- Default generation path: structured WAM items or target-ready WAM data
+  should feed the WASM/WAT emitter directly.
+- Symbolic WAM text: useful as a compact explanation before showing WAT.
+- Target-specific emphasis: stack-machine lowering, linear memory, browser
+  deployment, and sandboxed execution.
+
 ## Next Steps
 
 - [Chapter 3: JavaScript Integration](03_javascript.md)

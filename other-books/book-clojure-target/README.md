@@ -31,6 +31,12 @@ A guide to compiling Prolog predicates to Clojure with lazy sequences and thread
 - **deps.edn** build generation
 - **64 bindings** (Core, Collections, Sequences, Strings, Threading Macros)
 
+## Hybrid WAM Role
+
+Clojure is useful for explaining persistent data structure tradeoffs and
+lowered WAM on a dynamic JVM language. Book 17 covers the shared concepts;
+this book should focus on dynamic dispatch and persistent runtime shapes.
+
 ## See Also
 
 - [JVM_TARGET.md](../../../docs/JVM_TARGET.md) - JVM family documentation

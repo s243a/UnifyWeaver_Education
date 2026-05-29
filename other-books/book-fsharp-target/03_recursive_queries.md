@@ -99,3 +99,17 @@ The `and` keyword makes mutual recursion first-class in F#.
 ---
 
 **←** [Previous: Chapter 2: Pipeline Mode](02_pipeline_mode) | [📖 Book: F# Target](./)
+
+## Hybrid WAM Role
+
+F# is useful for explaining how WAM semantics fit a functional .NET target.
+Book 17 covers the shared Hybrid WAM model; this chapter should show how
+compiled parser support, .NET representation choices, and functional updates
+shape the target-specific version of that model.
+
+- Default generation path: structured WAM items or target-ready WAM data
+  should feed the F# emitter directly.
+- Symbolic WAM text: useful for readable listings and for explaining compiled
+  parser support.
+- Target-specific emphasis: compiled parser support, .NET representation
+  choices, and functional state updates.

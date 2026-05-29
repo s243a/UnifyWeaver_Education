@@ -35,6 +35,13 @@ const { instance } = await WebAssembly.instantiate(bytes);
 console.log(instance.exports.sum(10)); // 55
 ```
 
+## Hybrid WAM Role
+
+WASM is a portable execution target for WAM-shaped programs, especially when
+browser or sandboxed deployment matters. Book 17 explains the shared Hybrid
+WAM concepts and why WASM is one target option rather than the default meaning
+of WAM.
+
 ## Why WebAssembly?
 
 | Platform | Use Case |
