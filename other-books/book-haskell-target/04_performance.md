@@ -11,6 +11,11 @@ that journey taught.
 > perf lessons without deep WAM knowledge, but some context (registers,
 > choice points, unification) will help.
 
+Book 17 covers the shared Hybrid WAM concepts. This chapter is the Haskell
+case study: it shows how the same semantic obligations can be met with
+Haskell-specific choices around state, purity, profiling, FFI, and data
+layout.
+
 ## The benchmark
 
 We use the *effective-distance* benchmark: for each seed category in a

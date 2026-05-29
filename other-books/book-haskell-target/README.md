@@ -33,6 +33,13 @@ sumTo 0 !acc = acc
 sumTo n !acc = sumTo (n - 1) (acc + n)
 ```
 
+## Hybrid WAM Role
+
+Haskell demonstrates how a target can keep WAM semantics while experimenting
+with purity-aware routing, parallel search, FFI, and different state
+representations. Book 17 covers the shared Hybrid WAM concepts; this book is
+a target-specific case study in functional implementation tradeoffs.
+
 ## Why Haskell?
 
 | Feature | Benefit |

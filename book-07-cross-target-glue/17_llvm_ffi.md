@@ -206,6 +206,20 @@ cargo build
 LD_LIBRARY_PATH=. cargo run
 ```
 
+## Hybrid WAM And FFI
+
+The foreign function interface is one of the main places where Hybrid WAM
+stops being a pure interpreter story. A WAM-shaped predicate can call into a
+host function, a compiled kernel, a native library, or an external service,
+then unify the returned values back into logic variables. Book 17 explains
+the shared boundary; this chapter focuses on LLVM-oriented integration.
+
+- Default generation path: structured WAM items or target-ready lowering data
+  should reach the LLVM-facing emitter directly.
+- Symbolic WAM text: useful for showing the call site in a compact listing.
+- Target-specific emphasis: ABI boundaries, value representation, and how
+  native calls return into WAM unification.
+
 ## Advantages Over Other Glue Methods
 
 | Feature | LLVM FFI | Subprocess | HTTP |

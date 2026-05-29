@@ -9,6 +9,12 @@ Copyright (c) 2025-2026 John William Creighton (s243a)
 
 ## Overview
 
+Book 17 explains the general Hybrid WAM architecture. This chapter uses the
+Rust semantic-search kernels as a concrete example of one layer in that
+architecture: a recognized logic pattern is routed to a native handler through
+the WAM foreign-call boundary, then results are unified back into the logic
+query.
+
 Chapter 19 covered code generation for semantic search *operations* (embedding lookup, similarity computation). This chapter covers something deeper: the **recursive kernel system**, which recognizes entire *algorithm patterns* in Prolog clauses and lowers them to native target implementations.
 
 The motivating example: minimum semantic distance. A user writes a clean declarative Prolog spec:
@@ -46,7 +52,7 @@ When the Rust target compiles a predicate, it tries three strategies in order:
 │   ↓ otherwise...                                        │
 ├─────────────────────────────────────────────────────────┤
 │  Tier 3: WAM compilation                                │
-│     Compile Prolog → WAM bytecode → Rust runtime        │
+│     Compile Prolog -> WAM items or target-ready WAM representation -> Rust runtime        │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -335,7 +341,7 @@ This is a deliberate phasing:
 
 Rust got the WAM treatment first because:
 
-1. **Memory safety needs** — generated Rust must satisfy the borrow checker, which is much harder for arbitrary recursive Prolog. WAM bytecode is regular and easier to lower safely.
+1. **Memory safety needs** — generated Rust must satisfy the borrow checker, which is much harder for arbitrary recursive Prolog. WAM-shaped data is regular and easier to lower safely.
 2. **Embedded deployment** — Rust targets are often constrained environments where dynamic structures matter. The WAM gives precise control over allocation.
 3. **Hybrid execution** — patterns that lower to native handlers run at full speed; patterns that don't fall through to the WAM. You get the best of both.
 
