@@ -140,7 +140,9 @@ The same symbolic instruction can therefore lead to different target shapes:
 
 The table is illustrative. The shared contract is semantic: registers,
 unification, choice points, and calls must behave the same even when the host
-representation is different.
+representation is different. For the *real* item literals each target emits —
+grounded in the actual emitters and runtime templates — see
+[Chapter 5: Symbolic WAM Across Targets](05_symbolic_to_targets.md).
 
 ## Recursion and Tail Call Optimization (TCO)
 

@@ -130,9 +130,13 @@ WAM-backed Python generation, use the WAM Python target:
 ```prolog
 ?- use_module('src/unifyweaver/targets/wam_python_target').
 ?- write_wam_python_project([ancestor/2],
-       [emit_mode(auto), runtime_parser(off)],
+       [emit_mode(interpreter), runtime_parser(off)],
        'out/wam_python_ancestor').
 ```
+
+The Python target's `emit_mode(Mode)` accepts `interpreter` (default — every
+predicate dispatched through the instruction array) or `lowered` (lowerable
+deterministic predicates emitted as plain Python functions on top of the array).
 
 Use `runtime_parser(compiled)` only when the generated program must parse
 Prolog source terms at runtime, such as `read_term_from_atom/2`. It is not

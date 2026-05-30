@@ -108,14 +108,24 @@ older Go-native generator mode:
 ```prolog
 ?- use_module('src/unifyweaver/targets/wam_go_target').
 ?- write_wam_go_project([ancestor/2],
-       [emit_mode(auto), package_name(wam)],
+       [package_name(wam)],
        'out/wam_go_ancestor').
 ```
 
-`emit_mode(auto)` lets the target use lowered helpers where it can and keep the
-interpreter/runtime path for predicates that need full WAM behavior. Use Book
-17's symbolic WAM examples as the readable listing, but use `wam_go_target` for
-actual Hybrid WAM Go generation.
+The Go project writer always emits **two** files and chooses per predicate:
+
+- `lib.go` — the WAM bytecode path: each predicate as a `[]Instruction` slice
+  (e.g. `&GetConstant{C: Atom("alice"), Ai: 0}`) plus the interpreter.
+- `lowered.go` — deterministic predicates the target can safely turn into plain
+  Go functions, sharing the same interned atom table (`atoms.go`).
+
+There is no `emit_mode` switch on the Go target: lowering is automatic for
+lowerable deterministic predicates, and anything that needs full backtracking
+stays on the `lib.go` WAM path. The main knob is `package_name(Name)` (default
+`wam`). Use Book 17's symbolic WAM examples as the readable listing, and note
+that Go bakes register names into integer indices in the emitted items — see
+[Book 17, Chapter 5](../book-17-wam-target/05_symbolic_to_targets.md) for the
+exact Go item shapes.
 
 ## Hybrid WAM Role
 

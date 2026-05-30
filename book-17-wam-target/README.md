@@ -61,3 +61,4 @@ book should duplicate the full Hybrid WAM architecture.
 2. [Instruction Set Architecture](02_isa.md)
 3. [Compiling Rules and Recursion](03_compilation.md)
 4. [WAM as a Fallback Hub](04_fallback_hub.md)
+5. [Symbolic WAM Across Targets](05_symbolic_to_targets.md)

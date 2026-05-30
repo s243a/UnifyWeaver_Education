@@ -60,15 +60,25 @@ Use the WAM Rust target for Hybrid WAM projects:
 ```prolog
 ?- use_module('src/unifyweaver/targets/wam_rust_target').
 ?- write_wam_rust_project([ancestor/2],
-       [emit_mode(auto), lmdb_materialisation(auto)],
+       [emit_mode(interpreter), lmdb_mode(none)],
        'out/wam_rust_ancestor').
 ```
 
 The project writer compiles each predicate through the WAM pipeline, detects
-kernel opportunities, and emits Rust runtime code plus any lowered helpers the
-target can safely generate. For a single predicate fragment, use
-`compile_wam_predicate_to_rust/4` after obtaining WAM items or text from
-`wam_target`.
+kernel opportunities, and emits a full Cargo project (`Cargo.toml`, `src/lib.rs`,
+the WAM runtime modules, plus any lowered helpers the target can safely
+generate). For a single predicate fragment, use `compile_wam_predicate_to_rust/4`
+after obtaining WAM items or text from `wam_target`.
+
+Key options (defaults in parentheses):
+
+| Option | Values | Effect |
+|---|---|---|
+| `emit_mode(Mode)` | `interpreter` (default), `functions` | Keep the WAM interpreter loop, or lower deterministic predicates to plain Rust functions. |
+| `lmdb_mode(Mode)` | `none` (default), `cursor` | Back fact predicates with an LMDB cursor source instead of inlined facts. |
+| `lmdb_crate(Crate)` | `auto` (default → `lmdb_zero`), `lmdb_zero`, `heed` | Which Rust LMDB binding to emit when `lmdb_mode(cursor)`. |
+| `parallel(Bool)` | `false` (default), `true` | Enable Rayon parallel query execution. |
+| `wam_fallback(Bool)` | `true` (default), `false` | Allow falling back to the WAM path when native lowering does not apply. |
 
 ## Hybrid WAM Role
 
