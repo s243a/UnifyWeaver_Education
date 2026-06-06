@@ -83,9 +83,35 @@ Measured values on Wikipedia:
 
 The two wikis have similar `b_eff · D` but very different `r`. The English version has a *smaller* safety margin against the divergence threshold despite being 30× larger — a counter-intuitive finding that chapter 5 returns to.
 
+### A note on the choice of estimator
+
+The "right" quantity to govern path-count growth — in the sense of spectral graph theory — is the dominant eigenvalue (the Perron–Frobenius eigenvalue) of the graph's adjacency matrix. Computing it directly requires spectral decomposition of a multi-million-node matrix, which is expensive and offers no obvious computational benefit over the degree-distribution approach for the purposes the book cares about.
+
+`b_eff` as computed above is an estimator that is *asymptotically equivalent* to the spectral radius under configuration-model assumptions: for graphs whose degree distribution is captured by `E[d]` and `E[d²]`, and where edges are otherwise random, the spectral radius converges to `E[d²]/E[d]` as the graph grows. The combined `b_eff · D` factor plays the analogous role for the directional case.
+
+The book treats `D` and `b_eff` as *loose* spectral estimators throughout — equivalent-ish to the spectral quantities the theoretically-cleanest formulation would use, without paying the cost of spectral decomposition. Where the book says "the convergence parameter `b_eff · D`", the underlying object is a spectral one; the calculation is a degree-distribution shortcut. Appendix A.1 develops the spectral connection in more detail.
+
+## Statistical homogeneity — when the calibration applies
+
+The calibration constants `D` and `b_eff` are computed as global averages over the whole graph. The metric formula then uses these globals to weight individual paths. This works if the graph is *statistically homogeneous* — if the local behaviour anywhere in the graph resembles the global behaviour. It can fail if the graph has regions with very different local properties.
+
+The theory doc (`docs/design/TREE_LIKENESS_INDEX_THEORY.md` §0.6) formalises homogeneity via three conditions:
+
+- **H1 (local degree distribution).** The conditional degree distribution at a node, given its position in the graph, is consistent with the global degree distribution.
+- **H2 (path-length distribution).** The number of intermediate parent-direction hops along typical paths is approximately Poisson, with rate consistent across regions.
+- **H3 (convergence ratio).** The per-region convergence ratio `r` is approximately equal to the global `r`.
+
+When all three hold, the global calibration constants predict local path behaviour. When they fail — typically because the graph mixes thematic clusters with different topological characteristics — locally-measured `b_eff` can differ substantially from the global value, and the metric's behaviour on individual queries diverges from the calibration-based prediction.
+
+The empirical observation on Wikipedia: full-graph calibration over the unrestricted categorisation graph is *inhomogeneous* (the design note §4.4 reports a measurable inhomogeneity gap), but *topical* subgraphs — rooted at a thematic node like `Category:Physics` or `Category:Main_topic_classifications` — are homogeneous to within measurement noise. This is why UnifyWeaver's ingest pipeline builds LMDBs rooted at topical nodes rather than over the full categorisation graph.
+
+Appendix B.2 develops the homogeneity framework more thoroughly. Appendix B.4 covers topical scoping as the empirical workaround.
+
 ## Tree-likeness index
 
-The **tree-likeness index** (TLI) compares `d_wPow` against the shortest-path metric `d_BFS`:
+Tree-likeness is a property of a **(graph, metric) pair**, not of the graph alone. The same graph can be highly tree-like under one metric and substantially non-tree-like under another. The framing matters: in the literature it is tempting to ask "is this graph tree-like?", and the right answer is "tree-like *under which metric?*" The design note's title (*Tree-likeness index: a (graph, metric)-pair statistic*) signals this. Appendix B.1 unpacks the framing.
+
+For the metrics this book cares about — `d_wPow` against the shortest-path metric `d_BFS` — the **tree-likeness index** (TLI) is:
 
 ```
 TLI(G) = E_{u, v}[ d_wPow(u, v) − d_BFS(u, v) ]
@@ -99,6 +125,26 @@ For Wikipedia categorisation:
 - TLI becomes positive only at deeper depths or with relaxed budget.
 
 This is the empirical content of the "shortcuts are rare" property — but only along certain directions, and only at tight budgets. Chapter 5 unpacks the budget-dependence carefully.
+
+### The child-step coherence principle
+
+The operational content of tree-likeness, for queries in the child-to-root direction, is a per-edge statement: *each child-step traversed adds exactly one unit of metric distance toward the root*. Formally, for a (graph, metric) pair with `TLI ≈ 0` in this direction:
+
+```
+d_wPow(c, root) ≈ d_wPow(v, root) + 1     for every child c of every node v
+```
+
+This is what "the metric behaves like depth" *means*, expressed per-edge instead of per-node. It is the strong statement that the chapter-5 empirical work confirms in the regime where it holds: the per-node TLI being zero to floating-point precision is the aggregate of every individual child-step adding +1 with no deviation.
+
+The principle has three immediate corollaries the rest of the book uses:
+
+1. **Cheap metric computation in the tree-like regime.** Where child-step coherence holds, `d_wPow(v, root) = depth(v) + 1` — the BFS shortest-path distance plus one. The expensive path-enumeration computation is unnecessary; the cheap BFS computation gives the same answer. Chapter 6's cost-ledger analysis depends on this — when tree-likeness holds, the graph-search kernel can use plain BFS instead of weighted-power-mean enumeration.
+
+2. **Local certifiability.** Coherence is a per-edge property. A query that walks downward from root to leaf only needs to verify the local coherence at each step — there is no global integrity check required. Design note §6.3 calls this *per-pair check is cheap* and uses it as a runtime certificate.
+
+3. **Failure mode is interpretable.** When coherence fails — `d_wPow(c, root) < d_wPow(v, root) + 1` — the failure is a *shortcut*: `c` has an alternate route to root not passing through `v`, contributing weight that reduces the metric below the depth-based prediction. The localness of the failure makes the diagnosis straightforward; chapter 6's "drift as a diagnostic" subsection (and design note §6.2) builds on this.
+
+The contrapositive — coherence-failure as a *shortcut* — is why the design note phrases the property as "shortcuts are rare" rather than "metric increments are coherent". Both phrasings describe the same regime; the *shortcut* phrasing is the failure-mode phrasing, the *coherence* phrasing is the success-mode phrasing. Appendix B.3 (weights as path-count normalisers) connects coherence to the underlying weight construction.
 
 ## Why this matters for compilation strategy
 

@@ -79,6 +79,13 @@ Where the example benefits from showing the *symbolic* version of an algorithm r
 | 10 | Pattern detection by rule *(planned)* | Rules that rewrite graph-search into difference-equation form |
 | 11 | Open problems *(planned)* | What's not built; what tree-likeness hinted at; how the book should evolve |
 
+### Appendices
+
+| # | Appendix | Topics |
+|---|----------|--------|
+| A | [Theory beyond the book — further reading](12_appendix_a_further_reading.md) | Spectral graph theory (and its connection to `D`/`b_eff`), random graph models, treewidth, graph isomorphism, alternative metrics (resistance, commute, PageRank), Datalog semantics, Prolog tabling, Tarski's theorem, power-law fitting (Clauset–Shalizi–Newman), foundational scale-free papers, open courseware, libraries-as-tutorials. *See Also* with reading recommendations. |
+| B | [UnifyWeaver-internal theory beyond the main text](13_appendix_b_internal_theory.md) | The (graph, metric)-pair framing; statistical homogeneity (H1/H2/H3); weights as path-count normalisers; topical scoping for homogeneity; symmetric-DAG observation; routing-correction redundancy; convergence robustness (feature + trap); geometric-vs-metric decoupling; inhomogeneity gap; data-prep consequences; extensions to undirected/infinite; spectral expansion connection. Pointers into `docs/design/TREE_LIKENESS_INDEX*.md`. |
+
 ## Prerequisites
 
 - Comfort reading code in at least one of F#, OCaml, Haskell, or Scala (chapter 5 onward assumes you can follow F#).
