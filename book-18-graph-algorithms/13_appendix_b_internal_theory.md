@@ -180,6 +180,39 @@ The relationship is *predicted* by the theory doc to exist; the form has not bee
 
 **Open question.** A formal characterisation of the TLI–spectral-expansion relationship. Likely depends on assumptions about the graph (sparsity, degree distribution, scale-free vs uniform-degree). This is research-grade work that has not been done.
 
+## B.13 `r = b'/(b_eff·D)` as contraction rate: conjecture and tracked theory work
+
+**The concept.** The convergence ratio `r = b'/(b_eff · D)` defined in `docs/design/TREE_LIKENESS_INDEX.md` §2 (UnifyWeaver main repo) is treated, throughout the project's design work, as the **spectral contraction rate** for the linearised `d_wPow` iteration operator. Theorem 2.3 of the theory doc gives the bound `r/(1−r)` on the per-step contribution from longer paths — a geometric-series bound that has the same form as the convergence rate of a contraction mapping with rate `r`.
+
+**The conjecture.** That `r` (a graph-structural quantity, computed from degree statistics) actually equals (or is asymptotically equal to, in an appropriate sense) the spectral radius of the linearised `d_wPow` iteration operator (an operator-theoretic quantity that would be computed by spectral decomposition).
+
+**Why this is a conjecture rather than a theorem.** A rigorous identification requires tightening three things at once:
+
+1. **Which norm** the spectral analysis is being done in. The spectral radius `ρ(B)` of an operator `B` is well-defined; but its relationship to convergence rates depends on operator-norm choices that have to be made explicit.
+2. **Which operator linearisation** of the `d_wPow` iteration is being analysed. The `d_wPow` recurrence is non-linear in its weight construction; the contraction-rate analysis assumes a specific linearisation (around the fixed point, or in a suitable functional setting). The choice of linearisation determines the operator whose spectrum is at stake.
+3. **The assumption that the weighted-degree distribution is approximately uncorrelated.** The friendship-paradox quantity `E[d²]/E[d]` is a known estimator for the spectral radius of a configuration-model random graph's adjacency matrix. `b_eff` extends this to directional weighted edges; the extension is plausible under configuration-model-style independence assumptions but can diverge from the true spectral radius on graphs with strongly correlated degree distributions.
+
+The intuition is sound, the bound has the right form, and empirical observations on Wikipedia categorisation (design note §3.3, §4.5) are consistent with the conjecture. But the precise proof that `r` equals the spectral radius of the linearised operator under stated assumptions has not been constructed in the project to date.
+
+**Why it matters operationally — the dependence is load-bearing.** The Recurrence Evaluation Strategy module (`docs/design/RECURRENCE_EVALUATION_STRATEGY_*.md` in the main repo) uses `r` operationally for two purposes:
+
+- **Gating `fixed_point` admissibility** for numeric recurrences: the selector refuses to admit `fixed_point` when `r ≥ 1` (no convergence guarantee). This is a hard test in `admissible_strategies/2`.
+- **Cost-model rules** for predicting convergence speed when fixed_point is chosen: the iteration-count prediction is `~log(ε)/log(r)` for tolerance `ε`, derived from the geometric-series rate.
+
+Both uses assume `r` reliably tracks what the linearised operator's spectral radius actually does. If the conjecture is wrong in a substantive way (e.g. on a graph class where the configuration-model assumption breaks down hard), the cost-model rules can be wildly off and the admissibility gate can mis-classify. The cost rules are robust to *small* estimator errors (see [B.7 — convergence robustness](#b7-convergence-robustness--feature-and-trap)) but not to a fundamentally wrong identification.
+
+**Where to read.**
+
+- `docs/design/RECURRENCE_EVALUATION_STRATEGY_PHILOSOPHY.md` §*Theory connection: `r` is conjectured to be the contraction rate* — the design's framing of the conjecture and the hedge that it's load-bearing-but-unproven.
+- `docs/design/RECURRENCE_EVALUATION_STRATEGY_PHILOSOPHY.md` §*Spectral connection in plainer terms* — eigenvalues, condition number, spectral radius, diagonal dominance for readers approaching from linear algebra; includes scoping note on condition-number being SPD-specific while `d_wPow` is directed.
+- `docs/design/RECURRENCE_EVALUATION_STRATEGY_IMPLEMENTATION_PLAN.md` risk-table row: "the r = diagonal-dominance conjecture turns out to be wrong in a substantive way" — names the conjecture as a tracked risk with mitigation framing.
+- `docs/design/TREE_LIKENESS_INDEX.md` §2 — original definition of `r`.
+- `docs/design/TREE_LIKENESS_INDEX_THEORY.md` §2.3 — the convergence theorem and the `r/(1−r)` bound.
+
+**Status: tracked theory work.** This entry exists to make the conjecture's load-bearing dependence visible — the design depends on it; the rigorous proof is future work; the framing acknowledges both. When the proof is constructed (and possibly relocated to `TREE_LIKENESS_INDEX_THEORY.md` as a real theorem), this appendix entry can be revised to point at the theorem rather than the conjecture, and the RES design docs' hedges can be retired.
+
+This is also a small but interesting research-grade theoretical question — the kind of thing a Master's thesis or a focused paper could address. Anyone wanting to contribute to the project's theoretical foundations could pick this up and work it out.
+
 ## Closing
 
 Appendix B is the book's pointer to its own depth. The design notes are *more* than the book — they include conjectures the book does not state, empirical work the book summarises briefly, and theoretical extensions the book does not touch. The appendix exists to make that depth visible: a reader who wants more than book-18 provides knows where to go.
