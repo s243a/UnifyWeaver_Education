@@ -28,7 +28,7 @@ This is what pattern detection by rule means: the compiler has a library of reco
 
 ## What exists today
 
-Two pieces of the infrastructure are in place.
+Three pieces of the infrastructure are in place.
 
 **Recursion-pattern classification.** The modules under `src/unifyweaver/core/` (`recursive_compiler.pl`, `recursive_kernel_detection.pl`, the `recursion/` directory) classify predicates into recursion shapes: tail recursion, linear recursion, mutual recursion, fixed-point, or non-recursive. The classifier looks at the structure of the rule bodies and the call graph among predicates. For each classified pattern, target-specific code generators register multifile clauses that emit the right code.
 
@@ -36,33 +36,43 @@ This is already a form of pattern detection. The pattern catalogue is recursion-
 
 **Algorithm manifest with separately-stated *what*.** Per chapter 9, the user states the algorithm with `decl_algorithm/2` separately from how to compile it. This means the algorithm declaration is *available to the compiler as data* — the compiler can read it, inspect it, and reason about its shape. The compiler does not yet do much with this beyond reading the optimisation manifest, but the architecture supports more.
 
-Both pieces are necessary for the vision. Without recursion-pattern classification, the compiler cannot tell a transitive-closure rule from an arbitrary recursive rule. Without separately-stated *what*, the compiler does not have a clean place to attach the inferred strategy.
+**The recurrence-evaluation-strategy selector.** `src/unifyweaver/core/recurrence_evaluation_strategy.pl` is the dispatch hub between recognised patterns and emitted strategies. Inputs: a recurrence term (kernel kind plus per-recurrence properties) and a workload signal set (the classified intent / declared-data / inferred-data tiers from chapter 9). Output: a chosen strategy plus a structured trace that records every step of the classification, cost-model evaluation, and conflict resolution. The trace is exposed to the user — for the F# WAM target the selector's narrative is emitted as a comment block at the top of the generated module, and a short summary is logged to stderr at codegen time.
+
+The selector ships with three concrete cost-model rules (prefer-bidirectional-when-CSR-present being the one used in the prototyped bidirectional path), six conflict-resolution steps (intent-matches, third-option, scope-disambiguation, satisfiability, caller-wins, no-intent), and a pluggable adapter shape so each target can render the trace its own way. This is the piece that closes the loop between chapter 9's hints and the code generator's choice.
+
+All three pieces are necessary for the vision. Without recursion-pattern classification, the compiler cannot tell a transitive-closure rule from an arbitrary recursive rule. Without separately-stated *what*, the compiler does not have a clean place to attach the inferred strategy. Without the selector, the recognised pattern and the classified workload have no shared mechanism to combine into a code-generation choice.
 
 ## What is missing
 
-The gap between current and full vision:
+The gap between current and full vision has narrowed. What remains:
+
+- **The fixed-point branch of the selector.** The strategy selector's `fixed_point(...)` modes are structurally present in the API and gated by admissibility checks, but no cost-model rule currently chooses them — every implemented rule routes to a `per_query(...)` strategy. Filling in the fixed-point side requires a second consumer of the selector (the natural candidate is the C# parameterised query runtime, which already realises bottom-up fixed-point iteration); the selector then has somewhere to *send* the recommendation, and the cost-model rules become worth writing. Until then, the selector is half a converter.
+
+- **A second target consumer of the selector.** The F# WAM target is the only call site today. A second consumer (C# query runtime, Haskell WAM, or C WAM) would shake out whether the helper API in `src/unifyweaver/core/recurrence_inputs.pl` has accidentally calcified around F#-specific assumptions. The mock-second-caller test in `tests/core/test_recurrence_inputs_mock_caller.pl` is a stand-in for now; a real consumer is the durable signal.
 
 - **A library of graph-algorithm patterns.** Transitive closure has a recognisable shape; so do shortest-path computations, reachability, strongly connected components, topological sort. The compiler does not yet have explicit pattern templates for these. (The relation-policy module `src/unifyweaver/core/relation_policy.pl` is a candidate place for this catalogue.)
 
-- **Rewrite rules from a recognised pattern to a chosen strategy.** Once the compiler recognises "this is transitive closure", it needs a rewrite rule that emits "compile as bottom-up semi-naive iteration with such-and-such convergence checking". The rules need to be parameterisable by the cost model — the same recognised pattern might compile differently on a small graph (per-query is fine) vs a large one (fixed point).
-
-- **Confidence in the classification.** Pattern recognition is a heuristic. Two rules that look identical may have different semantics in subtle ways (cycles in the input, non-monotone updates, etc.). The compiler needs to know how confident the classification is and what to do when confidence is low. One option is to emit the recognised strategy with a fallback to the general-purpose strategy; another is to require the user to confirm.
+- **Confidence in the classification.** Pattern recognition is a heuristic. Two rules that look identical may have different semantics in subtle ways (cycles in the input, non-monotone updates, etc.). The compiler needs to know how confident the classification is and what to do when confidence is low. The trace structure introduced for the recurrence-evaluation-strategy selector is the natural place to expose this — the selector already records *why* a strategy was chosen; a confidence rating per signal tier is a small addition. One option is to emit the recognised strategy with a fallback to the general-purpose strategy; another is to require the user to confirm.
 
 - **The graph-shape side.** A pattern that should compile as a fixed point on a sparse DAG might compile as something different on a dense graph or one with cycles. The compiler needs to know the graph's shape — which means either the user declares it or the runtime measures it. Neither is currently automatic.
 
+- **ML-based detection.** Discussed below; not currently in scope.
+
 ## Concrete prototyped detection: bidirectional ancestor
 
-One specific pattern has been worked out as a prototype: the bidirectional ancestor kernel. The F# template `templates/targets/fsharp_wam/kernel_bidirectional_ancestor.fs.mustache` is what gets emitted when the compiler recognises an ancestor-query pattern targeting the `fsharp_wam` backend with appropriate optimisation hints.
+One specific pattern has been worked out as a prototype: the bidirectional ancestor kernel. The F# template `templates/targets/fsharp_wam/kernel_bidirectional_ancestor.fs.mustache` is what gets emitted when the compiler recognises an ancestor-query pattern targeting the `fsharp_wam` backend with appropriate workload signals.
 
-The recognition is currently driven by an explicit optimisation manifest entry (`strategy(bidirectional_search)`), not by inferring from the surface predicate. The kernel emission is templated, parameterised by cost weights and budget. The compiler picks the template; the user picks the strategy via the manifest.
+Auto-selection now works. As of the recurrence-evaluation-strategy implementation, the three components named in earlier drafts of this chapter are wired together end-to-end:
 
-The next step toward full pattern detection: have the compiler *infer* that an ancestor query with appropriate cost-model hints should pick the bidirectional template, *without* the user saying so. This requires:
+- **The pattern matcher.** `recursive_kernel_detection.pl` recognises ancestor-style left-recursive transitive-closure rules and classifies them as `category_ancestor` kernels.
+- **The cost-model rule.** The selector's `prefer_bidirectional_csr_present` rule fires when (a) the recurrence is a `category_ancestor` kernel, (b) the workload has `query_pattern(single_pair)` and `cardinality(large)`, and (c) the data side carries `csr_available(true)` (declared via `csr_path/1` in the optimisation manifest, or inferred when a CSR artifact exists).
+- **The strategy selector.** Combines the two: when the rule fires and no conflicting intent is declared, the selector recommends `strategy(per_query(bidirectional))` and the F# WAM target emits the `bidirectional_ancestor` kernel in place of the default `category_ancestor` kernel. A safe-default policy keeps the kernel-kind swap behind `allow_bidirectional_kernel_swap(true)` in the F# WAM options — without the flag, the selector's recommendation is logged but the emission stays as `category_ancestor` (the recommendation is advisory until the consumer opts in).
 
-- A pattern matcher that recognises ancestor-style left-recursive transitive-closure rules.
-- A cost-model rule that prefers bidirectional search when the query is a single-pair lookup and a precomputed minimum-distance map is available.
-- A strategy selector that combines the recognition and the cost model into a code-generation choice.
+The auto-select end-to-end test (`tests/core/test_wam_fsharp_strategy_autoselect_e2e.pl`) and the opt-in bidirectional emission test (`tests/core/test_wam_fsharp_bidirectional_e2e.pl`) cover both arms: cost-model says bidirectional and the F# project builds either way; the bidirectional emission produces a runnable .NET binary that the second test exercises against a synthetic Phase-1 LMDB graph.
 
-Each component is implementable; the combination has not been wired together end-to-end. This is one of the most concrete forward-direction work items.
+What is *not* yet validated by the prototype: the analytical justification for choosing bidirectional. The bidirectional kernel internally computes `calibrateGraph` (which produces `b_eff`, `D`, `routing_correction`, and a `min_dist[node]` BFS table used as an A\* lower bound), and the cost-model rule's `prefer_bidirectional_csr_present` clause is informally motivated by the chapter-7 difference-equation framing — the search cost grows as `b_eff^depth` and bidirectional search amortises the depth across two converging frontiers. But the calibration outputs are consumed inside the kernel and never logged at the benchmark level; the synthetic fixtures used in the e2e tests are too small and too tree-like (a depth-1 4-ary tree, `b_eff ≈ 1`) to discriminate between the analytical prediction and any other strategy. A meaningful comparison between the difference-equation prediction and observed search cost will need (a) a real-scale graph with non-trivial `b_eff` (the simplewiki topical subgraph used in chapters 3–4 is the obvious candidate) and (b) instrumentation that exposes the calibration metrics alongside `solutions=` and `query_ms=` in the benchmark output. Both are concrete forward-direction items — the prototype is wired, but it does not yet prove the analytical model.
+
+A second gap worth naming: the bidirectional kernel's cost weights (parent-step cost, child-step cost, budget) are currently hardcoded in the F# WAM dispatch template (`WamRuntime.fs`'s `executeForeign` branch sets `parent=1.0`, `child=3.0`, `budget=10.0`) and the native benchmark loop mirrors them. The selector chooses *which* kernel to emit but does not yet plumb cost-model parameters through to the kernel's runtime weights. Closing this gap is what would let the difference-equation framing actually drive the search.
 
 ## Rule-based vs ML-based detection
 

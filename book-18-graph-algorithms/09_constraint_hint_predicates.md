@@ -111,6 +111,9 @@ Currently supported (or nearly so):
 - `target(...)` — explicit target choice in the optimisation manifest.
 - `scan_strategy(...)` — choice of how to scan the input source.
 - `cache_mode(...)` — caching behaviour for repeated queries.
+- `strategy(per_query(...))` / `strategy(fixed_point(...))` — declared evaluation strategy. Consumed by the recurrence-evaluation-strategy selector (`src/unifyweaver/core/recurrence_evaluation_strategy.pl`), which treats it as a *strong intent* signal (top of the three-tier hierarchy described below).
+- `kernel_mode(unidirectional)` / `kernel_mode(bidirectional)` — declared kernel kind for graph-search recursions. Same status as `strategy/1`: a strong intent that survives any conflicting inferred-data signal unless explicitly overridden.
+- `force_search_algorithm(bfs | dfs | astar)` — declared search algorithm. Strong intent.
 - Recursion-pattern hints implicitly via the pattern detector.
 
 Not currently supported, but planned:
@@ -120,8 +123,29 @@ Not currently supported, but planned:
 - **Per-query-shape index selection.** "If the query binds `X` and leaves `Y` free, use index A; if reversed, use index B." Partially supported by the binding-state analyser, but not exposed cleanly in the optimisation manifest.
 - **Convergence tolerance for difference-equation compilations.** "Stop iterating when the change per step is below ε." Would let users trade accuracy for speed; not currently exposed.
 - **Metric-specific hints for graph queries.** "This query computes `d_wPow`; the calibration constants are already available at path X." Would let the compiler skip redundant calibration work.
+- **Selector-driven cost-model parameters.** The bidirectional kernel's parent-step / child-step / budget costs are still hardcoded in the dispatch template (`WamRuntime.fs` for the F# WAM target). The strategy selector chooses *which* kernel to emit but does not yet plumb cost-model parameters through to the kernel. A follow-up would let `b_eff`, `D`, or per-call budget be passed via the optimisation manifest.
 
 The list of "planned" is not a roadmap commitment; it is the gap the book observes between what graph-algorithm compilation could express and what UnifyWeaver currently lets the user say. Each is an opportunity for the compiler to do more on the user's behalf.
+
+## Three tiers of signals: intent, declared-data, inferred-data
+
+The recurrence-evaluation-strategy selector classifies every input signal into one of three confidence tiers before applying cost-model rules. This matters for hint design: the same value carries different weight depending on where it came from.
+
+1. **Intent** — the user has stated what they want.
+
+   Examples: `strategy(per_query(bidirectional))` in the optimisation manifest, `kernel_mode(bidirectional)` as an explicit compile option. These are *the user speaking*. The selector treats intent as authoritative: if intent is admissible for the recurrence, intent wins.
+
+2. **Declared data** — the user has stated a property of the *data*, not of the strategy.
+
+   Examples: a `csr_path(...)` option (the user has materialised a compressed-sparse-row artifact for this graph), `cardinality(large)` (the user knows the answer set is large), `query_pattern(single_pair)` (the user knows queries are single source/target pairs, not whole-frontier sweeps). Declared data is high-confidence — the user has direct knowledge of the data — but it is *not* a strategy claim. The cost model uses declared data to *infer* which strategies fit.
+
+3. **Inferred data** — the compiler has derived a property from static analysis.
+
+   Examples: `csr_buildable(true)` (the compiler analysed the predicate and concluded a CSR could be built for it), recursion-shape classification from the pattern detector. Inferred data is the lowest-confidence tier: the static analysis may be wrong, the predicate may have hidden semantics the analyser missed, the inference may be a safe under-approximation.
+
+The hierarchy is not "intent overrides everything blindly". It is "where signals conflict, the higher-confidence tier wins, and the selector logs which tier each decision came from". The user can see the trace: which hints were treated as intent, which as data, and how the cost model resolved any conflict. This is the same trace mechanism that makes pattern detection (chapter 10) auditable — both share the principle that *implicit* compilation choices should remain *explicit* in the compiler's output.
+
+A practical consequence: when adding a new hint, decide which tier it belongs to. A hint that names a strategy ("compile this as fixed point") is intent. A hint that names a property of the data ("the relation is monotone in argument 2") is declared data. A hint that lets the compiler do its own analysis (the absence of explicit hints, in effect) lets inferred-data signals dominate. The tier choice shapes how the selector treats the hint when other signals conflict.
 
 ## How users discover hints
 
