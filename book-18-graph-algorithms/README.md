@@ -11,7 +11,7 @@ This documentation is dual-licensed under MIT and CC-BY-4.0.
 
 *Part of the [UnifyWeaver Education Series](../README.md)*
 
-**Status:** Initial — this book is a starting point. The architecture it describes is partly built (graph-search kernels, predicate-driven transpilation) and partly forward-looking (rule-based detection that rewrites graph-search formulations into difference equations). Chapters will be revised as the code direction settles.
+**Status:** Initial — this book is a starting point. The architecture it describes is partly built (graph-search kernels, predicate-driven transpilation, the recurrence-evaluation-strategy selector that wires hint classification into code-generation choice — see chapters 9 and 10) and partly forward-looking (the fixed-point branch of the selector, a second-target consumer to validate the API, an instrumented benchmark that compares the difference-equation prediction against observed search cost — chapter 10). Chapters will be revised as the code direction settles.
 
 ## What this book is about
 
