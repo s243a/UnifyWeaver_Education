@@ -27,12 +27,12 @@ The two views are equivalent — a difference equation on a graph relation, iter
 
 ## Scalar equations vs distributional recurrences
 
-The clean scalar form above is not always the right state space. It works when the value at a node is memoryless: a node's next value can be computed from the current values of its neighbours without remembering how those values were reached. Shortest distance, reachability, and ordinary transitive closure have that shape.
+The clean scalar form above is not always the right state space. It works when the value at a node is path-independent (the Markov property on the graph): a node's next value can be computed from the current values of its neighbours alone, without remembering how those values were reached. Shortest distance, reachability, and ordinary transitive closure have that shape.
 
-Budgeted path metrics do not. A query like `d_wPow(v, root)` is not asking for a single node value independent of path history; it is asking for a statistic of the paths from `v` to `root`, subject to a constraint. If the constraint is ordinary path length, the exact finite-horizon state is a distribution over lengths:
+Budgeted path metrics do not. A query like `d_wPow(v, root)` is not asking for a single node value independent of path history; it is asking for a statistic of the paths from `v` to `root`, subject to a constraint. If the constraint is ordinary path length, the exact finite-horizon state is a count of paths of each length:
 
 ```
-C_v[L] = number or mass of paths from v to root of length L
+C_v[L] = number of paths from v to root of exactly length L
 ```
 
 For parent-only paths on a DAG, the recurrence is simple and exact:
@@ -41,7 +41,9 @@ For parent-only paths on a DAG, the recurrence is simple and exact:
 C_v[L + 1] = sum over p in parents(v) of C_p[L]
 ```
 
-In probability form this is a shifted mixture, not a convolution between parent distributions:
+This equation is written as a pull recurrence: `v` asks each direct parent for its length-`L` count, then shifts that count by one edge. The equivalent root-down push pass is the same computation on a DAG, but it has different cache, memory, and parallelism behaviour.
+
+In probability form this is a shifted mixture (each parent contributes its own distribution, shifted one hop forward; the weights `q(p | v)` normalise to 1), not a convolution between parent distributions:
 
 ```
 P_v(L + 1) = sum over p in parents(v) of q(p | v) * P_p(L)
@@ -56,11 +58,12 @@ C_v[N, M] = mass of paths from v to root
             with N parent hops and M child hops
 
 accepted iff N * parent_cost + M * child_cost <= budget
+and, if a separate max_depth is active, N + M <= max_depth
 ```
 
 Only after this finite distribution is computed can the metric collapse it to a single number by applying the weighted-power-mean formula.
 
-This distinction matters for the rest of the chapter. The "difference equation" framing is still correct, but the equation is sometimes over a distributional state, not a scalar state. If the path constraint is removed and the weighted series converges, the distribution can sometimes be collapsed to a scalar fixed point. If the path constraint remains, exactness requires carrying the finite path statistic, or else explicitly accepting an approximation.
+This distinction matters for the rest of the chapter. The "difference equation" framing is still correct, but the equation is sometimes over a distributional state, not a scalar state. If the path constraint is removed and the weighted series converges, the distribution can sometimes be summarised to a single scalar value per node; that scalar may then satisfy a fixed-point equation in the denotational sense. If the path constraint remains, exactness requires carrying the finite path statistic, or else explicitly accepting an approximation.
 
 ## Why the difference-equation framing matters
 
@@ -96,7 +99,11 @@ A query that requires the full materialised `TC` to be available — for example
 
 A query whose iteration does not converge, or converges only after `O(N)` iterations, is also bad. Graphs with high diameter, graphs with very high effective branching factor, graphs where the difference equation amplifies error at each step — all break the assumed properties. Most real graphs the book cares about (ultra-small-world, sparse, monotone rules) avoid these failures, but the framework's applicability is not unconditional.
 
-A constrained path metric can also lose for a more subtle reason: the scalar equation may be the wrong abstraction. If the user's question depends on maximum path length, weighted path budget, or direction-specific hop counts, the compiler needs the distributional state described above. Dropping that state can turn an exact computation into a statistical approximation without saying so. This is acceptable only if the approximation has a diagnostic: for example, a measured shortcut mass, entropy of the parent distribution, or a sampled parity check against the exact search aggregate.
+A constrained path metric can also lose for a more subtle reason: the scalar equation may be the wrong abstraction. If the user's question depends on maximum path length, weighted path budget, or direction-specific hop counts, the compiler needs the distributional state described above. Dropping that state can turn an exact computation into a statistical approximation without saying so. This is acceptable only if the approximation has diagnostics, for example:
+
+- a measured shortcut mass;
+- the entropy or width of the parent distribution;
+- a sampled parity check against the exact search aggregate.
 
 ## Connection to UnifyWeaver's compilation targets
 
@@ -123,7 +130,9 @@ For transitive closure on a sparse DAG, both factors are favourable. The Wikiped
 
 For more general rules — for example, computing the weighted-power-mean metric `d_wPow` by propagating path-length or direction-hop distributions — the convergence rate is harder to characterise. The calibration constant `r` (chapter 4 §calibration) bounds the per-step contribution from longer paths to `r/(1−r)` when the weighted series is treated as an unconstrained tail. With `r ≈ 0.04` on enwiki, this bound is roughly 4% — small, so a few iterations suffice. With `r ≈ 0.16` on simplewiki, the bound is roughly 19% — still manageable, but slower convergence.
 
-The connection between graph structure (`b_eff`, `D`, `r`) and difference-equation convergence is the *empirical* anchor that makes the pivot tractable. Without the bound on `r`, an arbitrary distributional recurrence might converge slowly or not at all. With the bound, the user can predict that "the tail mass beyond the finite horizon is small enough to ignore" — but only after checking that the finite-horizon constraints the query actually uses have been represented in the state."
+This bound applies to the unconstrained weighted series: no `max_depth`, no direction budget. With a finite-horizon constraint in place, the tail beyond the horizon is truncated by definition; the separate question is how much metric error that truncation introduces, which depends on how much mass falls beyond the horizon.
+
+The connection between graph structure (`b_eff`, `D`, `r`) and difference-equation convergence is the *empirical* anchor that makes the pivot tractable. Without the bound on `r`, an arbitrary distributional recurrence might converge slowly or not at all. With the bound, the user can predict that "the tail mass beyond the finite horizon is small enough to ignore" — but only after checking that the finite-horizon constraints the query actually uses have been represented in the state.
 
 ## Hybrid strategies
 
@@ -131,7 +140,7 @@ The pivot is not absolute. Many queries benefit from a hybrid: use graph search 
 
 A concrete example: compute `d_wPow(v, root)` for all `v`. The graph-search approach is V kernel calls, each doing budgeted path enumeration. The distributional approach propagates path-length distributions downward from the root, or direction-hop distributions when child hops are admitted. The initial values matter, and seeding from a quick BFS gives a much better starting point than seeding from zero.
 
-For the Wikipedia category graph, the natural hybrid is depth-stratified. Take `Category:Main_topic_classifications` (or a topical root) as the root, compute the minimum parent distance from each node to that root, and use that distance as the notion of "near the root." Nodes with the fewest parent hops to the root are where the graph is most likely to contain high-degree hubs and cross-topic shortcuts, so they are the best candidates for exact search aggregates. Farther down a topical branch, especially below the main-topic layer, the graph appears more tree-like and the shifted parent-distribution approximation becomes more credible.
+For the Wikipedia category graph, the natural hybrid is depth-stratified. Take `Category:Main_topic_classifications` (or a topical root) as the root, compute the minimum parent distance from each node to that root, and use that distance as the notion of "near the root." The stratification depth is itself a plain `d_BFS` computation over the parent-edge graph, so it is cheap and requires no distributional state. Nodes with the fewest parent hops to the root are where the graph is most likely to contain high-degree hubs and cross-topic shortcuts, so they are the best candidates for exact search aggregates. Farther down a topical branch, especially below the main-topic layer, the graph appears more tree-like and the shifted parent-distribution approximation becomes more credible.
 
 One possible hybrid schedule:
 
@@ -141,7 +150,7 @@ middle band:     blend exact aggregates with parent-distribution propagation
 deep region:     propagate parent distributions only
 ```
 
-The blend should not be controlled by depth alone. Useful diagnostics include the width or entropy of the parent distribution, the number of direct parents, a local shortcut-mass estimate, and periodic sampled parity checks against the F# search aggregate. If those diagnostics drift above threshold, the exact zone can expand locally. This turns the finite-difference idea into an adaptive statistical compiler pass rather than a single hard-coded recurrence.
+The blend should not be controlled by depth alone. Useful diagnostics include the width or entropy of the parent distribution, the number of direct parents, a local shortcut-mass estimate, and periodic sampled parity checks against the F# search aggregate. If those diagnostics drift above threshold, the exact zone can expand locally. This turns the depth-stratified hybrid into an adaptive statistical compiler pass: one where the compilation strategy for `d_wPow` is chosen node-locally rather than globally. Chapter 10 returns to this kind of choice as a first-class compilation target.
 
 UnifyWeaver does not currently express hybrid strategies as first-class compilation targets; they would have to be expressed by the user composing two predicates. The forward direction (chapter 10) considers what it would take to recognise and compile hybrids directly.
 
