@@ -37,6 +37,18 @@ The Python V2 prototype timed out on 61% of measured pairs, suggesting the true 
 
 Open work: design and implement an admissible heuristic for arbitrary-target queries on the categorisation DAG. The heuristic should not require precomputing all-pairs distances (infeasible at enwiki scale) but should be tighter than "zero", which degrades A\* to plain BFS.
 
+### Distributional recurrence parity for constrained path metrics
+
+Chapter 7's difference-equation pivot is exact for scalar, memoryless graph relations and for unconstrained convergent numeric recurrences. It is not automatically exact for constrained path metrics. Once the query has a `max_depth`, weighted budget, or direction-dependent step cost, the node state is a finite distribution over path statistics — length for parent-only paths, `(parent_hops, child_hops)` for the F# bidirectional kernel — and the final metric is a functional of that distribution.
+
+Open work: build a parity harness that compares three implementations on the same small fixtures and sampled Wikipedia nodes:
+
+- the F# exact search aggregate;
+- the finite distributional recurrence with the same constraints encoded in the state;
+- the parent-distribution approximation used as an initializer or deep-region substitute.
+
+The immediate question is not performance. It is semantic: identify exactly which constraints must be present in the recurrence state for equality, and measure when the parent-distribution approximation is close enough to use below the main-topic layer.
+
 ## Compilation infrastructure
 
 ### Cost-model integration with ingest decisions

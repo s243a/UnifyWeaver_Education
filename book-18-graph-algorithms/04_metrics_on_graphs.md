@@ -151,7 +151,7 @@ The contrapositive — coherence-failure as a *shortcut* — is why the design n
 The metric a query asks for governs the algorithm needed to compute it:
 
 - **`d_BFS`** is a single bidirectional or unidirectional BFS. Per-query cost is low; no path enumeration needed. Compiles cleanly to a graph-search kernel.
-- **`d_wPow`** requires path enumeration up to a budget. Per-query cost is higher and grows with budget. Compiles to a graph-search kernel with explicit path tracking — or, if the structure permits, to an iterative refinement that *approximates* the path-enumeration result.
+- **`d_wPow`** requires path information up to a budget. Per-query enumeration is the most direct implementation, but the exact state is not usually a single scalar per node: with a path-length bound it is a finite distribution over path lengths, and with direction-dependent costs it is a distribution over `(parent_hops, child_hops)`. A node-local scalar recurrence is exact only after the path constraints are removed, or after the distribution has been collapsed by an approximation.
 - **TLI-aware queries** (those that want a metric calibrated to the graph's tree-likeness) require the calibration constants, which require a one-time scan of the graph. Compiles as a two-phase pipeline: precompute constants, then per-query path enumeration.
 
 The choice of metric is the user's responsibility. The choice of how to compute it is the compiler's. Chapter 9 returns to how the choice is communicated.
