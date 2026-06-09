@@ -65,6 +65,38 @@ Only after this finite distribution is computed can the metric collapse it to a 
 
 This distinction matters for the rest of the chapter. The "difference equation" framing is still correct, but the equation is sometimes over a distributional state, not a scalar state. If the path constraint is removed and the weighted series converges, the distribution can sometimes be summarised to a single scalar value per node; that scalar may then satisfy a fixed-point equation in the denotational sense. If the path constraint remains, exactness requires carrying the finite path statistic, or else explicitly accepting an approximation.
 
+### Parent-only baselines and metric functionals
+
+The first useful distributional target is parent-only. Compute the exact parent-path distribution from each node to the chosen root before admitting child-direction paths:
+
+```
+P_v[S] = mass, count, or probability of parent-only paths from v to root
+         whose path statistic is S
+```
+
+The statistic `S` is not fixed by the recurrence. It may be hop count, weighted path length, semantic edge cost, or a tuple such as `(parent_hops, child_hops)` once richer path types are admitted. The important point is that the parent-only aggregate is reusable state; it is not itself "the distance."
+
+Different root-nearness metrics are functionals over the same baseline distribution:
+
+```
+minimum distance:
+  min S with P_v[S] > 0
+
+bounded average distance:
+  sum_{S <= B} S * P_v[S] / sum_{S <= B} P_v[S]
+
+bounded reachability mass:
+  sum_{S <= B} P_v[S]
+
+tail mass beyond the budget:
+  sum_{S > B} P_v[S]
+
+ambiguity / entropy:
+  -sum_S P_v[S] log P_v[S]
+```
+
+This is why parent-only search should come before child-inclusive search. It provides an exact distributional baseline against which later approximations can be tested. Child-direction search can then be treated as a bounded correction to a chosen functional, not necessarily as a search for a shorter path. For a minimum-distance functional, the correction asks whether child paths create a shorter route to the root. For a bounded-average functional, it asks whether child paths move enough mass under the horizon to change the expected value. For an entropy or ambiguity functional, it asks whether the extra paths materially widen or concentrate the distribution.
+
 ## Why the difference-equation framing matters
 
 Three reasons the framing pays off in practice.
@@ -151,6 +183,8 @@ deep region:     propagate parent distributions only
 ```
 
 The blend should not be controlled by depth alone. Useful diagnostics include the width or entropy of the parent distribution, the number of direct parents, a local shortcut-mass estimate, and periodic sampled parity checks against the F# search aggregate. If those diagnostics drift above threshold, the exact zone can expand locally. This turns the depth-stratified hybrid into an adaptive statistical compiler pass: one where the compilation strategy for `d_wPow` is chosen node-locally rather than globally. Chapter 10 returns to this kind of choice as a first-class compilation target.
+
+The cutoff is also metric-specific. Exact child-inclusive search is valuable only when it can change the functional the query will actually report: a shorter support point for minimum distance, enough additional under-budget mass to move a bounded average, enough new mass to change reachability confidence, or enough spread to affect an entropy diagnostic. The decision criterion is therefore marginal value per marginal cost for the selected functional, with the parent-only distribution acting as the baseline estimate.
 
 UnifyWeaver does not currently express hybrid strategies as first-class compilation targets; they would have to be expressed by the user composing two predicates. The forward direction (chapter 10) considers what it would take to recognise and compile hybrids directly.
 
