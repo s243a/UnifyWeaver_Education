@@ -41,13 +41,17 @@ Open work: design and implement an admissible heuristic for arbitrary-target que
 
 Chapter 7's difference-equation pivot is exact for scalar, memoryless graph relations and for unconstrained convergent numeric recurrences. It is not automatically exact for constrained path metrics. Once the query has a `max_depth`, weighted budget, or direction-dependent step cost, the node state is a finite distribution over path statistics — length for parent-only paths, `(parent_hops, child_hops)` for the F# bidirectional kernel — and the final metric is a functional of that distribution.
 
-Open work: build a parity harness that compares three implementations on the same small fixtures and sampled Wikipedia nodes:
+Open work: build a parity harness that compares three implementations on synthetic DAGs with 10-100 nodes (covering trees, near-trees, and graphs with a few shortcuts) and on a sample of about 50-100 Wikipedia category nodes from both above and below the main-topic layer:
 
 - the F# exact search aggregate;
 - the finite distributional recurrence with the same constraints encoded in the state;
 - the parent-distribution approximation used as an initializer or deep-region substitute.
 
-The immediate question is not performance. It is semantic: identify exactly which constraints must be present in the recurrence state for equality, and measure when the parent-distribution approximation is close enough to use below the main-topic layer.
+Expected result: the finite distributional recurrence with full constraint state should match the F# exact aggregate exactly on the fixtures. The parent-distribution approximation should diverge most at high-degree near-root nodes, where shortcuts are common, and converge toward the exact result in deeper tree-like regions.
+
+Surprising result: if the distributional recurrence fails to match F# even with full constraint state, the discrepancy indicates a missing constraint dimension rather than a performance problem.
+
+The immediate question is semantic: identify exactly which constraints must be present in the recurrence state for equality, and measure when the parent-distribution approximation is close enough to use below the main-topic layer.
 
 ## Compilation infrastructure
 
