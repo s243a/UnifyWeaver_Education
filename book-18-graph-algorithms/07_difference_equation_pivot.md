@@ -97,6 +97,48 @@ ambiguity / entropy:
 
 This is why parent-only search should come before child-inclusive search. It provides an exact distributional baseline against which later approximations can be tested. Child-direction search can then be treated as a bounded correction to a chosen functional, not necessarily as a search for a shorter path. For a minimum-distance functional, the correction asks whether child paths create a shorter route to the root. For a bounded-average functional, it asks whether child paths move enough mass under the horizon to change the expected value. For an entropy or ambiguity functional, it asks whether the extra paths materially widen or concentrate the distribution.
 
+### Scalar support bounds before full distributions
+
+Some functionals do not need the full distribution. If the query asks only for
+the minimum or maximum support point, the distribution collapses exactly to a
+scalar recurrence. For parent-only hop counts:
+
+```
+L_min(root) = 0
+L_min(v) = 1 + min over p in parents(v) of L_min(p)
+
+L_max(root) = 0
+L_max(v) = 1 + max over p in parents(v) of L_max(p)
+```
+
+`L_min` is the ordinary shortest-path-to-root recurrence. `L_max` is exact on a
+DAG, or under whatever bounded/cycle policy makes longest paths well-defined.
+Neither recurrence needs path-length mass, entropy, or cumulative bases; the
+semiring is simply `(min,+)` or `(max,+)`.
+
+These scalar values are still useful even when the eventual query needs a full
+distribution. They bound the finite support:
+
+```
+support(P_v) is contained in [L_min(v), L_max(v)]
+```
+
+That support interval gives cheap edge cases for budgeted queries. If the budget
+is below `L_min`, the under-budget mass is zero. If the budget is at least
+`L_max`, the whole parent-only distribution is inside the horizon. The width
+`L_max - L_min` is also a useful diagnostic: narrow support may not justify an
+exact histogram, while wide support is a sign that the distributional state or a
+fitted finite-support approximation may be valuable.
+
+The approximation question then becomes empirical. If parent-only distributions
+with similar local graph statistics tend toward a recognisable finite-support
+family, the scalar bounds can initialise that family. For example, a binomial-like
+or truncated-normal shape would be plausible if many weakly dependent parent
+choices combine in a central-limit-like way; a truncated geometric shape would be
+more plausible when each extra hop contributes roughly memoryless decay. The book
+does not assume either shape. It treats `L_min` and `L_max` as cheap bounds first,
+and distribution-family fitting as a later measurement question.
+
 ## Why the difference-equation framing matters
 
 Three reasons the framing pays off in practice.

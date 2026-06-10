@@ -79,6 +79,23 @@ The cross-predicate optimisation problem (chapter 10 §composition) — given a 
 
 ## Conceptual gaps the book did not close
 
+### Empirical distribution families for path statistics
+
+Chapter 7 separates scalar support bounds (`L_min`, `L_max`) from full
+path-statistic distributions. The next theoretical question is whether those
+distributions tend toward a small set of finite-support families on real category
+graphs. If they do, the compiler can use the scalar bounds plus a few cheap
+statistics to initialise approximations before deciding whether an exact
+histogram is worth computing.
+
+Possible families include truncated geometric/exponential tails, binomial-like or
+truncated-normal shapes suggested by central-limit-style aggregation, or mixtures
+when topical and administrative category regimes overlap. The book has not yet
+measured which, if any, dominates on simplewiki or enwiki. This matters because a
+good family fit would make approximate distributional recurrences much more
+useful; a poor fit would push the design toward exact histograms, empirical
+sketches, or conservative cache-only acceleration.
+
 ### The metric-on-graphs theory
 
 Chapter 4 §9 noted that "metric on a graph" is not a settled concept. The book picked `d_wPow` because it is the one with the tightest connection to UnifyWeaver's compilation strategy. Other metrics (resistance distance, commute distance, personalised PageRank) have well-developed mathematical foundations and connect differently to compilation. A more comprehensive treatment of the design space would compare them systematically and articulate when each is the right metric to ask for.
