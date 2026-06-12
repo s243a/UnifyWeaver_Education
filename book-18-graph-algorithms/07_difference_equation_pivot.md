@@ -76,6 +76,16 @@ P_v[S] = mass, count, or probability of parent-only paths from v to root
 
 The statistic `S` is not fixed by the recurrence. It may be hop count, weighted path length, semantic edge cost, or a tuple such as `(parent_hops, child_hops)` once richer path types are admitted. The important point is that the parent-only aggregate is reusable state; it is not itself "the distance."
 
+This creates two different kinds of prior information. A **node-local
+recurrence prior** is the distribution computed for a concrete node or ancestor
+cone by the difference equation above. It is close to exact when the graph is
+DAG-like and the recurrence state includes the query's constraints. A
+**global, depth-conditioned planning prior** is different: it estimates the
+typical distribution shape at depth `D` from graph-level statistics such as
+parent branching, support width, tail decay, or a fitted binomial/Gamma family.
+The planning prior is not a boundary condition for a particular node; it is a
+cost model input for deciding how deep exact histograms are worth materialising.
+
 Different root-nearness metrics are functionals over the same baseline distribution:
 
 ```

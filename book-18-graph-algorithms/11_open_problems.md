@@ -96,6 +96,14 @@ good family fit would make approximate distributional recurrences much more
 useful; a poor fit would push the design toward exact histograms, empirical
 sketches, or conservative cache-only acceleration.
 
+This is also where the word "prior" needs care. A recurrence-computed histogram
+for a specific node is a local prior for later bounded search or residual
+calibration. A depth-conditioned family predicted from global graph statistics is
+a planning prior: it estimates expected support width, skew, and tail mass before
+node-local materialisation. The compiler should use the planning prior to decide
+where exact histograms are likely to be cheap enough, then use the recurrence
+prior as the boundary condition once a concrete ancestor cone has been selected.
+
 ### The metric-on-graphs theory
 
 Chapter 4 §9 noted that "metric on a graph" is not a settled concept. The book picked `d_wPow` because it is the one with the tightest connection to UnifyWeaver's compilation strategy. Other metrics (resistance distance, commute distance, personalised PageRank) have well-developed mathematical foundations and connect differently to compilation. A more comprehensive treatment of the design space would compare them systematically and articulate when each is the right metric to ask for.
