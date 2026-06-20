@@ -60,5 +60,5 @@ book should duplicate the full Hybrid WAM architecture.
 1. [Introduction to WAM](01_introduction.md)
 2. [Instruction Set Architecture](02_isa.md)
 3. [Compiling Rules and Recursion](03_compilation.md)
-4. [WAM as a Fallback Hub](04_fallback_hub.md)
+4. [WAM as a Hybrid Routing Layer](04_fallback_hub.md)
 5. [Symbolic WAM Across Targets](05_symbolic_to_targets.md)

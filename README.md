@@ -176,7 +176,7 @@ cd UnifyWeaver
 | 14 - AI Training | Complete | `book-14-ai-training/` |
 | 15 - Perl Target | Complete | `book-15-perl-target/` |
 | 16 - Ruby Target | Complete | `book-16-ruby-target/` |
-| 17 - WAM and Hybrid WAM | Planned refresh | `book-17-wam-target/` |
+| 17 - WAM and Hybrid WAM | Complete | `book-17-wam-target/` |
 | AWK Target | Complete (supplementary) | `book-awk-target/` |
 
 ## Progress Tracking
