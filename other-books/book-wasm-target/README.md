@@ -35,6 +35,28 @@ const { instance } = await WebAssembly.instantiate(bytes);
 console.log(instance.exports.sum(10)); // 55
 ```
 
+## Generating WASM/WAT Hybrid WAM Code
+
+Use the WAM WAT target when the desired output is WebAssembly text:
+
+```prolog
+?- use_module('src/unifyweaver/targets/wam_wat_target').
+?- write_wam_wat_project([ancestor/2],
+       [],
+       'out/ancestor.wat').
+```
+
+This path emits a portable WAM-shaped runtime for WASM. It is separate from
+using symbolic WAM text as a debug listing; the WAT target is an executable
+backend.
+
+## Hybrid WAM Role
+
+WASM is a portable execution target for WAM-shaped programs, especially when
+browser or sandboxed deployment matters. Book 17 explains the shared Hybrid
+WAM concepts and why WASM is one target option rather than the default meaning
+of WAM.
+
 ## Why WebAssembly?
 
 | Platform | Use Case |

@@ -61,6 +61,12 @@ The books are designed to be read in sequence, with each building on concepts fr
 | **15** | [Perl Target](book-15-perl-target/README.md) | CPS with callbacks, Unix pipelines, text processing |
 | **16** | [Ruby Target](book-16-ruby-target/README.md) | Block-based CPS, Rails integration, idiomatic Ruby |
 
+### Execution Architecture (Book 17)
+
+| Book | Title | Focus |
+|------|-------|-------|
+| **17** | [WAM and Hybrid WAM](book-17-wam-target/README.md) | WAM items, symbolic WAM notation, lowered emitters, FFI, external fact sources, kernels, and cross-target parity |
+
 ### Supplementary Material
 
 | Resource | Description |
@@ -107,6 +113,13 @@ The books are designed to be read in sequence, with each building on concepts fr
 3. Book 4: Workflows
 4. Book 13: Semantic Search
 5. Book 14: AI Training
+
+### Path 7: Hybrid WAM Contributor
+1. Book 1: Foundations
+2. Book 17: WAM and Hybrid WAM
+3. Book 6 or 9: Go or Rust Target
+4. Book 7: Cross-Target Glue
+5. Target-specific books for the runtime you plan to edit
 
 ## Prerequisites
 
@@ -163,6 +176,7 @@ cd UnifyWeaver
 | 14 - AI Training | Complete | `book-14-ai-training/` |
 | 15 - Perl Target | Complete | `book-15-perl-target/` |
 | 16 - Ruby Target | Complete | `book-16-ruby-target/` |
+| 17 - WAM and Hybrid WAM | Complete | `book-17-wam-target/` |
 | AWK Target | Complete (supplementary) | `book-awk-target/` |
 
 ## Progress Tracking
@@ -196,6 +210,9 @@ Track your progress through the series:
 **Scripting:**
 - [ ] Book 15: Perl Target
 - [ ] Book 16: Ruby Target
+
+**Execution Architecture:**
+- [ ] Book 17: WAM and Hybrid WAM
 
 ## Additional Resources
 

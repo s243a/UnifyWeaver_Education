@@ -92,3 +92,16 @@ object Main {
 ```
 
 The `@tailrec` annotation ensures the Scala compiler verifies tail call optimization.
+
+## Hybrid WAM Role
+
+Scala is useful for explaining JVM-hosted Hybrid WAM with typed functional and
+object-oriented representation options. Book 17 explains the shared WAM item
+and parity contract; this chapter should show where Scala can use typed data
+models, functional collections, and JVM dispatch to host WAM-shaped logic.
+
+- Default generation path: structured WAM items or target-ready WAM data
+  should feed Scala generation directly.
+- Symbolic WAM text: useful as readable notation and test/debug output.
+- Target-specific emphasis: typed JVM representations, functional
+  collections, and hybrid runtime dispatch.

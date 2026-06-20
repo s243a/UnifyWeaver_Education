@@ -86,3 +86,16 @@ The Clojure target also supports tail and linear recursion via multifile dispatc
 ```
 
 Clojure requires explicit `recur` for tail-call optimization — the compiler verifies recur is in tail position.
+
+## Hybrid WAM Role
+
+Clojure is useful for explaining Hybrid WAM on a dynamic JVM language. Book
+17 defines the shared contract; this chapter should focus on how persistent
+data structures, dynamic dispatch, and lowered helpers can represent WAM
+semantics without copying another target's concrete runtime shape.
+
+- Default generation path: structured WAM items or target-ready WAM data
+  should feed Clojure generation directly.
+- Symbolic WAM text: useful as a readable listing and debug artifact.
+- Target-specific emphasis: persistent data structures, dynamic dispatch, and
+  lowered helpers.

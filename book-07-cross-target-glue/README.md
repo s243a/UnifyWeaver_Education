@@ -328,6 +328,13 @@ examples/
 - Source code: `src/unifyweaver/glue/`
 - Tests: `tests/integration/glue/`
 
+## Hybrid WAM Role
+
+Cross-target glue explains how WAM-shaped execution, FFI calls, kernels, and
+service boundaries compose across languages. Book 17 supplies the WAM
+concepts; this book supplies integration patterns for moving values, calls,
+and execution boundaries between targets.
+
 ## What's Next?
 
 After completing this book, you'll understand:

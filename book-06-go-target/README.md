@@ -100,6 +100,39 @@ By completing this book, you will be able to:
 -   Uses `interface{}` for generic types
 -   `panic()` for unmatched clauses
 
+## Generating Go Hybrid WAM Code
+
+Use the WAM Go target when you want the Hybrid WAM runtime rather than the
+older Go-native generator mode:
+
+```prolog
+?- use_module('src/unifyweaver/targets/wam_go_target').
+?- write_wam_go_project([ancestor/2],
+       [package_name(wam)],
+       'out/wam_go_ancestor').
+```
+
+The Go project writer always emits **two** files and chooses per predicate:
+
+- `lib.go` — the WAM bytecode path: each predicate as a `[]Instruction` slice
+  (e.g. `&GetConstant{C: Atom("alice"), Ai: 0}`) plus the interpreter.
+- `lowered.go` — deterministic predicates the target can safely turn into plain
+  Go functions, sharing the same interned atom table (`atoms.go`).
+
+There is no `emit_mode` switch on the Go target: lowering is automatic for
+lowerable deterministic predicates, and anything that needs full backtracking
+stays on the `lib.go` WAM path. The main knob is `package_name(Name)` (default
+`wam`). Use Book 17's symbolic WAM examples as the readable listing, and note
+that Go bakes register names into integer indices in the emitted items — see
+[Book 17, Chapter 5](../book-17-wam-target/05_symbolic_to_targets.md) for the
+exact Go item shapes.
+
+## Hybrid WAM Role
+
+Go is a practical host for explicit WAM state, indexed fact dispatch, and
+selective lowered predicates. Book 17 covers the shared model; this book shows
+where Go's maps, slices, structs, and generated functions fit that model.
+
 ## Related Books
 
 - [Book 13: Semantic Search](../book-13-semantic-search/README.md) - Deep dive into semantic features (Chapter 5)

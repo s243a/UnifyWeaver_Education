@@ -179,12 +179,12 @@ This book covers building intelligent semantic agents using UnifyWeaver's Python
 - Cross-runtime pipeline integration
 
 ### [Chapter 20: Recursive Kernels and Foreign Lowering](20_recursive_kernels.md)
-- Three-tier lowering: native pattern → kernel FFI → WAM
+- Three-tier lowering: native pattern -> kernel FFI -> WAM-shaped fallback
 - Pattern-matched algorithm detection (`weighted_shortest_path3`, `astar_shortest_path4`)
 - Dijkstra and A* kernels for semantic distance
 - A* with dimensionality-aware heuristic `f(n) = g^D + h^D`
 - Effective semantic distance via power-mean aggregation
-- Rust hybrid WAM with foreign function interface
+- Rust Hybrid WAM with foreign function interface; see Book 17 for the shared WAM concepts
 - Why Python doesn't have a WAM target (yet)
 - Adding new kernels to the system
 

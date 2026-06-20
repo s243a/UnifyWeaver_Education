@@ -294,6 +294,64 @@ func is_odd(n int) bool {
 
 ---
 
+## How Go Can Host Hybrid WAM
+
+A Go hybrid WAM target can keep the runtime model explicit. Registers become
+fields or slices on a `WamState`; choice points become structs on a stack; fact
+indexes become maps from keys to candidate rows. That makes Go a good target
+for teaching the mechanical path from WAM items to host code.
+
+Consider the symbolic item:
+
+```wam
+get_constant alice, A1
+```
+
+In a direct interpreter this is a runtime operation: read argument register
+`A1`, compare or bind it to the atom `alice`, and trail any binding that must
+be undone on backtracking. In a lowered deterministic helper, the same work can
+be emitted as straight Go code inside a generated method:
+
+```go
+func (vm *WamState) PredParent2() bool {
+    if !vm.GetConstant(vm.Atom("alice"), 1) {
+        return false
+    }
+    if !vm.GetConstant(vm.Atom("bob"), 2) {
+        return false
+    }
+    return true
+}
+```
+
+For multi-clause predicates, Go can mix approaches. A first deterministic
+clause may be lowered into a helper, while later alternatives remain in an
+instruction array with explicit choice points. The important point is that both
+paths operate on the same WAM state contract.
+
+| WAM concept | Go representation | Effect |
+|---|---|---|
+| Argument registers | `[]Value` or fields on `WamState` | Carry call inputs and outputs. |
+| Choice point | struct with next label, trail mark, register snapshot | Restores search state on failure. |
+| Indexed facts | `map[Value][]Fact` | Avoids scanning when an argument is bound. |
+| Lowered helper | method on `*WamState` | Executes common deterministic paths without the dispatch loop. |
+
+## Hybrid WAM Role
+
+Go is a useful example of a target that can keep WAM state explicit while
+still lowering selected predicates into ordinary host-language functions.
+The shared Hybrid WAM concepts are covered in Book 17; the Go-specific point
+is that registers, choice points, indexed fact access, and deterministic
+predicate helpers can be represented with simple structs, slices, maps, and
+methods.
+
+- Default generation path: structured WAM items or target-ready WAM data
+  should feed the Go emitter directly.
+- Symbolic WAM text: useful as a readable debug listing, not as the normal
+  internal bridge.
+- Target-specific emphasis: explicit state, indexed dispatch, and selective
+  lowered helpers for deterministic pieces of a larger WAM-shaped program.
+
 ## Navigation
 
 **←** [Previous: Chapter 6: Generator Mode](06_generator_mode) | [📖 Book 6: Go Target](./) | [Next: Book 7: Cross-Target Glue →](../book-07-cross-target-glue/)

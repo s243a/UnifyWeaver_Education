@@ -234,3 +234,50 @@ clause automatically.
 ---
 
 **←** [Previous: Facts and Rules](02_facts_and_rules.md) | **→** [Next: Pipelines](04_pipelines.md)
+
+## Continuations And Failure In An Elixir-Shaped WAM
+
+Elixir is useful because it makes control flow visible. A WAM runtime has to
+answer a simple question after every goal: what happens on success, and what
+happens on failure? In an Elixir-shaped lowering, that can be modeled with
+small continuation functions or segments.
+
+A two-goal rule such as:
+
+```prolog
+ancestor(X, Y) :- parent(X, Z), ancestor(Z, Y).
+```
+
+can be thought of as three pieces:
+
+| Segment | Responsibility |
+|---|---|
+| Head segment | Read `X` and `Y` from argument registers. |
+| First call continuation | Call `parent(X, Z)` and preserve `Z` for the next segment. |
+| Tail continuation | Call `ancestor(Z, Y)` or fail into the next choice point. |
+
+The target does not need to copy Go's explicit dispatch loop or Rust's state
+layout. It still has to preserve the same WAM contract: bindings must be
+trailed, alternatives must be reachable, and a failed branch must resume at the
+right continuation or choice point.
+
+This is also where BEAM-specific options become interesting. A future pure,
+aggregate-shaped search can use BEAM processes for parallel alternatives, but
+only when the calling context can safely merge all branch results. Direct
+`next_solution`-style enumeration still needs sequential choice-point behavior
+so it does not lose answers.
+
+## Hybrid WAM Role
+
+Elixir is a good teaching target for continuation-oriented WAM execution.
+The BEAM encourages explicit process and continuation thinking, so Elixir
+examples can explain how recursive logic, choice points, and failure paths
+can be represented without pretending every target shares the same runtime
+shape.
+
+- Default generation path: target-ready WAM data should feed the Elixir
+  emitter directly.
+- Symbolic WAM text: useful as a readable listing, not as the normal internal
+  bridge.
+- Target-specific emphasis: CPS-style control flow, failure handling, and
+  future strategy-menu choices such as BEAM-native parallel search.

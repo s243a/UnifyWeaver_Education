@@ -33,6 +33,29 @@ A guide to compiling Prolog predicates to modern C++ programs using nlohmann/jso
 - **CMake FetchContent** for automatic dependency download
 - **45 bindings** (STL, iostream, algorithms, nlohmann/json)
 
+## Generating C++ Hybrid WAM Code
+
+Use the WAM C++ target for the hybrid runtime with optional lowered functions:
+
+```prolog
+?- use_module('src/unifyweaver/targets/wam_cpp_target').
+?- write_wam_cpp_project([ancestor/2],
+       [emit_mode(functions), runtime_parser(native)],
+       'out/wam_cpp_ancestor').
+```
+
+`emit_mode(interpreter)` keeps everything in the instruction-array runtime.
+`emit_mode(functions)` emits direct C++ functions for lowerable predicates.
+`runtime_parser(native)` is useful for canonical term parsing; use
+`runtime_parser(compiled)` only when operator-aware Prolog source parsing is
+needed and the compile-time cost is acceptable.
+
+## Hybrid WAM Role
+
+C++ is useful for explaining runtime containers, parser support, LMDB-style
+fact sources, and compiled/native parser tradeoffs. Book 17 covers the shared
+Hybrid WAM architecture; this book should focus on C++ runtime choices.
+
 ## See Also
 
 - [NATIVE_TARGET.md](../../../docs/NATIVE_TARGET.md) - Reference documentation

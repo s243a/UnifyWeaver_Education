@@ -116,3 +116,43 @@ int factorial(int n) {
     return result;
 }
 ```
+
+## Fact Sources And Parser Modes In C++
+
+C++ is a natural target for explaining two practical Hybrid WAM boundaries:
+where facts live and how source terms enter the runtime.
+
+For facts, the target can choose between generated containers and external
+sources. A small predicate might become a `std::vector<Fact>`. A large
+predicate can be backed by an indexed store such as LMDB. The WAM call path is
+the same from the reader's point of view: bound arguments become lookup keys,
+candidate rows become terms, and unification decides whether each row is an
+answer.
+
+```text
+edge(a, B)
+  -> A1 is bound to a
+  -> C++ fact source looks up rows by first argument
+  -> each candidate B value is unified with A2
+  -> remaining candidates become choice-point work
+```
+
+Parser support is a separate boundary. A native parser is fast and compact
+when the input is canonical. A compiled parser is heavier but can support a
+fuller Prolog surface. Neither parser mode changes the default Hybrid WAM
+generation path; parser modes matter only when the generated program needs to
+read source text at runtime.
+
+## Hybrid WAM Role
+
+C++ is useful for explaining the host-runtime side of Hybrid WAM: containers,
+fact-source adapters, parser modes, and native library integration. Book 17
+defines the shared concepts; this chapter should show why C++ can host both
+compact runtime structures and pragmatic bridges to storage or parsing code.
+
+- Default generation path: structured WAM items or target-ready WAM data
+  should feed C++ generation directly.
+- Symbolic WAM text: useful for debug listings and parser-related workflows,
+  not as the preferred internal transport.
+- Target-specific emphasis: runtime containers, parser modes, fact sources,
+  and native/library integration.

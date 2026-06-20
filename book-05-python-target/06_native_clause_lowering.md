@@ -119,6 +119,41 @@ small
 large
 ```
 
+## What Python Native Lowering Avoids
+
+Python is easiest to understand when the predicate can become ordinary code. A
+classification predicate, arithmetic helper, or generator-style recursive
+search can often stay in Python-native form. That avoids carrying a full WAM
+state object through every step.
+
+The boundary appears when the source program needs behavior that native Python
+lowering does not naturally provide:
+
+| Requirement | Native Python pressure | WAM-backed answer |
+|---|---|---|
+| Open-ended backtracking | hard to express with one return value | generator/runtime choice points |
+| Deep unification | ad hoc recursive matching grows complex | WAM unifier and trail |
+| Runtime term parsing | Python needs a Prolog parser | compiled or native parser path |
+| Cross-target parity | Python idioms may drift | shared WAM item contract |
+
+So Python-native lowering and Hybrid WAM are not competitors. Native lowering
+is the simple path when the predicate shape allows it. WAM-backed execution is
+the path when the program needs full logic semantics or parser behavior.
+
+## Hybrid WAM Boundary
+
+Python's native target material is best understood as the high-level side of
+the Hybrid WAM boundary. Many examples can stay as procedural or generator
+code. When a workload needs full WAM semantics or a runtime parser, Book 17's
+model explains the alternate path.
+
+- Default generation path in this book: Python-native lowering where the
+  predicate shape is simple enough.
+- Symbolic WAM text: useful for debugging and parser-related tests when using
+  WAM-backed Python paths.
+- Target-specific emphasis: readability, generator-style search, and clear
+  separation between native Python lowering and WAM-backed execution.
+
 ## Summary
 
 - Multi-clause Prolog predicates compile to Python `if`/`elif`/`else`

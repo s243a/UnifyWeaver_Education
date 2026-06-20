@@ -27,6 +27,13 @@ The two variants are not mutually exclusive: a single program can compile some p
 - **Pipeline operator** - Natural data flow: `|> Seq.map |> Seq.filter`
 - **Mutual recursion** - Native `and` keyword support
 
+## Hybrid WAM Role
+
+F# is a useful lens on the shared Hybrid WAM model: compiled parser support,
+.NET-friendly WAM state, and functional update tradeoffs. Book 17 covers the
+model itself; chapter 4 of this book shows the functional .NET view of those
+concepts through the `fsharp_wam` variant.
+
 ## Quick Example (native target)
 
 ```prolog
@@ -38,13 +45,14 @@ The two variants are not mutually exclusive: a single program can compile some p
 ## Quick Example (WAM target)
 
 ```prolog
-?- use_module('src/unifyweaver/targets/fsharp_wam_target').
-?- init_fsharp_wam_target.
-?- compile_predicate_to_fsharp_wam(ancestor/2, [
-       strategy(bidirectional_search),
-       source(lmdb(path('/data/enwiki.lmdb')))
-   ], Code).
+?- use_module('src/unifyweaver/targets/wam_fsharp_target').
+?- write_wam_fsharp_project([ancestor/2],
+       [emit_mode(auto), runtime_parser(off)],
+       'out/wam_fsharp_ancestor').
 ```
+
+Use `runtime_parser(compiled)` only for programs that need runtime Prolog term
+parsing. Ordinary recursive predicates do not need to bundle the parser.
 
 ## Related Books
 

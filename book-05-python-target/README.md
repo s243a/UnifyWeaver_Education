@@ -122,6 +122,33 @@ echo '{"arg0": "a", "arg1": "b"}
 # {"arg0": "a", "arg1": "c"}  ← derived
 ```
 
+## Generating Python WAM-Backed Code
+
+Most of this book uses the Python-native target. When you specifically want
+WAM-backed Python generation, use the WAM Python target:
+
+```prolog
+?- use_module('src/unifyweaver/targets/wam_python_target').
+?- write_wam_python_project([ancestor/2],
+       [emit_mode(interpreter), runtime_parser(off)],
+       'out/wam_python_ancestor').
+```
+
+The Python target's `emit_mode(Mode)` accepts `interpreter` (default — every
+predicate dispatched through the instruction array) or `lowered` (lowerable
+deterministic predicates emitted as plain Python functions on top of the array).
+
+Use `runtime_parser(compiled)` only when the generated program must parse
+Prolog source terms at runtime, such as `read_term_from_atom/2`. It is not
+needed for ordinary recursive predicates.
+
+## Hybrid WAM Role
+
+Python remains primarily a high-level target in this book. Where WAM appears,
+it should be framed as an optional runtime, parser, or debug path rather than
+the default Python compilation model. Book 17 covers the shared Hybrid WAM
+concepts and explains when a WAM-backed path is appropriate.
+
 ## What's Next?
 
 After completing Book 5, continue to:

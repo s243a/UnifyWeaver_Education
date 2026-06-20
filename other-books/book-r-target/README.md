@@ -63,6 +63,29 @@ parent_contains <- function(x, y) {
 | `Rscript` CLI | Generated scripts run directly from the command line |
 | CRAN ecosystem | 20,000+ packages for statistics, ML, visualization |
 
+## Generating R Hybrid WAM Code
+
+Use the WAM R target when R needs WAM-backed execution or parser-aware runtime
+behavior:
+
+```prolog
+?- use_module('src/unifyweaver/targets/wam_r_target').
+?- write_wam_r_project([ancestor/2],
+       [emit_mode(auto), runtime_parser(native)],
+       'out/wam_r_ancestor').
+```
+
+The native parser mode is appropriate for canonical runtime term parsing. Keep
+R-native lowering for ordinary analysis code when full WAM behavior is not
+required.
+
+## Hybrid WAM Role
+
+R is useful for discussing native parser support and data-analysis-friendly
+WAM boundaries. Book 17 covers the shared Hybrid WAM model; this book should
+keep R-specific details focused on analysis workflows and parser/data-frame
+integration points.
+
 ## Comparison
 
 | Feature | Bash | R | Python |

@@ -111,3 +111,43 @@ BFS worklist for graph reachability:
 ---
 
 **←** [Previous: Integration](02_integration.md) | [📖 Book: LLVM Target](./)
+
+## Lowering WAM Control Flow To LLVM Shapes
+
+LLVM is where symbolic WAM stops looking like a list of instructions and starts
+looking like blocks, branches, and calls. The translation is mechanical but not
+trivial:
+
+| WAM item | LLVM-shaped concern |
+|---|---|
+| `label("ancestor/2")` | Function or basic-block entry point. |
+| `try_me_else L2` | Save a continuation target and branch state. |
+| `get_value X1, A1` | Load two values, call or inline unification, branch on failure. |
+| `call parent/2, 2` | Call runtime dispatch or a lowered function with state pointer. |
+| `execute ancestor/2` | Tail-position branch/call without returning to current frame. |
+
+A lowered LLVM emitter therefore needs a stable runtime ABI. The generated code
+usually passes a pointer to WAM state, reads or writes registers through helper
+functions, and branches to failure handling when unification returns false.
+
+```text
+WAM item -> LLVM block -> runtime helper call -> success/failure branch
+```
+
+The foreign-function interface uses the same idea in reverse. LLVM-generated
+code can call a native function, but the returned values still have to be
+converted into WAM terms and unified with the current registers.
+
+## Hybrid WAM Role
+
+LLVM is the clearest target for explaining the lowered-emitter idea. The
+shared Hybrid WAM contract is still semantic, but LLVM forces control flow,
+register movement, value representation, and foreign-call boundaries into a
+lower-level form.
+
+- Default generation path: structured WAM items or target-ready lowering data
+  should feed LLVM emission directly.
+- Symbolic WAM text: useful as a compact listing before showing lower-level
+  control-flow shapes.
+- Target-specific emphasis: basic blocks, branches, value layout, and ABI
+  calls.

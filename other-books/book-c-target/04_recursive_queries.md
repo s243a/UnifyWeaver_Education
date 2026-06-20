@@ -104,3 +104,17 @@ int factorial(int n) {
 ```
 
 C uses static arrays for memoization since it lacks built-in hash maps. The `MAX_MEMO` bound limits cache size.
+
+## Hybrid WAM Role
+
+C is the low-level reference point for WAM memory and lifecycle choices. Book
+17 explains the shared Hybrid WAM model; the C-specific value is seeing how
+registers, stacks, trails, foreign calls, and explicit ownership can be made
+visible without hiding behind a managed runtime.
+
+- Default generation path: structured WAM items or target-ready WAM data
+  should feed C emission directly.
+- Symbolic WAM text: useful as a readable listing before discussing concrete
+  memory layout.
+- Target-specific emphasis: memory layout, lifecycle, explicit stacks, and
+  foreign-call boundaries.

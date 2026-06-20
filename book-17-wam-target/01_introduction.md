@@ -19,11 +19,14 @@ When these features are needed, a native translation becomes very complex. WAM s
 
 ## The WAM Strategy in UnifyWeaver
 
-UnifyWeaver uses WAM as a "hub". If a predicate cannot be compiled into clean, idiomatic code for a specific target, it can be compiled to WAM instead.
+UnifyWeaver uses WAM as a shared semantic layer. If a predicate cannot be
+compiled into clean, idiomatic code for a specific target, it can still be
+represented with WAM-shaped items and executed by a target runtime. If a
+predicate is simple, deterministic, indexed, or kernel-shaped, a hybrid target
+can lower that same WAM-shaped program into host-language structures or direct
+helper functions.
 
-This WAM bytecode can then be fanned out to other bytecode-based environments:
-
-- **WAT** (WebAssembly Text) for browser or Node.js.
-- **Jamaica** or **Krakatau** for the Java Virtual Machine.
-
-By implementing the WAM target once, we provide a robust path for all these environments to support full Prolog semantics.
+Symbolic WAM text is still useful because people can read it. In the compiler,
+however, the preferred path is to produce structured WAM items or target-ready
+WAM data directly and let the target emitter consume that representation. The
+symbolic text path remains available for debugging, tests, and interchange.
