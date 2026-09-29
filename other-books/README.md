@@ -13,6 +13,7 @@ This folder contains educational materials for additional targets and specialize
 | Book | Topic | Status |
 |------|-------|--------|
 | [book-semantic-geometry](book-semantic-geometry/) | Metric geometry for semantic search — embeddings, density, trees | 🚧 Initial |
+| [book-package-resolver](book-package-resolver/) | Package / ABI dependency resolution in Prolog, compiled to many targets | 🚧 Initial |
 
 ### GUI & Frontend Generation
 | Book | Topic | Status |
