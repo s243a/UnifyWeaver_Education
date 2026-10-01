@@ -60,7 +60,9 @@ out of this. If a library's soname is not in the binary's `DT_NEEDED` list and i
 not a declared stand-in for one that is, the verdict is `not_needed(So)`: the
 question simply does not apply. And if the binary needs `libc.so.6` but you offer
 `libc.so.7`, that is a `soname_mismatch` — the generations do not match, and the
-loader would not pair them.
+loader would not pair them. (Appendix A traces how the loader turns a soname into
+an actual file on disk — `ldconfig`, `/etc/ld.so.cache`, and the override knobs —
+and why this book reasons statically instead of running the binary to find out.)
 
 This is also why there is no name-stem heuristic anywhere in the resolver. It is
 tempting to assume `libselinux.so.10` is the natural successor of
