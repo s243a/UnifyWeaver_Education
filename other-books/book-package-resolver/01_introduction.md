@@ -7,6 +7,16 @@ This documentation is dual-licensed under MIT and CC-BY-4.0.
 
 # Chapter 1: Introduction
 
+**The cast.** Three names recur throughout this book. **glibc**, the GNU C
+library, ships as `libc.so.6` and is the library almost every Linux program links
+against for the basics — opening a file, starting up, calling `printf`.
+**libselinux** (`libselinux.so.1`) is a smaller library for security labelling
+that ordinary utilities like `ls` pull in. And **`ldd`** is the command-line tool
+that lists which shared libraries a given program depends on — it asks the
+**dynamic loader** (the part of the system that finds and loads those libraries
+when a program starts) what it would pull in. If those three are already
+familiar, skip ahead.
+
 ## A question `ldd` cannot answer
 
 Run `ldd` on a program and it tells you which shared libraries the dynamic
@@ -19,8 +29,10 @@ library does not export, and dies with
 undefined symbol: __libc_start_main, version GLIBC_2.34
 ```
 
-`ldd` answers "which libraries", by *soname*. It does not answer the question a
-distribution maintainer actually has to answer, which is "which *versions* of
+`ldd` answers "which libraries", by *soname* — the versioned name a library
+advertises itself under, like `libc.so.6` (Chapter 2 makes this precise). It does
+not answer the question a distribution maintainer actually has to answer, which is
+"which *versions* of
 those libraries will this binary run against". That second question is the
 subject of this book. It is harder than it looks, it has a genuinely elegant
 declarative structure once you find it, and — this is the part that makes it
