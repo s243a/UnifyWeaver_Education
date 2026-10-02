@@ -14,9 +14,9 @@ small set of Prolog relations over facts, and it makes one design decision that
 shapes everything after it — the ABI lane is built as a driver *above* the
 existing package resolver, not inside it. This is the "why declarative is
 powerful" chapter chapter 1 promised, and the payoff is concrete: once the two
-axes and the evidence are data, the hard questions become short relations, and
-the whole model compiles to targets other than SWI-Prolog without changing a
-line. The spine stays the same `/bin/ls` from coreutils on an Ubuntu 22.04 box.
+axes and the evidence are data, the hard questions become short relations — and, by
+design, the model is written to compile to targets beyond SWI-Prolog (what is
+demonstrated today versus what is still a goal is the subject of Appendix C). The spine stays the same `/bin/ls` from coreutils on an Ubuntu 22.04 box.
 
 ## 3.1 Catalog-as-data, not database
 
@@ -136,8 +136,8 @@ evidence release. A symbol present only at a non-default node does not satisfy a
 unversioned reference, and the model records precisely that rather than pretending
 the reference resolved.
 
-Put the pieces together on the smallest possible store — one provider row and one
-requirement row, in the JSONL shape chapter 4 makes precise:
+Put the pieces together on a tiny store. The two rows that carry the identity are
+the provider and the requirement:
 
 ```jsonl
 # symprov.jsonl — libb.so.1 exports bar@LIBB_1, curated from release 2.0
@@ -146,15 +146,33 @@ requirement row, in the JSONL shape chapter 4 makes precise:
 ["mybin|bar@LIBB_1", ["libb.so.1", "GLOBAL"]]
 ```
 
-Ask for `mybin`'s status against `libb.so.1` at release `2.0`. `req_status/5`
-reaches for the provider carrying the matching `(libb.so.1, bar, LIBB_1)` triple,
-finds it, and the curated lower bound is satisfied, so the status comes back
-`provided(bar@'LIBB_1', curated)`. Ask the *same* question at `1.0`, below the
-curated minimum, and the *same* row now yields `below_floor(bar@'LIBB_1', '2.0')` —
-the provider is there, but its guaranteed-from version is above what you asked for.
-One provider row, one requirement row, two releases, two different answers. Every
-later mechanism — the floor and range of chapter 5, the English of chapter 6 — is
-this one lookup, aggregated over all of a binary's requirements and dressed up.
+Those two rows alone are deliberately *not* enough. Query them and every release
+comes back `unknown(bar@'LIBB_1', no_provider_evidence('libb.so.1'))`: the resolver
+has a provider row but nothing telling it what *kind* of evidence stands behind it,
+and it will not reason from an unqualified fact — the refusal that is the whole
+subject of chapter 4. Add the one evidence row that marks `libb.so.1`'s exports as
+curated `.symbols` data —
+
+```jsonl
+# evidence.jsonl
+["provides|libb.so.1", ["symbols", "2.0", "curated", "test-fixture"]]
+```
+
+— (with `mybin`'s requirement-evidence row and a `needed`/`releases` line completing
+the store, as chapter 4 lays out) and the query resolves. Now `req_status/5` reaches
+for the provider carrying the matching `(libb.so.1, bar, LIBB_1)` triple, finds it,
+and the curated lower bound decides the answer:
+
+```
+status mybin libb.so.1 2.0  ->  provided(bar@'LIBB_1',curated)
+status mybin libb.so.1 1.0  ->  below_floor(bar@'LIBB_1','2.0')
+```
+
+At `1.0`, below the curated minimum, the *same* row yields `below_floor` — the
+provider is there, but its guaranteed-from version is above what you asked for. One
+provider row, one requirement row, one evidence row, two releases, two answers — and
+every later mechanism (the floor and range of chapter 5, the English of chapter 6)
+is this lookup, aggregated over all of a binary's requirements and dressed up.
 
 ## 3.4 A driver above a frozen core
 

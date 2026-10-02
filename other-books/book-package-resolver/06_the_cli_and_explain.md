@@ -92,7 +92,7 @@ $ ... status mybin libb.so.1 1.0
 
 ### `floor <binary> <soname>`
 
-The curated lower bound implied by the `.symbols` data: the earliest release that satisfies all of the binary's requirements on that soname. This is the same figure `dpkg-shlibdeps` would put in a dependency. If a requirement has no `since` provider row, it prints `none` with an explanation instead.
+The curated lower bound implied by the `.symbols` data: the earliest release that satisfies all of the binary's *versioned* requirements on that soname. This is the same figure `dpkg-shlibdeps` would put in a dependency. It is a dependency minimum, not a proof of absence below it — stronger evidence can still make a lower release compatible — and it does not settle unversioned requirements. If a requirement has no `since` provider row, it prints `none` with an explanation instead.
 
 ```
 $ ... floor mybin liba.so.1

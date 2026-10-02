@@ -19,15 +19,20 @@ familiar, skip ahead.
 
 ## A question `ldd` cannot answer
 
-Run `ldd` on a program and it tells you which shared libraries the dynamic
-loader will pull in: `libc.so.6`, `libselinux.so.1`, and so on. Run it on a
-machine where one of those libraries is *too old*, and plain `ldd` still tells you
-the same thing — right up until the program starts, reaches for a function the old
-library does not export, and dies with
+Run `ldd` on a program and it tells you which shared libraries the dynamic loader
+will pull in on *this* machine: `libc.so.6`, `libselinux.so.1`, and so on. Where
+those libraries are new enough it reports a clean set of resolutions — and that
+clean report is exactly the trap, because it describes the machine you ran it on,
+not the one you are about to deploy to. Move the same binary to a release where one
+of those libraries is *too old* and it dies on startup with
 
 ```
 undefined symbol: __libc_start_main, version GLIBC_2.34
 ```
+
+On that older machine `ldd` *would* have caught it — run there, it prints the same
+`not found` — but you were not on that machine when you needed the answer, and that
+is the whole problem.
 
 `ldd` answers "which libraries", by *soname* — the versioned name a library
 advertises itself under, like `libc.so.6` (Chapter 2 makes this precise). It does
@@ -120,8 +125,8 @@ Three properties of the Prolog formulation carry the whole design:
   the same questions. Chapter 4 is about the store and the tiers of evidence it
   records.
 - **A verdict is a derivation.** "Incompatible" is never a bare boolean; it is a
-  term that carries *why* — `below_floor(bar@'LIBB_1', '2.0')` says a symbol
-  first appears in release 2.0 and you asked about something earlier. Because the
+  term that carries *why* — `below_floor(bar@'LIBB_1', '2.0')` says a symbol's
+  curated minimum version is 2.0 and you asked about something earlier. Because the
   reasoning is declarative, the explanation falls out of the same clauses that
   reach the conclusion. Chapter 6, already written, shows the `explain` command
   turning those terms into English.

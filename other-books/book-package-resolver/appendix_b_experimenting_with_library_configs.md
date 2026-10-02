@@ -182,10 +182,11 @@ The cleanest example is `/etc/ld.so.preload`, the file form of `LD_PRELOAD`:
 ```bash
 printf '%s\n' "$PWD/libshim.so" > myreload
 sudo unshare -m bash -c '
-  # the bind target must exist, and /etc/ld.so.preload does NOT by default; creating
-  # it writes to the REAL /etc even inside the namespace (a mount namespace shares the
-  # filesystem) — so this belongs in a throwaway VM. We create it, then clean up:
-  touch /etc/ld.so.preload
+  # the bind target must exist, and creating it writes to the REAL /etc even inside the
+  # namespace (a mount namespace shares the filesystem) — so this belongs in a throwaway
+  # VM. Refuse if a real preload config already exists, so cleanup cannot delete it:
+  test -e /etc/ld.so.preload && { echo "refusing: /etc/ld.so.preload already exists"; exit 1; }
+  touch /etc/ld.so.preload                       # we created it, so we alone may remove it
   mount --bind "'"$PWD"'/myreload" /etc/ld.so.preload
   ./prog                 # preloads libshim for EVERY program in this namespace, no LD_PRELOAD set
   umount /etc/ld.so.preload && rm -f /etc/ld.so.preload
@@ -193,8 +194,9 @@ sudo unshare -m bash -c '
 ```
 
 The bind mount itself lives only in the namespace; the one thing that does touch the
-host is creating the target file, which is why this is a throwaway-VM exercise and
-why we remove it afterwards. The reason to use `/etc/ld.so.preload` at all is how it
+host is creating the target file, which is why this is a throwaway-VM exercise — and
+why the script refuses when a real `/etc/ld.so.preload` already exists, removing only
+the empty target it created itself. The reason to use `/etc/ld.so.preload` at all is how it
 differs from the env var: it
 applies even to programs that clear their environment, and (on a real system) even
 to set-uid binaries, which ignore `LD_PRELOAD`.

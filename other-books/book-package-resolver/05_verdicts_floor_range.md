@@ -153,7 +153,7 @@ because the symbol is genuinely missing or because the only evidence is
 readelf-only with no curated minimum. That failure is the honest result, not a
 bug. A floor is a claim about every release at and above some version; without a
 lower bound for even one required symbol, there is no version the resolver can
-honestly name as the bottom of the compatible set, and inventing one would be the
+honestly name as the floor, and inventing one would be the
 guessing the whole design refuses.
 
 Here is where the loop opened in chapter 1 closes. Asked for the floors of
@@ -175,8 +175,10 @@ trusts, before it goes on to compute the things the metadata does not carry.
 
 ## 5.5 The range
 
-The floor names the bottom of the compatible set and nothing else. The range
-characterises the rest of it across the real world — but as a pair of compatible
+The floor is the curated dependency minimum — the single number `dpkg-shlibdeps`
+would emit — not necessarily the true bottom of what is compatible: stronger evidence
+can make a release *below* the floor come back compatible (§5.2). The range is the
+actual compatible set read off the real axis, reported as a pair of compatible
 endpoints plus the full per-release detail, not as a guaranteed-contiguous band.
 `abi_range` evaluates the
 verdict at every release on the *actual* candidate axis — the releases the store
@@ -223,9 +225,9 @@ incompatible([below_floor(__libc_start_main@GLIBC_2.34, 2.34),
               below_floor(lstat@GLIBC_2.33, 2.33)])
 ```
 
-— not a bare "no", but the specific symbols that would be absent and the release
-each first appears at, the same evidence the floor was computed from turned to a
-different question. And because a curated floor never vetoes a release that some
+— not a bare "no", but the specific symbols that fall below their curated minimum and
+the release each is guaranteed from, the same evidence the floor was computed from
+turned to a different question. And because a curated floor never vetoes a release that some
 other evidence row satisfies, adding readelf evidence for that release would turn
 the verdict into `compatible(exact)` — the defeasible conclusion withdrawn the
 moment a harder observation contradicts it.

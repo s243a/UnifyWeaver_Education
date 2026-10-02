@@ -26,8 +26,8 @@ the stock package manager consumes directly — the `Packages` `Depends:` tier.
 A coarse floor is cheap and, as far as it goes, correct. But look at what it is:
 one number, per library, computed once when the `.deb` was built. That shape
 limits what it can tell you. It cannot answer "what is the *range* of releases
-this binary is compatible with" — it only names the bottom of that range, and
-only the bottom it happened to know about at build time. It cannot reason about a
+this binary is compatible with" — it only names a lower bound on that range, and
+only the bound it happened to know about at build time. It cannot reason about a
 frozen base layer you want to keep and a binary you want to drop on top of it,
 because for that you need both ends, not just the floor. And it collapses a lot
 of detail into a single integer-looking token, hiding the fact that the real
@@ -160,14 +160,14 @@ files the loader would open here, and it is accurate about that. What it cannot 
 is say anything about any other release: it reports the libraries present now, not
 the versions a binary would tolerate elsewhere. That is the chapter-1 crash seen
 from the other side — `ldd` was asked the right question ("will this run?") and
-gave an answer to a narrower one ("which sonames resolve on this box?"), which is
-why it stays silent right up until the `undefined symbol` abort.
+gave an answer to a narrower one ("which sonames resolve on *this* box?") —
+accurate about the machine you are on, and silent about every release you are not.
 
 `dpkg-shlibdeps` goes further and is genuinely useful. At build time it inspects
 the binary, looks its symbols up in the `.symbols` files, and emits a single
 floor — the `libc6 (>= 2.34)` from §2.1. That number is correct and the resolver
 is built to reproduce it. But it is one number, computed once, at build time. It
-names the bottom of the compatible range and nothing else: no upper end, no
+names a curated lower bound and nothing else: no upper end, no
 notion of a release it has no data for, no way to say "I cannot prove this is
 safe" instead of guessing.
 
@@ -211,9 +211,9 @@ incompatible([below_floor(__libc_start_main@GLIBC_2.34, 2.34),
               below_floor(lstat@GLIBC_2.33, 2.33)])
 ```
 
-— not a bare "no", but the specific symbols that would be absent and the release
-each first appears at. That is the same evidence the floor was computed from,
-turned to a different question and carrying its reasons with it.
+— not a bare "no", but the specific symbols that fall below their curated minimum
+and the release each is guaranteed from. That is the same evidence the floor was
+computed from, turned to a different question and carrying its reasons with it.
 
 To answer any of these as actual queries, though, we need a way to *write down*
 the evidence and the two axes as data the resolver can reason over. That is the
