@@ -74,7 +74,13 @@ This is the right tool for "run against a different build" (§A.5).
 
 `LD_PRELOAD` force-loads a library *ahead* of all others, so its symbols win. It
 is for **interposition** — overriding individual functions — not version
-selection. A shim that intercepts `puts`:
+selection. Take a one-line program and a shim that intercepts `puts`:
+
+```c
+/* prog.c */
+#include <stdio.h>
+int main(void){ printf("hello from the real program\n"); return 0; }
+```
 
 ```c
 /* shim.c */
@@ -87,6 +93,7 @@ int puts(const char *s){
 ```
 
 ```
+$ gcc -O2 -o prog prog.c
 $ gcc -shared -fPIC -o libshim.so shim.c
 $ ./prog
 hello from the real program
@@ -120,6 +127,10 @@ needed if you own the directory. Put *both* versions in one directory and point
 the soname link at the older one by hand:
 
 ```
+$ mkdir -p libmix     # v1.c / v2.c are from §B.1
+$ gcc -shared -fPIC -Wl,-soname,libgreet.so.1 -o libmix/libgreet.so.1.2.10 v1.c
+$ gcc -shared -fPIC -Wl,-soname,libgreet.so.1 -o libmix/libgreet.so.1.2.99 v2.c
+$ ln -sf libgreet.so.1.2.10 libmix/libgreet.so.1   # hand-point the soname at the OLDER file
 $ ls libmix/
 libgreet.so.1.2.10   libgreet.so.1.2.99   libgreet.so.1 -> libgreet.so.1.2.10
 $ ldconfig -n libmix
@@ -146,10 +157,14 @@ point the local most-recent wins and clobbers the link. (Both behaviours are
 demonstrated in Appendix A's terms; the lesson is that hand-set links are a *soft*
 pin, `-X` is a hard one.)
 
-Build a private cache file without root using `-C`:
+Build a private cache file without root using `-C` — but **not** with `-n`, which
+implies `-N` and suppresses cache creation (so `-C` would write nothing). Point
+`ldconfig` at your directory with a one-line config instead:
 
 ```bash
-ldconfig -C "$PWD/mycache" -n libmix     # writes a cache you own
+printf '%s\n' "$PWD/libmix" > mylibs.conf
+ldconfig -C "$PWD/mycache" -f mylibs.conf         # writes a cache you own
+ldconfig -p -C "$PWD/mycache" | grep libgreet     # verify: libgreet.so.1 => .../libmix/libgreet.so.1
 ```
 
 The catch from §A.6 still holds: the *running* loader reads its cache from the
@@ -167,13 +182,20 @@ The cleanest example is `/etc/ld.so.preload`, the file form of `LD_PRELOAD`:
 ```bash
 printf '%s\n' "$PWD/libshim.so" > myreload
 sudo unshare -m bash -c '
+  # the bind target must exist, and /etc/ld.so.preload does NOT by default; creating
+  # it writes to the REAL /etc even inside the namespace (a mount namespace shares the
+  # filesystem) — so this belongs in a throwaway VM. We create it, then clean up:
+  touch /etc/ld.so.preload
   mount --bind "'"$PWD"'/myreload" /etc/ld.so.preload
-  ./prog                 # preloads libshim for EVERY program in this namespace,
-'                        # with no LD_PRELOAD set — and nothing leaks to the host
+  ./prog                 # preloads libshim for EVERY program in this namespace, no LD_PRELOAD set
+  umount /etc/ld.so.preload && rm -f /etc/ld.so.preload
+'
 ```
 
-Because the bind lives only in the namespace, the host's `/etc/ld.so.preload` is
-untouched. This is also how `/etc/ld.so.preload` differs from the env var: it
+The bind mount itself lives only in the namespace; the one thing that does touch the
+host is creating the target file, which is why this is a throwaway-VM exercise and
+why we remove it afterwards. The reason to use `/etc/ld.so.preload` at all is how it
+differs from the env var: it
 applies even to programs that clear their environment, and (on a real system) even
 to set-uid binaries, which ignore `LD_PRELOAD`.
 
@@ -200,7 +222,9 @@ sudo unshare -m bash <<'NS'
   # 1. your alternative libraries live in a directory of their own
   #    (say /opt/altlib), already populated with libgreet.so.1 -> v2
   # 2. build a cache that redirects the soname into /opt/altlib
-  ldconfig -C /tmp/altcache -n /opt/altlib
+  #    (-f, not -n: -n implies -N and would write no cache at all)
+  printf '/opt/altlib\n' > /tmp/altlib.conf
+  ldconfig -C /tmp/altcache -f /tmp/altlib.conf
   # 3. overlay only the loader config; the rest of the system is the host, in place
   mount --bind /tmp/altcache          /etc/ld.so.cache
   # (optionally also bind custom ld.so.conf / ld.so.preload here)
@@ -256,9 +280,10 @@ awk-like surface compiled through UnifyWeaver's WAM→LLVM target to a **native
 binary** — is precisely the kind of artifact a prefix suits and a `venv` cannot
 hold: what needs isolating is a compiled executable and its shared-library
 dependencies, not a set of Python packages. (It is also, not coincidentally,
-exactly the kind of binary this book's resolver reasons about — you could *confirm*
-a compatibility verdict by building the prefix the verdict describes and running
-the binary in it.)
+exactly the kind of binary this book's resolver reasons about — you could *exercise*
+a verdict by building the prefix it describes and running the binary, bearing in mind
+the verdict is a symbol-level, defeasible check, not a proof that the whole program
+runs.)
 
 The two compose rather than compete. A prefix can perfectly well *contain* a `venv`
 as its Python layer — the prefix supplies the system and native libraries, a `venv`
@@ -288,8 +313,10 @@ and most are machine- and moment-specific.
 
 That is the *dynamic* way to find out whether a binary runs against a given set of
 libraries: construct the world, run the program, watch for `undefined symbol`. The
-resolver in this book answers the same question without constructing anything — it
-reasons from the symbol-and-node evidence (Chapters 3–5) to a floor, a range, and a
-verdict that carries its reasons, for every release at once. The experiments here
-are worth doing precisely because they show how much runtime machinery the static
-answer lets you *not* touch.
+resolver in this book answers the *symbol-compatibility* part of that question
+without constructing anything — it reasons from the symbol-and-node evidence
+(Chapters 3–5) to a floor, a range, and a defeasible verdict that carries its
+reasons, for every release at once. It does not replace running the program — a
+`compatible` verdict means "nothing in the evidence forbids it," not "verified at
+runtime" — but it tells you which releases are even worth the experiment, and how
+much runtime machinery the static answer lets you *not* touch to find out.

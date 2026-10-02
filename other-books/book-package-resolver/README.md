@@ -41,7 +41,11 @@ to many targets, making it scale, and the open edges.*
 ## Prerequisites
 
 - SWI-Prolog (`swipl`)
-- A checkout of UnifyWeaver (the book refers to `examples/pkg_resolver/abi/`)
+- A checkout of UnifyWeaver (the book refers to `examples/pkg_resolver/abi/`).
+  Chapter 6 uses the `abi explain` subcommand, which a frozen/older snapshot of the
+  resolver may predate — build against a revision that includes it (check with
+  `swipl ... abi_cli.pl -- <store> explain ...` or look for the `explain` clause in
+  `abi_cli.pl`).
 - Basic familiarity with Prolog facts and queries
 - Helpful: a rough idea of shared-library sonames and ELF symbol versioning (Appendix A covers this from the ground up)
 

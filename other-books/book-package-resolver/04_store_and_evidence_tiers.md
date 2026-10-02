@@ -89,8 +89,10 @@ fails to load rather than admitting a self-inconsistent fact.
 
 The last field on every provider row is the binding, `default | nondefault |
 unproven`. It is carried here, on the provider row, for the reason chapter 3's
-unversioned-reference rule demands: an unversioned requirement binds only to a
-`Base` export or to a *default* (`@@`) export, never to a hidden (`@`) one, so the
+unversioned-reference rule demands: an unversioned requirement binds only to the
+symbol's *default* version — a `Base` or `@@` export (or the legacy
+hidden-at-index-2 node the loader counts as default), never an ordinary non-default
+hidden (`@`) node — so the
 resolver has to know a symbol's default-version binding to decide whether it
 satisfies such a reference. Keeping the binding on the same row that establishes
 presence is what guarantees presence and binding never diverge — the resolver can
@@ -226,4 +228,4 @@ compatible range is read off the real release axis.
 ## Next
 
 Chapter 5: Verdicts, floor, range — turning this evidence into an answer with a
-confidence label *(planned)*.
+confidence label.

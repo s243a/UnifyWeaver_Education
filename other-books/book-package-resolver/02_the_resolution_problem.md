@@ -107,9 +107,12 @@ The resolver returns `incompatible([missing(foo@LIB_1)])` for the same inputs �
 the same verdict the loader reaches at runtime, reached statically.
 
 An *unversioned* requirement follows a companion rule, again matching what the
-loader accepts: it binds only to a `Base` export or to a *default* (`@@`) export,
-never to a hidden (`@`) one. The hidden-version fixture makes the distinction
-concrete. A symbol `hid_fn` exported only at a hidden `@HID_1` does **not**
+loader accepts: it binds to whatever the loader treats as the symbol's *default*
+version — a `Base` export, a `@@` default export, or (a documented legacy case) a
+hidden node at the first real version-definition index, which the loader still
+counts as default. What it does not bind to is an ordinary *non-default* hidden
+(`@`) node. The hidden-version fixture makes the distinction
+concrete. A symbol `hid_fn` exported only at a *non-default* hidden `@HID_1` does **not**
 satisfy an unversioned reference; the resolver returns
 `incompatible([missing(hid_fn, no_default_export(...))])`, and the loader again
 agrees — `undefined symbol: hid_fn`. The same symbol exported where the loader
@@ -219,4 +222,4 @@ model, and it is the next chapter.
 ## Next
 
 Chapter 3: Modeling in Prolog — the two axes as data, and a driver built above
-the frozen resolver *(planned)*.
+the frozen resolver.

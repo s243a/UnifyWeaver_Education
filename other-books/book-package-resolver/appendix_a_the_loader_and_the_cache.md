@@ -149,10 +149,11 @@ versions of the same idea.
 To *build* a cache for another root without entering it, `ldconfig -r <root>`
 treats `<root>` as `/`, and `ldconfig -C <file>` writes to an alternate cache file
 — but remember the running loader still will not *read* an arbitrary `-C` file;
-that is for provisioning an image you will later `chroot` into or boot. To sidestep
-the system cache for a single run, invoke an **alternate interpreter**:
-`/path/to/ld-linux-x86-64.so.2 --library-path <dirs> ./prog`, or rewrite the
-binary's interpreter and rpath with `patchelf`.
+that is for provisioning an image you will later `chroot` into or boot. To
+prioritise alternative directories for a single run, invoke an **alternate
+interpreter**: `/path/to/ld-linux-x86-64.so.2 --library-path <dirs> ./prog` — though
+the cache is still consulted as a fallback, so add `--inhibit-cache` to bypass it
+entirely — or rewrite the binary's interpreter and rpath with `patchelf`.
 
 One library resists all of this: **glibc**. `libc.so.6` is bound tightly to the
 dynamic loader itself (they are the same project), so you cannot safely downgrade
@@ -176,3 +177,12 @@ carries its reasons — computed from data, for every release at once, with no c
 to swap and no container to boot. The loader's runtime machinery is what we are
 *modelling*; the static resolver is what lets us reason about it ahead of time, and
 — for the one library you cannot safely swap — it is the only cheap answer there is.
+
+One honest boundary: the verdict is about the *recorded symbol requirements* of the
+binary against the *queried* library, and it is defeasible — "structurally
+possible," in the resolver's own terms — not a guarantee that the whole program runs
+correctly. It can tell you a required versioned symbol will not resolve (a real
+failure caught ahead of time), but a `compatible` answer means "nothing in the
+recorded evidence forbids it," not "verified at runtime." The dynamic experiment
+above is still what proves *execution*; the resolver narrows down which experiments
+are even worth running.

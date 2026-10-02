@@ -95,10 +95,16 @@ unknown([ no_requires_evidence(Bin) | requires_evidence(Status, Detail)
 not_needed(So)
 ```
 
-Two properties of this grammar are worth naming. The first is that
-`incompatible` is a hard veto that is reachable *only* with complete, attributed
-evidence — the resolver will never emit a confident "no" from a curated list that
-merely failed to mention a symbol. The second is that every verdict carries its
+Two properties of this grammar are worth naming. The first concerns when the
+resolver will say "no" at all. A `missing` veto — a symbol *physically absent* — is
+reachable only with complete, attributed evidence; the resolver will never emit a
+confident "absent" from a curated list that merely failed to mention a symbol. A
+`below_floor` veto is a different animal: it rests on the curated `.symbols`
+dependency minimum, so it *can* come from curated evidence alone — but it is
+defeasible. It says only "the declared dependency minimum is above the release you
+asked about," not "the symbol is physically absent below it," and a direct
+observation of the symbol below that floor overrides it (you will see
+`compatible(exact)` win). The second is that every verdict carries its
 reasons as a term, not a bare boolean, which is exactly what lets chapter 6's
 `explain` command read a verdict out loud without re-deriving it.
 
@@ -170,11 +176,18 @@ trusts, before it goes on to compute the things the metadata does not carry.
 ## 5.5 The range
 
 The floor names the bottom of the compatible set and nothing else. The range
-names the whole of it, as far as the real world extends. `abi_range` evaluates the
+characterises the rest of it across the real world — but as a pair of compatible
+endpoints plus the full per-release detail, not as a guaranteed-contiguous band.
+`abi_range` evaluates the
 verdict at every release on the *actual* candidate axis — the releases the store
 was told exist, not a synthetic sweep — and reports `range(Min, Max, Pairs)`,
 where `Pairs` is every release paired with its verdict and both `Min` and `Max`
-are, by construction, releases whose verdict came back compatible. When no release
+are, by construction, releases whose verdict came back compatible. Crucially, `Min`
+and `Max` bound only the *compatible* releases — the lowest and highest that came
+back compatible, not a promise that every release between them did. An interior
+release can still be incompatible (a symbol dropped then re-added, or a hypothetical
+drop), so `Min`–`Max` is a summary and `Pairs` is the authoritative per-release
+picture: read it for gaps. When no release
 is compatible, the result is `no_candidate` instead; when nothing is compatible
 but something is unsettled, `unknown`; and when the axis is empty, `no_releases`.
 

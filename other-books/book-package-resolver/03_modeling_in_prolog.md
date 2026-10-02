@@ -127,8 +127,10 @@ into verdicts.
 The unversioned requirement is threaded through as its own case. It is stored with
 `Node = none` and `So = none`, because the loader resolves an unversioned
 reference against *any* `NEEDED` object, not a particular one. `unversioned_status`
-honours exactly the loader's rule from chapter 2: it binds only to a `Base` export
-or to a *default* (`@@`) export — never to a hidden (`@`) one — and it searches the
+honours exactly the loader's rule from chapter 2: it binds only to the symbol's
+*default* version — a `Base` export, a `@@` default export, or the legacy
+hidden-at-verdef-index-2 node the loader also treats as default — never an ordinary
+non-default hidden (`@`) node, and it searches the
 queried soname first, then the binary's other `NEEDED` objects at their own
 evidence release. A symbol present only at a non-default node does not satisfy an
 unversioned reference, and the model records precisely that rather than pretending
@@ -206,4 +208,4 @@ nothing at all.
 ## Next
 
 Chapter 4: Store & evidence tiers — the on-disk facts, and why absence is only
-sometimes a fact *(planned)*.
+sometimes a fact.

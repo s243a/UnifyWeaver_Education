@@ -21,8 +21,8 @@ familiar, skip ahead.
 
 Run `ldd` on a program and it tells you which shared libraries the dynamic
 loader will pull in: `libc.so.6`, `libselinux.so.1`, and so on. Run it on a
-machine where one of those libraries is *too old*, and it still tells you the
-same thing — right up until the program starts, reaches for a function the old
+machine where one of those libraries is *too old*, and plain `ldd` still tells you
+the same thing — right up until the program starts, reaches for a function the old
 library does not export, and dies with
 
 ```
@@ -33,8 +33,11 @@ undefined symbol: __libc_start_main, version GLIBC_2.34
 advertises itself under, like `libc.so.6` (Chapter 2 makes this precise). It does
 not answer the question a distribution maintainer actually has to answer, which is
 "which *versions* of
-those libraries will this binary run against". That second question is the
-subject of this book. It is harder than it looks, it has a genuinely elegant
+those libraries will this binary run against". Even `ldd`'s fuller modes stop short
+of it: `ldd -v` dumps the version information and `ldd -r` resolves relocations and
+names any function the loader cannot find — but both only inspect the libraries on
+*this* machine, never the *other* releases a binary might be dropped onto. That
+second question — compatibility across releases — is the subject of this book. It is harder than it looks, it has a genuinely elegant
 declarative structure once you find it, and — this is the part that makes it
 worth a whole book — it is a good test of whether "write the model once, compile
 it to many targets" is a real idea or a slogan.
@@ -204,4 +207,4 @@ this book is defined there.
 ## Next
 
 Chapter 2: The resolution problem — the loader's rule, and the exact gap between
-what the existing tools answer and what we need *(planned)*.
+what the existing tools answer and what we need.
