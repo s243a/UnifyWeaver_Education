@@ -92,7 +92,7 @@ $ ... status mybin libb.so.1 1.0
 
 ### `floor <binary> <soname>`
 
-The curated lower bound implied by the `.symbols` data: the earliest release that satisfies all of the binary's *versioned* requirements on that soname. This is the same figure `dpkg-shlibdeps` would put in a dependency. It is a dependency minimum, not a proof of absence below it — stronger evidence can still make a lower release compatible — and it does not settle unversioned requirements. If a requirement has no `since` provider row, it prints `none` with an explanation instead.
+The curated dependency minimum implied by the binary's *versioned* `.symbols` requirements on that soname: the earliest release the metadata *guarantees* every one of them present from. This is the same figure `dpkg-shlibdeps` would put in a dependency. It is a dependency minimum, not a proof of absence below it — stronger evidence can still make a lower release compatible — and it does not settle unversioned requirements. If a requirement has no `since` provider row, it prints `none` with an explanation instead.
 
 ```
 $ ... floor mybin liba.so.1
@@ -172,7 +172,7 @@ For a compatible verdict the header keeps the evidence tier (`exact`, `curated` 
 | `verdict` | Is the binary compatible with this release? (raw term) |
 | `explain` | The same, with one readable line per reason |
 | `status` | Per-requirement status at this release |
-| `floor` | What is the lowest release that satisfies the requirements? |
+| `floor` | The curated dependency minimum from the versioned `.symbols` requirements |
 | `axis` | Which releases are known for this soname? |
 | `range` | Which releases are compatible, and on what evidence? |
 | `report` | `floor`, `axis` and `range` for every `NEEDED` soname |

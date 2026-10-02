@@ -84,8 +84,9 @@ what already exists.
 When a `.deb` is built, `dpkg-shlibdeps` inspects the binary, sees which
 versioned symbols it needs, looks them up in the `.symbols` files that ship
 with the libraries, and emits a dependency like `libc6 (>= 2.34)`. That `>= 2.34`
-is a *floor*: the earliest release of `libc6` that provides every symbol the
-binary needs. The `.symbols` files it reads are curated lists, a few kilobytes
+is a *floor*: the curated minimum version its `.symbols` metadata guarantees every
+symbol the binary needs is present from — a dependency bound, not a proof that older
+releases lack the symbols (chapters 4–5 make that distinction precise). The `.symbols` files it reads are curated lists, a few kilobytes
 each, already sitting on every Debian system under `/var/lib/dpkg/info/*.symbols`.
 Each line records a versioned symbol and the minimum package version it is
 guaranteed to appear from.

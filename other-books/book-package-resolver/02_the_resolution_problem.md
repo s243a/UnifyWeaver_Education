@@ -19,7 +19,8 @@ before: `/bin/ls` from coreutils on an Ubuntu 22.04 box.
 
 Start with the layer most people already know. When you look at a package's
 metadata you see dependency lines like `libc6 (>= 2.34)`. That `>= 2.34` is a
-*floor* on a whole package: the earliest release of `libc6` that will do. It is
+*floor* on a whole package: a curated minimum — the earliest release of `libc6` the
+dependency metadata vouches for, not necessarily the earliest that in fact works. It is
 the coarsest of three provider tiers the resolver works with, and the only one
 the stock package manager consumes directly — the `Packages` `Depends:` tier.
 
@@ -34,8 +35,8 @@ of detail into a single integer-looking token, hiding the fact that the real
 compatibility relation does not live at the level of packages at all.
 
 It lives per *symbol*. `libc6 (>= 2.34)` is a summary; the thing being summarised
-is a list of individual functions the binary calls and the earliest release of
-the library that offers each of them. To answer the questions the coarse floor
+is a list of individual functions the binary calls and, for each, the curated minimum
+release the library's metadata guarantees it from. To answer the questions the coarse floor
 cannot, we have to drill down to that list. The rest of this chapter is that
 drill-down.
 
@@ -176,7 +177,7 @@ Laid out as a table, the gap is clear:
 | Question | `ldd` | `dpkg-shlibdeps` | This book |
 |----------|-------|------------------|-----------|
 | Which sonames does this binary need? | yes | — | ch 2 |
-| What is the floor — the earliest compatible release? | no | yes (one number) | ch 5 |
+| What is the floor — the curated dependency minimum? | no | yes (one number) | ch 5 |
 | What is the full compatible *range*? | no | no | ch 5 |
 | Can "I don't know" be a first-class answer? | no | no | ch 4–5 |
 | What is the verdict against a release nobody shipped a `.symbols` file for? | no | no | ch 5 |

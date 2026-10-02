@@ -212,11 +212,13 @@ set a `range` query walks in chapter 5. For `/bin/ls` on this machine the axis f
 
 One property of the axis matters enough to state now, because it is where the
 floor and the axis meet. Extending the axis with a release *below* the floor does
-not drag the compatible minimum down to it. A release below the floor comes back
-`below_floor` — incompatible — so it never enters the compatible set the range is
-read from, and the minimum of the range stays at the lowest release the evidence
-actually supports (`2.34-0ubuntu3` for `libc.so.6`), never the lowest release
-merely *listed*. The axis says which releases to ask about; the evidence tiers of
+not, by itself, drag the compatible minimum down to it. Absent stronger evidence of
+its own, a release below the floor comes back `below_floor` — incompatible — so
+merely *listing* it never enters it into the compatible set, and the minimum of the
+range stays at the lowest release the evidence actually supports (`2.34-0ubuntu3` for
+`libc.so.6`). (A below-floor release that *does* carry its own direct evidence is a
+different case: chapter 5 shows it can come back `compatible(exact)`, and then the
+minimum legitimately moves down — the floor is a curated bound, not a hard wall.) The axis says which releases to ask about; the evidence tiers of
 this chapter decide what the answer is.
 
 With the store schema in hand and the complete-versus-curated distinction fixed,

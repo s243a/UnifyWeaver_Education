@@ -12,8 +12,8 @@ library's evidence is *complete*, absence of a symbol is a fact; when it is
 merely *curated*, absence proves nothing at all. That distinction is a property
 of individual identities. A user does not ask about an identity, though. They ask
 about a binary against a library at a release, and they want three answers: a
-*verdict* — can this run? — a *floor* — what is the earliest release that will
-do? — and a *range* — across the releases that actually exist, which ones are
+*verdict* — can this run? — a *floor* — the curated dependency minimum the metadata
+guarantees — and a *range* — across the releases that actually exist, which ones are
 safe? This chapter is how the per-identity statuses of chapter 4 are assembled
 into those three outputs, and how each output carries a label that says how much
 to trust it. It is also the chapter that defines every term chapter 6 prints. The
