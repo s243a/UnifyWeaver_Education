@@ -37,6 +37,7 @@ to many targets, making it scale, and the open edges.*
 9. Open problems - *planned*
 
 - [Appendix A: How the loader finds a library](appendix_a_the_loader_and_the_cache.md) - `ldd` vs `ldconfig` vs the loader, the soname→file mapping, the cache, overriding it, and why we reason statically - *written*
+- [Appendix B: Experimenting with library configurations](appendix_b_experimenting_with_library_configs.md) - hands-on: `LD_LIBRARY_PATH`/`LD_PRELOAD`, pinning with `ldconfig -X`, test prefixes, the chroot `/etc` cache-swap, and Termux as a real-world prefix userland - *written*
 
 ## Prerequisites
 
