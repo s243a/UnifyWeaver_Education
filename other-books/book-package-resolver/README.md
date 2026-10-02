@@ -11,8 +11,9 @@ A guide to modeling Debian-style package and ABI dependency resolution declarati
 
 ## Status: 🚧 In progress
 
-Chapters 1-6 are written; Chapters 7-9 are planned. Appendices A and B (how the
-loader finds a library, and experimenting with library configurations) are written.
+Chapters 1-6 are written; Chapters 7-9 are planned. Appendices A, B, and C (how the
+loader finds a library, experimenting with library configurations, and the resolver
+as a test of UnifyWeaver) are written.
 
 ## The arc
 
@@ -37,6 +38,7 @@ to many targets, making it scale, and the open edges.*
 
 - [Appendix A: How the loader finds a library](appendix_a_the_loader_and_the_cache.md) - `ldd` vs `ldconfig` vs the loader, the soname→file mapping, the cache, overriding it, and why we reason statically - *written*
 - [Appendix B: Experimenting with library configurations](appendix_b_experimenting_with_library_configs.md) - hands-on: `LD_LIBRARY_PATH`/`LD_PRELOAD`, pinning with `ldconfig -X`, test prefixes, the chroot `/etc` cache-swap, and Termux as a real-world prefix userland - *written*
+- [Appendix C: The resolver as a test of UnifyWeaver](appendix_c_resolver_as_a_compiler_test.md) - why multi-target transpilation is secondary for the resolver but a primary compiler test, the oracle/zero-divergence differential, and demonstrated-vs-goal status - *written*
 
 ## Prerequisites
 

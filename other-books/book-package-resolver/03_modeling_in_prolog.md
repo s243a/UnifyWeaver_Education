@@ -136,6 +136,26 @@ evidence release. A symbol present only at a non-default node does not satisfy a
 unversioned reference, and the model records precisely that rather than pretending
 the reference resolved.
 
+Put the pieces together on the smallest possible store — one provider row and one
+requirement row, in the JSONL shape chapter 4 makes precise:
+
+```jsonl
+# symprov.jsonl — libb.so.1 exports bar@LIBB_1, curated from release 2.0
+["libb.so.1|bar@LIBB_1", ["since", "2.0", "2.0", "default"]]
+# symreq.jsonl  — mybin needs bar@LIBB_1 from libb.so.1, a GLOBAL reference
+["mybin|bar@LIBB_1", ["libb.so.1", "GLOBAL"]]
+```
+
+Ask for `mybin`'s status against `libb.so.1` at release `2.0`. `req_status/5`
+reaches for the provider carrying the matching `(libb.so.1, bar, LIBB_1)` triple,
+finds it, and the curated lower bound is satisfied, so the status comes back
+`provided(bar@'LIBB_1', curated)`. Ask the *same* question at `1.0`, below the
+curated minimum, and the *same* row now yields `below_floor(bar@'LIBB_1', '2.0')` —
+the provider is there, but its guaranteed-from version is above what you asked for.
+One provider row, one requirement row, two releases, two different answers. Every
+later mechanism — the floor and range of chapter 5, the English of chapter 6 — is
+this one lookup, aggregated over all of a binary's requirements and dressed up.
+
 ## 3.4 A driver above a frozen core
 
 The single most important structural decision is the one the lane's README leads

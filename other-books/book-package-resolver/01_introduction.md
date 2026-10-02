@@ -149,16 +149,17 @@ Everything so far could be a standalone Prolog program. What makes it a
 UnifyWeaver example — and what earns it a place in this series — is that the
 *same declarative model* is not meant to run only in SWI-Prolog.
 
-UnifyWeaver is a declarative-to-imperative compiler: you write the relations
-once, and the compiler emits them for a chosen target. The resolver is written
-to be compiled, not just interpreted. SWI-Prolog serves as the *oracle* — the
-reference implementation whose answers define "correct" — and the same
-specification is compiled through other backends (a JavaScript WAM, among
-others) and held to the oracle's answers by a differential test that must report
-*zero* divergences. The underlying package resolver this ABI lane sits above even
-offers a choice of fact-store backends behind one set of relations, so the same
-queries can run against an in-memory term, an indexed file store, or an LMDB
-database without the model changing a line.
+UnifyWeaver is a declarative-to-imperative compiler: you write the relations once,
+and it emits them for a chosen target. The resolver is written to be compiled, not
+just interpreted — but for the resolver that is a *secondary* benefit; its real job
+is answering package and ABI questions, which it does in SWI-Prolog. The compilation
+earns its keep in the *other* direction: a program this detail-heavy is a stringent
+test of **UnifyWeaver itself**, and transpiling it is how the compiler's
+deficiencies surface. SWI-Prolog serves as the *oracle* whose answers define
+"correct," and a target is trusted only when a differential against it reports
+*zero* divergences. Appendix C takes up this relationship in full — what is
+demonstrated today, what is still a goal, and why a demanding real program makes a
+better compiler test than a toy.
 
 That is the slogan made concrete: *one declarative model, many targets, one set
 of answers.* A problem as detail-heavy and as unforgiving as ABI compatibility —
