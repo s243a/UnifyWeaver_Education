@@ -11,9 +11,8 @@ A guide to modeling Debian-style package and ABI dependency resolution declarati
 
 ## Status: 🚧 In progress
 
-Chapters 1-3 and Chapter 6 (the CLI reference) are written; Chapters 4-5 are
-detailed skeletons awaiting a writing pass; 7-9 are planned. Appendix A (how the
-loader finds a library) is written.
+Chapters 1-6 are written; Chapters 7-9 are planned. Appendices A and B (how the
+loader finds a library, and experimenting with library configurations) are written.
 
 ## The arc
 
@@ -29,8 +28,8 @@ to many targets, making it scale, and the open edges.*
 1. [Introduction](01_introduction.md) - Why ABI resolution is hard, the Debian `.symbols`/`dpkg-shlibdeps` grounding, and what one declarative model compiled to many targets buys you - *written*
 2. [The resolution problem](02_the_resolution_problem.md) - Sonames, versioned symbols, the loader's exact-match rule, and the gap between what `ldd`/`dpkg-shlibdeps` answer and what we need - *written*
 3. [Modeling in Prolog](03_modeling_in_prolog.md) - The two axes as data, catalog-as-facts, and a driver built above the frozen package resolver - *written*
-4. [Store & evidence tiers](04_store_and_evidence_tiers.md) - The JSONL store, and *complete* vs *curated* evidence - why absence is only sometimes a fact - *skeleton*
-5. [Verdicts, floor, range](05_verdicts_floor_range.md) - Deriving and labelling a verdict, the floor that matches `dpkg-shlibdeps`, and the compatible range - *skeleton*
+4. [Store & evidence tiers](04_store_and_evidence_tiers.md) - The JSONL store, and *complete* vs *curated* evidence - why absence is only sometimes a fact - *written*
+5. [Verdicts, floor, range](05_verdicts_floor_range.md) - Deriving and labelling a verdict, the floor that matches `dpkg-shlibdeps`, and the compatible range - *written*
 6. [The CLI & `explain`](06_the_cli_and_explain.md) - Driving the resolver from the command line and reading a verdict - *written*
 7. Compiling to targets - *planned*
 8. Pruning & scale - *planned*
