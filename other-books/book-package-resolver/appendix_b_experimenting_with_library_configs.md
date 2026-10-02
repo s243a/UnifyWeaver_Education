@@ -243,6 +243,31 @@ view and you get the same result as the symlink prefix with less bookkeeping —
 it is why a live USB system can carry a whole experimental library set as one image
 without rewriting the base at all.
 
+### A prefix is a language-agnostic virtual environment
+
+Seen this way, a prefix is the general case of a tool many developers already know:
+the **virtual environment**. A Python `venv` isolates exactly one layer — Python
+packages — through `sys.path` and a wrapper, and does nothing for native libraries,
+other interpreters, or command-line tools. A prefix isolates at the loader and
+filesystem level, so it captures *everything* an application uses. That matters
+because real applications are rarely one language: a UnifyWeaver tool like
+[`plawk`](https://github.com/s243a/UnifyWeaver/tree/main/examples/plawk) — an
+awk-like surface compiled through UnifyWeaver's WAM→LLVM target to a **native
+binary** — is precisely the kind of artifact a prefix suits and a `venv` cannot
+hold: what needs isolating is a compiled executable and its shared-library
+dependencies, not a set of Python packages. (It is also, not coincidentally,
+exactly the kind of binary this book's resolver reasons about — you could *confirm*
+a compatibility verdict by building the prefix the verdict describes and running
+the binary in it.)
+
+The two compose rather than compete. A prefix can perfectly well *contain* a `venv`
+as its Python layer — the prefix supplies the system and native libraries, a `venv`
+inside it supplies the Python packages. The one wrinkle is that a `venv` is not
+relocatable: its `pyvenv.cfg` records the base interpreter's absolute path and its
+scripts carry absolute shebangs, so inside a `chroot` the venv must sit at the same
+absolute path it was created at (with its base interpreter present), or the shebangs
+need rewriting — the very `exec`-path problem `termux-exec` solves (§B.2.2).
+
 > **The glibc exception, again.** All of this works for *ordinary* libraries. It
 > does **not** let you swap glibc: `libc.so.6` and the loader (`ld-linux-*.so`) are
 > the same project and must match, so redirecting `libc.so.6` to a different glibc
