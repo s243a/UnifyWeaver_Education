@@ -92,7 +92,7 @@ $ ... status mybin libb.so.1 1.0
 
 ### `floor <binary> <soname>`
 
-The curated lower bound implied by the `.symbols` data: the earliest release that satisfies all of the binary's requirements on that soname. This is the same figure `dpkg-shlibdeps` would put in a dependency. If a requirement has no `since` provider row, it prints `none` with an explanation instead.
+The curated dependency minimum implied by the binary's *versioned* `.symbols` requirements on that soname: the earliest release the metadata *guarantees* every one of them present from. This is the same figure `dpkg-shlibdeps` would put in a dependency. It is a dependency minimum, not a proof of absence below it — stronger evidence can still make a lower release compatible — and it does not settle unversioned requirements. If a requirement has no `since` provider row, it prints `none` with an explanation instead.
 
 ```
 $ ... floor mybin liba.so.1
@@ -155,7 +155,7 @@ Compare with the `verdict` output for the same question:
 verdict mybin libb.so.1 1.0: incompatible([below_floor(bar@'LIBB_1','2.0')])
 ```
 
-The term `below_floor(bar@'LIBB_1','2.0')` is `below_floor(Sym@Node, Min)`: symbol `bar` under version node `LIBB_1` first exists in release `Min` = 2.0, which is above the release we asked about. `explain` unpacks that term into a sentence. The other reasons are handled the same way: `missing(...)` (absent at this release, removed by a hypothetical drop, or observed absent at a later release), `unknown(Sym@Node, Why)`, and `soname_mismatch(offered(O), needed(N))`. A reason with no dedicated sentence is printed as the raw term, so nothing is hidden. The full grammar of these terms is in the abi `README.md`.
+The term `below_floor(bar@'LIBB_1','2.0')` is `below_floor(Sym@Node, Min)`: the curated `.symbols` metadata guarantees symbol `bar` under version node `LIBB_1` only from release `Min` = 2.0 — a dependency *floor*, which a maintainer may have set at or above where the symbol physically first appeared — and 2.0 is above the release we asked about, so (absent stronger evidence) it is below the floor. `explain` unpacks that term into a sentence. The other reasons are handled the same way: `missing(...)` (absent at this release, removed by a hypothetical drop, or observed absent at a later release), `unknown(Sym@Node, Why)`, and `soname_mismatch(offered(O), needed(N))`. A reason with no dedicated sentence is printed as the raw term, so nothing is hidden. The full grammar of these terms is in the abi `README.md`.
 
 When the verdict is compatible there are no reasons, so `explain` prints only the header. Asking about `liba.so.1` at 1.0 in this store gives a header with no indented lines, which is what `test_explain_cmd.sh` asserts:
 
@@ -172,7 +172,7 @@ For a compatible verdict the header keeps the evidence tier (`exact`, `curated` 
 | `verdict` | Is the binary compatible with this release? (raw term) |
 | `explain` | The same, with one readable line per reason |
 | `status` | Per-requirement status at this release |
-| `floor` | What is the lowest release that satisfies the requirements? |
+| `floor` | The curated dependency minimum from the versioned `.symbols` requirements |
 | `axis` | Which releases are known for this soname? |
 | `range` | Which releases are compatible, and on what evidence? |
 | `report` | `floor`, `axis` and `range` for every `NEEDED` soname |
