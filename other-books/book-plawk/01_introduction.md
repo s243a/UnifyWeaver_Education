@@ -57,7 +57,7 @@ Built and run with the plawk CLI (`examples/plawk/bin/plawk run prog.plawk log.t
 total 5 errors 3 ERROR-lines 3
 ```
 
-(plawk also prints a `WAM fallback` note per compiled predicate to standard error while building; it is diagnostic noise, not part of the output.)
+(When a program carries embedded Prolog, plawk's build step can also write `WAM fallback` notes to standard error — one per predicate it lowers that way; they are build diagnostics, not part of a program's output.)
 
 That is the cross-compatible core: a few rules, scalar counters, one associative array, a final report. Chapter 2 maps how far it extends. The book's examples marked *cross-compatible* were checked by running them under both plawk and gawk and comparing output.
 
@@ -80,7 +80,7 @@ case 1 { $1 == "boom" { events++ } }
 END { print msum, events }
 ```
 
-Tag 0 is a metric (`i64 f64`), tag 1 is an event (`lps16 i64`, a length-prefixed string of up to 16 bytes, then an integer). Inside `case 0`, `$1` is an integer; inside `case 1`, it is a string. On a six-record test feed it printed `6.5 2`. Chapter 5 explains every token.
+Tag 0 is a metric (`i64 f64`), tag 1 is an event (`lps16 i64`, a length-prefixed string of up to 16 bytes, then an integer). Inside `case 0`, `$1` is an integer; inside `case 1`, it is a string. On a six-record feed — three metrics, then three events of which two are `boom` — it prints `2.75 2` (the two metrics with an id over 100 contribute 2.5 and 0.25; `boom` occurs twice). Chapter 5 explains every token.
 
 ## What runs today versus what is design
 
@@ -88,7 +88,7 @@ This book will not blur the two, so here is the ledger once, up front. Chapter 1
 
 **Runs today (exercised).**
 - The pure-Prolog interpreter core, `examples/plawk/core/plawk_core.pl`: `process_all/4`, field accessors, `NR`/`NF`/`FS`/`OFS`, a text-file reader. It has a 16-test suite.
-- The surface parser (`plawk_parser.pl`) and the native code generator (`plawk_native_codegen.pl`), driven by the `plawk` CLI. Beyond the core's 16 tests, the repository carries a separate set of about 40 `tests/test_plawk_*.pl` files that parse programs, generate LLVM IR, and (where `clang` is available) build and run native binaries. The programs in this book marked *run* were built and executed that way and their output compared against the expected result.
+- The surface parser (`plawk_parser.pl`) and the native code generator (`plawk_native_codegen.pl`), driven by the `plawk` CLI. Beyond the core's 16 tests, the repository carries a separate set of 44 `tests/test_plawk_*.pl` files that parse programs, generate LLVM IR, and (where `clang` is available) build and run native binaries. The programs in this book marked *run* were built and executed that way and their output compared against the expected result.
 
 **Design, or partly so.**
 - The three subsystems are *decoupled*. The interpreter core does not execute what the parser produces; the parser feeds the native code generator, and the interpreter is the reference model for the Reader/Handler/Writer contract. Chapter 7 draws this carefully, because it is easy to assume the interpreter is the thing that runs your `.plawk` file. It is not.

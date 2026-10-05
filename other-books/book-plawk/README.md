@@ -7,7 +7,7 @@ This documentation is dual-licensed under MIT and CC-BY-4.0.
 
 # Book: plawk, a Prolog awk
 
-A guide to plawk (the `examples/plawk` app in UnifyWeaver): an awk-like surface language whose programs run over **typed binary records**, can carry **embedded Prolog**, and compile through UnifyWeaver's WAM-to-LLVM target to a native binary.
+A guide to plawk (the `examples/plawk` app in UnifyWeaver): an awk-like surface language whose programs can run over **typed binary records**, can carry **embedded Prolog**, and compile through UnifyWeaver's WAM-to-LLVM target to a native binary.
 
 ## Status: 🚧 Prototype-phase book about a prototype-phase tool
 
