@@ -57,7 +57,7 @@ Built and run with the plawk CLI (`examples/plawk/bin/plawk run prog.plawk log.t
 total 5 errors 3 ERROR-lines 3
 ```
 
-(When a program carries embedded Prolog, plawk's build step can also write `WAM fallback` notes to standard error — one per predicate it lowers that way; they are build diagnostics, not part of a program's output.)
+(plawk's build step writes `WAM fallback` notes to standard error — at least one (a `plawk_cli_marker/0`) even for a pure-awk program, plus one more per predicate it lowers that way, such as embedded Prolog. They are build diagnostics, not part of a program's output.)
 
 That is the cross-compatible core: a few rules, scalar counters, one associative array, a final report. Chapter 2 maps how far it extends. The book's examples marked *cross-compatible* were checked by running them under both plawk and gawk and comparing output.
 
