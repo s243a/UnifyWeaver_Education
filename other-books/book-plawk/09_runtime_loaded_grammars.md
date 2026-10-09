@@ -127,17 +127,24 @@ The code generator throws `plawk_dyncall_without_dynload` with the message
 
 ## What is demonstrated, and what is not
 
-Demonstrated. The two test files, `tests/test_plawk_dyncall.pl` and
-`tests/test_plawk_dyncall_at.pl`, hold ten tests: parse shapes, arity
+Demonstrated, end to end. The two test files, `tests/test_plawk_dyncall.pl`
+and `tests/test_plawk_dyncall_at.pl`, hold ten tests: parse shapes, arity
 collection, the missing-`DYNLOAD` failure, the `150` then `44` swap,
 `dyncall_at` selection by field (`30`), `off` mode (`30`), and `mtime`
 redefinition (`7` then `11`). I ran both files against the source tree used for
-this book (`swipl` and `clang` present) and all ten passed. Every number quoted
-above comes from those assertions, not from a program of my own.
+this book (`swipl` and `clang` present) and all ten passed. This is the whole
+loop, not just a parse: each run test calls `write_wam_object/3` to build a real
+`.wamo`, compiles the plawk program to a native binary with `clang`, runs it
+over real input, and asserts the printed total. So `dyncall` is **test-backed
+end to end** — a built object, loaded at run time, driving real output — and not
+merely a described design. Every number quoted above comes from those
+assertions, not from a program of my own.
 
-Not demonstrated by me. I did not write and run a `dyncall` program of my own
-against a `.wamo` I built separately; the programs shown in this chapter are
-the tests' programs, restated. <!-- TODO(run-verify): build a .wamo with write_wam_object/3 outside the test harness and run a standalone dyncall program end to end before presenting it as an independent example -->
+One thing I did not do. I did not write and run a `dyncall` program of my own,
+against a `.wamo` I built by hand *outside* the test harness, as a standalone
+demonstration. The end-to-end path is exercised by the tests; what remains is an
+independent reproduction of it from a fresh program, which Chapter 11 keeps on
+its roadmap.
 
 Design only, or unmeasured:
 
@@ -146,7 +153,9 @@ Design only, or unmeasured:
   around it by construction.
 - Native compilation of the loaded grammar. That is the Phase 5 JIT plan, and
   it does not exist today.
-- `dyncall_at` with multiple input arguments beyond the arity-collection test;
-  the round-trip tests only use the zero-input form. <!-- TODO(run-verify): run dyncall_at($1, $2) with a two-input grammar -->
+- `dyncall_at` with multiple input arguments beyond the arity-collection test.
+  The arity machinery accepts them, but every round-trip test uses the
+  zero-input form (`dyncall_at($1)`, source only), so a two-input call such as
+  `dyncall_at($1, $2)` against a two-input grammar is not yet run end to end.
 - Safety of loading untrusted `.wamo` files. Nothing in the source or tests
   addresses it; treat a `.wamo` as code you chose to run.

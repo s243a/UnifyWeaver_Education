@@ -20,7 +20,9 @@ The count first, because earlier drafts of this book were vague about it. There 
 
 This corrects a mistake that the first reconnaissance pass made. That pass read only the core test file and reported the parser and code generator as untested. They are not: they are the subject of 44 test files. The error is worth stating because it is the natural one. The file named `plawk_core_tests.pl` sounds like the project's test suite and is only one subsystem's.
 
-I ran twelve of the 44 files, all of which passed in full: `float_slots` (13 tests), `bounded_rep` (8), `binary_assoc` (11), `tagged_unions` (11), `binary_records` (14), `union_rep` (5), `union_out` (4), `binary_writers` (7), `union_writebin` (4), `varlen_writers` (7), `rep_writer` (6), and `outfmt_strings` (6). That is 96 tests across the typed-slot, binary-record, union, and writer features of Chapters 3 to 6, and it establishes that the parser, code generator, and CLI path are exercised for real, not just the core. It is not a run of the whole suite. The other 32 files, among them the `dyncall`, `prolog_blocks`, `functions`, and `tier2_blob` tests behind Chapters 8 and 9, were read but not run for this book. Where an earlier chapter quotes a value from one of them, it is the test's expected string.
+I ran twenty-three of the 44 files, all of which passed in full. Twelve are the output-bearing feature tests of Chapters 3 to 6: `float_slots` (13 tests), `bounded_rep` (8), `binary_assoc` (11), `tagged_unions` (11), `binary_records` (14), `union_rep` (5), `union_out` (4), `binary_writers` (7), `union_writebin` (4), `varlen_writers` (7), `rep_writer` (6), and `outfmt_strings` (6) — 96 tests across the typed-slot, binary-record, union, and writer features. The other six are the Prolog bridge and runtime-grammar tests behind Chapters 8 and 9: `prolog_blocks` (6), `surface_prolog_calls` (16), `functions` (5), `f64_foreign` (7), `dyncall` (5), and `dyncall_at` (5) — 44 more tests. Five more were run while preparing this book: `surface_arith_exprs` (22), `surface_float_exprs` (17), `surface_stdin_input` (8), `binfmt_strings` (9), and `varlen_records` (6) — 62 tests covering integer and float expressions, stdin input, and fixed- and variable-length binary strings. That is 202 tests over twenty-three files, and it establishes that the parser, code generator, foreign bridge, runtime loader, and CLI path are all exercised for real, not just the core.
+
+It is still not a run of the whole suite. The other 21 files — among them `tier2_blob` and the append and else-if surface tests — were read but not run for this book. Where a chapter quotes a value from one of those, it is the test's expected string, flagged as such at the point of use.
 
 The front door was also run directly. A pure-awk program (the counter-and-report shape of Chapter 1) was compiled by `plawk` and executed, and its output matched gawk's: `total 5 errors 3 ERROR-lines 3`.
 
@@ -42,10 +44,10 @@ First, the 16 core tests passing does not show that compiled binaries behave as 
 | `OUTFMT`, `writebin`, `writebin case K` | Run (tests) | `binary_writers` 7/7; `union_out` 4/4; `union_writebin` 4/4 |
 | Typed integer-keyed assoc tables | Run (tests) | `binary_assoc` 11/11 |
 | `float` slots, double `END` expressions | Run (tests), with caveats below | `float_slots` 13/13 |
-| Text-mode `printf`, `float(...)`, guards | Test-backed | `surface_*` files, not re-run |
-| `@prolog` blocks, bridged calls, `function` | Test-backed | `prolog_blocks`, `surface_prolog_calls`, `functions`; not re-run |
-| `blobN` Tier-2 payloads | Test-backed | `tier2_blob`; not re-run |
-| `DYNLOAD`, `dyncall`, `dyncall_at` | Test-backed, not reproduced | `dyncall`, `dyncall_at`; README example not built end to end |
+| Text-mode `printf`, `float(...)`, guards | Run (tests) | `surface_prolog_calls` 16/16; `f64_foreign` 7/7 |
+| `@prolog` blocks, bridged calls, `function` | Run (tests) | `prolog_blocks` 6/6; `surface_prolog_calls` 16/16; `functions` 5/5; `f64_foreign` 7/7 |
+| `blobN` Tier-2 payloads | Run (tests), one path | DCG-over-blob end to end in `prolog_blocks` (`119`); dedicated `tier2_blob` file not re-run |
+| `DYNLOAD`, `dyncall`, `dyncall_at` | Run (tests); standalone not reproduced | `dyncall` 5/5, `dyncall_at` 5/5 (harness builds the `.wamo`, runs the binary); no hand-built `.wamo` outside the harness |
 | Reading from stdin | Test-backed, not re-run | `surface_stdin_input` checks the emitted `main` and has stdin smoke tests; I did not run them or a shell pipe |
 | Benchmarks (W1 to W4) | Project's claim | README table; `bench.sh` not re-run here |
 | Runtime grammar extension (JIT) | Design | Implementation plan Phase 5 |
@@ -60,9 +62,9 @@ Read the table with the three qualifiers in mind. "Run (tests)" means the test f
 
 **Double slots are partial.** Doubles work in expressions, in `END` arithmetic, and as accumulators with `float(...)` (Chapter 3). Assigning a double-typed expression to a scalar is rejected at code generation, because general scalar slots are `i64`, and the README calls typed double slots the documented follow-up. A double used as a pattern guard operand has no test that I found, so it is unconfirmed. Treat it as neither supported nor rejected until someone tries it. A `printf` format that mismatches its operand type is also uncharacterised beyond the README's statement that double expressions into `i64` formats are rejected.
 
-**`dyncall` is test-backed but not reproduced.** The tests exist and the parser path is read. The README's worked example, swapping `square.wamo` for a doubling grammar with no rebuild, requires a `.wamo` built with `write_wam_object/3`, and I did not build one and run it. Chapter 9 therefore presents `DYNLOAD` and `dyncall` as described and test-backed, not as run. The README also calls the load step "JIT-like". The execution-architecture document describes AOT native loops plus WAM bytecode on a natively compiled interpreter, with no JIT yet, which is why this book says "runtime-loaded".
+**`dyncall` is run at the test level, not reproduced standalone.** This has moved since earlier drafts. The two test files were run for this book, and they exercise the whole loop: each builds a real `.wamo` with `write_wam_object/3`, compiles the plawk program to a native binary, runs it, and asserts the output — the `150`-then-`44` swap with no rebuild, `dyncall_at` selection by field (`30`), and `mtime` reload (`7` then `11`). So `dyncall` is demonstrated end to end, not merely described (Chapter 9). What remains open is narrower than it was: a `.wamo` built *by hand outside the harness* and driven by a program of my own, as an independent reproduction of the README's worked example. The README also calls the load step "JIT-like"; the execution-architecture document describes AOT native loops plus WAM bytecode on a natively compiled interpreter, with no JIT yet, which is why this book says "runtime-loaded", not "JIT".
 
-**Bridged calls on text fields are unsettled.** A quick trial in preparing Chapter 8 returned `1` rather than the arithmetic result for a `function` called on text fields in `print` position, and a `function` placed before `BEGIN` failed to parse. The tests cover binary `i64` contexts. Outside those, the behaviour is unconfirmed and the book documents only what the tests cover.
+**Bridged calls on text fields have a known root cause, not a mystery.** Chapter 8 settles the mechanism: in text mode a field `$N` is interned as a Prolog *atom* (`wam_intern_atom`), never coerced to a number, so a bridged call that does arithmetic on a raw text field gets atoms where awk's automatic string-to-number coercion would give numbers. The supported text-mode uses — classifying a field against a fact table, mapping it to a rank, and integer or string literals — are run and pass (`surface_prolog_calls` 16/16). Binary-mode arithmetic, where fields arrive typed, is also run (`f64_foreign` 7/7). What is genuinely open is a *design* question, not a behaviour the book has failed to pin down: whether plawk should coerce numeric-looking text fields at the bridge or keep atom semantics and require an explicit conversion. (The separate observation that a `function` placed before `BEGIN` fails to parse is a consequence of the fixed program grammar, explained in Chapter 8, not a defect.)
 
 **Pipelines are file handoffs in the tests.** The two-stage tests of Chapter 6 write the first stage's output to a file and compile the second stage with that path. They show that one program's bytes are read correctly by another. They do not show streaming through `|`.
 
@@ -106,14 +108,14 @@ The implementation plan supplies the likeliest reading: Phase 0 is the Prolog co
 
 ## What the ledger adds up to
 
-The front door is real for the subset: a `.plawk` file in, a native binary out, with output matching gawk on the one cross-compatible program I ran, and with binary records, tagged unions, and writers backed by passing tests that build and run native code. What is not there is the breadth of awk, a link between the reference interpreter and the compiled output, a reproduced `dyncall`, a settled story for doubles as general scalars, and an independent measurement of the speed claims. The thesis, that typed binary records beat parsing text, is the best-evidenced part structurally and the least independently measured numerically.
+The front door is real for the subset: a `.plawk` file in, a native binary out, with output matching gawk on the one cross-compatible program I ran, and with binary records, tagged unions, writers, the `@prolog` bridge, and runtime-loaded grammars all backed by passing tests that build and run native code. What is not there is the breadth of awk, a link between the reference interpreter and the compiled output, a *standalone* `dyncall` reproduction outside the test harness, a settled design for doubles as general scalars and for text-field coercion at the bridge, and an independent measurement of the speed claims. The thesis, that typed binary records beat parsing text, is the best-evidenced part structurally and the least independently measured numerically.
 
 ## Remaining checks
 
 If you extend this ledger, these are the open items, in order of how much they would change it:
 
-1. Run all 44 test files, not twelve, and record the machine and the `swipl` and `clang` versions.
+1. Run all 44 test files, not twenty-three, and record the machine and the `swipl` and `clang` versions.
 2. Re-run `bench.sh` and record the hardware beside the numbers.
-3. Build a `.wamo` with `write_wam_object/3` and reproduce the README's `dyncall` example.
-4. Write a differential test of native output against `process_all/4` on the same text input.
-5. Test a double as a pattern-guard operand and a text-field bridged call, and settle both.
+3. Build a `.wamo` by hand with `write_wam_object/3`, outside the test harness, and reproduce the README's `dyncall` swap from a program of your own.
+4. Write a differential test of native output against `process_all/4` on the same text input — the native-versus-interpreter agreement that is currently design intent, not a checked property.
+5. Settle the two open design questions: a double used as a pattern-guard operand (behaviour untested), and whether the bridge should coerce numeric-looking text fields (Chapter 8's atom-interning edge).

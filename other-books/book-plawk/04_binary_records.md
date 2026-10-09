@@ -44,7 +44,7 @@ $1 > 100 { hits++; sum += $2 }
 END { print hits, sum }
 ```
 
-Over three records `(50, 1)`, `(200, 2)`, `(300, 3)` this prints `2 5`. That is the expected output in `tests/test_plawk_binary_records.pl` (`surface_binary_guard_and_sum`); the tests build and run a native binary where `clang` is available. *Run-claim: I have taken the output from the test's expectation and have not re-run it for this book.* The input is a binary file of 48 bytes, not text, so you cannot create it with `echo`; Chapter 6 shows how plawk writes such files itself.
+Over three records `(50, 1)`, `(200, 2)`, `(300, 3)` this prints `2 5`. That output was produced by building and running `tests/test_plawk_binary_records.pl` (`surface_binary_guard_and_sum`), one of the suite's 14 tests, all passing; the suite builds and runs a native binary where `clang` is available. The input is a binary file of 48 bytes, not text, so you cannot create it with `echo`; Chapter 6 shows how plawk writes such files itself.
 
 A few things are checked at compile time rather than at run time:
 
@@ -95,7 +95,7 @@ reads as "an `i64`, then up to 4 elements of `(i64, f64)`". On the wire:
         +--------+--------+-----------------+-----------------+
 ```
 
-The element count is an ordinary `i64` field in its own right: here `$1` is the leading `i64` and `$2` is the count. The elements follow as flat fields (`$3` is the first field of element 1, zero-filled past the actual count), a layout confirmed by `surface_count_field_and_direct_access` in `tests/test_plawk_bounded_rep.pl`. A count above `K`, or a payload cut short, exits with status 11, just as for `lps`.
+The element count is an ordinary `i64` field in its own right: here `$1` is the leading `i64` and `$2` is the count. The elements follow as flat fields (`$3` is the first field of element 1, zero-filled past the actual count), a layout confirmed by `surface_count_field_and_direct_access` in `tests/test_plawk_bounded_rep.pl`: over a `rep2(i64 f64)` layout, `{ csum += $2 ; s += $3 }` on records with 2, 0, and 1 elements prints `3 17` — the counts `2 + 0 + 1`, then the leading integer of each record's first element, `10 + 0 + 7`. A count above `K`, or a payload cut short, exits with status 11, just as for `lps`.
 
 To process the elements, `foreach { ... }` runs its block once per element, and inside the block `$1`, `$2` mean the *current element's* fields:
 
@@ -105,7 +105,7 @@ $1 > 0 { foreach { n++; wsum += float($2); if ($1 > 10) { big++ } } }
 END { print n, wsum, big }
 ```
 
-On the test's four records (with 2, 0, 4, and 1 elements; the last has a negative leading `i64` and is skipped by the guard), this prints `6 6.5 3`. *Run-claim, taken from the test expectation, not re-run here.*
+On the test's four records (with 2, 0, 4, and 1 elements; the last has a negative leading `i64` and is skipped by the guard), this prints `6 6.5 3` — `surface_foreach_aggregation`, one of the 8 passing tests in `tests/test_plawk_bounded_rep.pl`, built and run.
 
 `foreach` is a real runtime loop, not an unrolled copy. The compiler emits one loop; each iteration copies the current element into a fixed scratch slot placed after the declared fields and runs the block against it. So the code size does not depend on the cap: the project's test shows `rep64` compiles to the same single loop body as `rep4`. Memory is constant too.
 
@@ -139,7 +139,7 @@ Over the keys `5, -3, 5, 9, -3, 5` this yields (in no guaranteed order; the test
 
 ## What is demonstrated, and what is not
 
-Every `BINFMT` type in this chapter (`i64`, `f64`, `sN`, `lpsN`, `repK(...)`) is parsed and compiled by `plawk_native_codegen.pl`, and has a test that builds and runs a native binary (the tests are skipped if `clang` is absent). The chapter's printed outputs are the tests' expected values, not fresh runs by the author.
+Every `BINFMT` type in this chapter (`i64`, `f64`, `sN`, `lpsN`, `repK(...)`) is parsed and compiled by `plawk_native_codegen.pl`, and has a test that builds and runs a native binary (the tests are skipped if `clang` is absent). The chapter's printed outputs — `2 5`, `3 17`, `6 6.5 3`, and the integer group-by counts — come from `tests/test_plawk_binary_records.pl`, `tests/test_plawk_bounded_rep.pl`, and `tests/test_plawk_binary_assoc.pl`, which were built and run for this book: 14, 8, and 11 tests respectively, all passing. The `sN`/`lpsN` string-layout and varlen claims draw on `tests/test_plawk_binfmt_strings.pl` and `tests/test_plawk_varlen_records.pl`, cited but not separately re-run here.
 
 The win Chapter 1 claimed, "no splitting, no re-parsing", is demonstrated here in its *structural* form: the generated IR has fixed-offset loads and no text-path helpers. The *speed* claim, that this is faster than awk on real data, is the project's benchmark and is reported with its caveats in Chapter 11.
 

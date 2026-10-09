@@ -9,7 +9,7 @@ This documentation is dual-licensed under MIT and CC-BY-4.0.
 
 Chapter 1 showed two places where plawk and awk disagree before any binary record appears: `avg 7` versus `avg 7.5`, and `0` versus an empty line for an uninitialised scalar. This chapter explains both from the types up. The short version is that plawk has exactly two numeric types, a 64-bit signed integer (`i64`) and a double, and the compiler decides which one every expression and every scalar has. awk has one type that is, in effect, a double with string manners.
 
-Source references are to `examples/plawk/` in the UnifyWeaver repository, read at commit `0af53d6a3`. Test results quoted below are the expected outputs asserted by `tests/test_plawk_*.pl`; they were read, not re-run for this chapter. <!-- TODO: re-run the cited tests and confirm before final -->
+Source references are to `examples/plawk/` in the UnifyWeaver repository, read at commit `0af53d6a3`. The double-slot results in the "What is implemented today" section below were verified by running `tests/test_plawk_float_slots.pl` (13 tests, all passing). The integer- and float-expression outputs quoted elsewhere in this chapter are the values asserted by `tests/test_plawk_surface_arith_exprs.pl` and `tests/test_plawk_surface_float_exprs.pl`; those two suites were not separately re-run for this chapter.
 
 ## Integer expressions
 
@@ -79,9 +79,9 @@ Here `sum` becomes a double slot (double phis, `fadd` updates) while `n++` stays
 
 ### What is implemented today
 
-The project README contradicts itself here. One paragraph says doubles are "expression-level only in this slice: scalar slots, guards, and `END` expressions stay `i64`, and assigning a double expression to a scalar is rejected at codegen; typed double slots are the documented follow-up." A later paragraph describes typed double scalar slots as working. The source sides with the later paragraph, and the earlier text is stale:
+The project README contradicts itself here. One paragraph says doubles are "expression-level only in this slice: scalar slots, guards, and `END` expressions stay `i64`, and assigning a double expression to a scalar is rejected at codegen; typed double slots are the documented follow-up." A later paragraph describes typed double scalar slots as working. The source — and the test suite — side with the later paragraph; the earlier text is stale. Running `tests/test_plawk_float_slots.pl` passes all 13 of its tests, which exercise exactly the double-slot behaviour below:
 
-- **Double slots exist.** `scalar_double(Name)` is a slot kind with LLVM type `double` and zero `0.0`; update operations for `add` and `set` on it emit `fadd double` (`plawk_native_codegen.pl` around 1705-1715, 5304-5320). The test `double_slot_ir_uses_double_phis_and_fadd` asserts `phi double [0.0, ...]` in the generated IR.
+- **Double slots exist.** `scalar_double(Name)` is a slot kind with LLVM type `double` and zero `0.0`; update operations for `add` and `set` on it emit `fadd double` (`plawk_native_codegen.pl` around 1705-1715, 5304-5320). The test `double_slot_ir_uses_double_phis_and_fadd` asserts `phi double [0.0, ...]` in the generated IR, and `i64_slots_stay_i64` confirms an untouched integer slot keeps no `phi double` or `fadd`.
 - **Double `END` expressions exist.** `END { print sum + 1 }` promotes to f64 and `END { print sum / NR }` is an IEEE `fdiv`; float literals in `END` do the same, as in `END { print n * 1.5 }`. The test comment on `end_arith_on_double_slot_promotes_to_f64` records that this "was rejected before the f64 END slice". The code path is `plawk_end_scalar_operand_expr` accepting `float_const` (around 4885-4890), with double slot reads substituted as `ssa_f64` (around 4912-4934).
 - **Binary mode too.** `$1 > 10 { sum += float($2) }` over `i64 f64` records accumulates a native double (`surface_binary_double_accumulator`).
 

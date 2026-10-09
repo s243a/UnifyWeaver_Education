@@ -48,7 +48,7 @@ boom
 2 2.75 2
 ```
 
-That is the expected output of `surface_union_dispatch_and_state` in `tests/test_plawk_tagged_unions.pl`, which builds and runs a native binary. Chapter 1's shorter program, which prints only `msum` and `events`, is the same computation minus `mhits`; its `2.75 2` is the last two numbers of this line. *Run-claim: the Chapter 1 variant itself is not a separate test; its output is inferred from this one and should be re-run.*
+That is the output of `surface_union_dispatch_and_state` in `tests/test_plawk_tagged_unions.pl`, which builds and runs a native binary and passes. Chapter 1's shorter program, which prints only `msum` and `events`, is the same computation minus `mhits`; its `2.75 2` is the last two numbers of this line, so it is backed by this test. (The Chapter 1 variant is not itself a separate test case — it drops the `mhits` counter and its `print` — but the two numbers it reports are exactly the two this test verifies.)
 
 The parser turns the blocks into `case_blocks([case_arm(0, Rules), case_arm(1, Rules)])`, which the `parses_case_blocks` test checks (for example `case 0 { $1 > 100 { c++ } }` becomes `case_arm(0, [rule(field_cmp(1, gt, 100), [inc(var(c))])])`).
 
@@ -125,7 +125,7 @@ Every one of these is a *compile-time* error. The cost of mis-typing a field in 
 
 ## What is demonstrated, and what is not
 
-Demonstrated by passing tests that build and run native binaries (`test_plawk_tagged_unions.pl`, 11 of 11 passing as run for this chapter; `test_plawk_union_rep.pl` is taken from its expected strings): case blocks, `TAG == K`, shared state, skipped arms, the error exits, and the rejections above. Not demonstrated here: union-aware `writebin case K` (Chapter 6), unions combined with associative arrays beyond the rejection case (the skeleton cited `test_plawk_union_assoc.pl`, which this chapter did not read), and any performance claim.
+Demonstrated by passing tests that build and run native binaries — `test_plawk_tagged_unions.pl` (11 of 11) and `test_plawk_union_rep.pl` (5 of 5), both passing as run for this chapter, so the `2.75 2`, `3 4.25 1`, and `2 14 1` outputs above are backed rather than inferred: case blocks, `TAG == K`, shared state, skipped arms, lists in arms, the error exits, and the rejections above. Not demonstrated here: union-aware `writebin case K` (Chapter 6), unions combined with associative arrays beyond the rejection case (the skeleton cited `test_plawk_union_assoc.pl`, which this chapter did not read), and any performance claim.
 
 ## Next
 
