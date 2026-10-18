@@ -53,7 +53,7 @@ compile_predicate_to_awk(+Predicate/Arity, +Options, -Code)
 
 ```prolog
 ?- compile_predicate_to_awk(high_salary/2, [], AWK),
-   write_awk_script('high_salary.awk', AWK).
+   write_awk_script(AWK, 'high_salary.awk').
 ```
 
 ---
@@ -234,18 +234,22 @@ extract_ip(Line, IP) :- match(Line, "[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+", IP).
 
 | Limitation | Reason |
 |------------|--------|
-| No deep recursion | Only tail recursion supported |
+| Restricted recursion lowering | Numeric tail loops and specialized graph patterns; see Chapter 5 |
 | No nested structures | Flat data only |
-| No mutual recursion | Single recursive predicates |
-| No backtracking | First match semantics |
+| Mutual recursion | Not established by the verified AWK recipes |
+| General Prolog search | Not implemented by the specialized loop and graph traversals |
 | No complex unification | Simple variable binding |
 
-These limitations are inherent to AWK's streaming model.
+These are compiler restrictions, not limits on AWK's ability to call functions recursively.
+
+See [Chapter 5](../chapters/05-tail-recursion.md) and its
+[validation snapshot](../examples/VALIDATION.md) for the distinct direct and shared
+entry points, graph query semantics and current caveats.
 
 ---
 
 ## Related Documentation
 
-- [AWK Target Examples](../../../../docs/AWK_TARGET_EXAMPLES.md)
-- [AWK Target Status](../../../../docs/AWK_TARGET_STATUS.md)
+- [AWK Target Examples](https://github.com/s243a/UnifyWeaver/blob/main/docs/AWK_TARGET_EXAMPLES.md)
+- [AWK Target Status](https://github.com/s243a/UnifyWeaver/blob/main/docs/AWK_TARGET_STATUS.md)
 - [Book 2: Bash Target](../../book-02-bash-target/)

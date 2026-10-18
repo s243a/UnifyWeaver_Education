@@ -344,19 +344,19 @@ errors_only(Line, Message) :-
 % Generate scripts
 generate :-
     compile_predicate_to_awk(valid_email/1, [], AWK1),
-    write_awk_script('valid_email.awk', AWK1),
+    write_awk_script(AWK1, 'valid_email.awk'),
 
     compile_predicate_to_awk(email_parts/3, [], AWK2),
-    write_awk_script('email_parts.awk', AWK2),
+    write_awk_script(AWK2, 'email_parts.awk'),
 
     compile_predicate_to_awk(date_parts/4, [], AWK3),
-    write_awk_script('date_parts.awk', AWK3),
+    write_awk_script(AWK3, 'date_parts.awk'),
 
     compile_predicate_to_awk(log_entry/4, [], AWK4),
-    write_awk_script('log_entry.awk', AWK4),
+    write_awk_script(AWK4, 'log_entry.awk'),
 
     compile_predicate_to_awk(errors_only/2, [], AWK5),
-    write_awk_script('errors_only.awk', AWK5),
+    write_awk_script(AWK5, 'errors_only.awk'),
 
     format('Generated regex AWK scripts~n').
 

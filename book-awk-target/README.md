@@ -33,7 +33,7 @@ Compile single and multiple rules with arithmetic and logical constraints.
 Use built-in aggregation operations: sum, count, max, min, and avg.
 
 ### [Chapter 5: Tail Recursion](chapters/05-tail-recursion.md)
-Compile tail-recursive predicates to efficient AWK while loops.
+Compile numeric tail loops and use the shared compiler for graph reachability.
 
 ### [Chapter 6: Regex Pattern Matching](chapters/06-regex-matching.md)
 Use the `match/2`, `match/3`, and `match/4` predicates for regex operations.
@@ -52,7 +52,8 @@ Multi-clause predicates → if/else if chains, arithmetic, error handling.
 | Single Rules | Direct translation with constraint evaluation |
 | Multiple Rules | Combined with union-style logic |
 | Aggregations | sum, count, max, min, avg operations |
-| Tail Recursion | Compiled to efficient while loops |
+| Tail Recursion | Recognized numeric accumulator patterns become while loops |
+| Graph Recursion | Shared compiler: binary reachability; direct target: specialized hop traversal |
 | Regex Matching | Full support via `match/2`, `match/3`, `match/4` |
 | Input Formats | TSV, CSV, JSONL record formats |
 
@@ -86,7 +87,7 @@ high_salary(Name, Salary) :-
 **Compile to AWK:**
 ```prolog
 ?- compile_predicate_to_awk(high_salary/2, [], AWK),
-   write_awk_script('high_salary.awk', AWK).
+   write_awk_script(AWK, 'high_salary.awk').
 ```
 
 **Run the script:**
@@ -96,15 +97,25 @@ awk -f high_salary.awk employees.tsv
 
 ## Limitations
 
-The AWK target is designed for stream processing and has some constraints:
+AWK supports recursive user functions. The limits here concern which Prolog
+patterns UnifyWeaver translates and which entry point selects the right backend:
 
-- **No deep recursion**: Only tail recursion is supported
-- **No nested data structures**: Flat data only
-- **No mutual recursion**: Single recursive predicates only
-- **No backtracking**: First match semantics
-- **No complex unification**: Simple variable binding only
+- **Numeric tail loops**: The verified direct `factorial/3` recipe becomes a while
+  loop. The shared recursive compiler currently rejects that same AWK tail case.
+- **Graph recursion**: The shared compiler supports canonical binary transitive
+  closure using adjacency arrays, BFS and a visited set. The direct target has a
+  specialized ternary hop traversal using an explicit DFS stack for simple paths.
+- **Restricted semantics**: These paths do not establish support for arbitrary
+  linear, tree or mutual recursion, general Prolog backtracking, nested terms or
+  complex unification. Returning code alone does not establish semantic support.
+- **Entry point and query matter**: Single-source reachability, all reachable pairs
+  and all simple paths are different computations. The shared BFS excludes the
+  starting node even on cycles; a pair fixpoint can include cycle-derived self pairs.
 
-These limitations are inherent to AWK's streaming model and are not bugs.
+See [Chapter 5](chapters/05-tail-recursion.md) for the working recipes and the
+[validation snapshot](examples/VALIDATION.md) for the tested revision, results and
+entry-point caveats. These are compiler restrictions and conventions, not inherent
+limits of AWK's streaming model.
 
 ## Why AWK?
 
@@ -116,9 +127,9 @@ These limitations are inherent to AWK's streaming model and are not bugs.
 
 ## Getting Help
 
-- Check the [UnifyWeaver documentation](../../../docs/)
-- Review the [AWK target examples](../../../docs/AWK_TARGET_EXAMPLES.md)
-- See the [AWK target status](../../../docs/AWK_TARGET_STATUS.md)
+- Check the [UnifyWeaver documentation](https://github.com/s243a/UnifyWeaver/tree/main/docs)
+- Review the [AWK target examples](https://github.com/s243a/UnifyWeaver/blob/main/docs/AWK_TARGET_EXAMPLES.md)
+- See the [AWK target status](https://github.com/s243a/UnifyWeaver/blob/main/docs/AWK_TARGET_STATUS.md)
 
 ## License
 

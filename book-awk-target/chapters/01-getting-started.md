@@ -44,7 +44,7 @@ The AWK target exports two main predicates:
 compile_predicate_to_awk(Predicate/Arity, Options, AWKCode)
 
 % Write AWK code to a file
-write_awk_script(Filename, AWKCode)
+write_awk_script(AWKCode, Filename)
 ```
 
 ### Loading the Module
@@ -74,7 +74,7 @@ engineering_staff(Name, Dept) :-
 
 ```prolog
 ?- compile_predicate_to_awk(engineering_staff/2, [], AWK),
-   write_awk_script('engineering.awk', AWK).
+   write_awk_script(AWK, 'engineering.awk').
 ```
 
 ### Step 3: Create Test Data
@@ -196,7 +196,7 @@ generate :-
         record_format(tsv),
         include_header(true)
     ], AWK),
-    write_awk_script('high_earners.awk', AWK),
+    write_awk_script(AWK, 'high_earners.awk'),
     format('Generated high_earners.awk~n').
 
 :- initialization(generate, main).

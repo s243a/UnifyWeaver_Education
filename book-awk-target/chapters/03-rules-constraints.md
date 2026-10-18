@@ -302,10 +302,10 @@ performance_bonus(Name, Bonus) :-
 % Generate scripts
 generate :-
     compile_predicate_to_awk(tax/4, [], AWK1),
-    write_awk_script('tax.awk', AWK1),
+    write_awk_script(AWK1, 'tax.awk'),
 
     compile_predicate_to_awk(performance_bonus/2, [], AWK2),
-    write_awk_script('bonus.awk', AWK2),
+    write_awk_script(AWK2, 'bonus.awk'),
 
     format('Generated tax.awk and bonus.awk~n').
 
