@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: MIT OR Apache-2.0
+# Copyright (c) 2026 John William Creighton (s243a)
 # Copyright (c) 2026 UnifyWeaver contributors
 # Run from the UnifyWeaver compiler root:
 # bash "$EDUCATION_ROOT/book-awk-target/examples/run_recursion_tests.sh"

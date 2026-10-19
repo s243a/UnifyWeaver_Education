@@ -1,4 +1,5 @@
 % SPDX-License-Identifier: MIT OR Apache-2.0
+% Copyright (c) 2026 John William Creighton (s243a)
 % Copyright (c) 2026 UnifyWeaver contributors
 %
 % Run from the compiler root with init.pl loaded. See VALIDATION.md.

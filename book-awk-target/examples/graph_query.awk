@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: MIT OR Apache-2.0
+# Copyright (c) 2026 John William Creighton (s243a)
 # Copyright (c) 2026 UnifyWeaver contributors
 # Caller for the generated embedded path.awk library. Load it after path.awk.
 END {

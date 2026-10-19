@@ -145,3 +145,13 @@ verbatim and executed separately, with `field_separator('\t')`. Its input rows
 `5 TAB 1 TAB 0` and `0 TAB 1 TAB 0` yielded `120` and `1`.
 
 No compiler fixes or benchmark investigations are included.
+
+## Final review follow-up (2026-10-19)
+
+The focused recursion runner, exact complete chapter recipe, Bash syntax,
+36 relative documentation links, fenced blocks and whitespace checks passed
+again after the review edits. The illustrative factorial AWK block was extracted
+and executed: `5` and `0` returned `120` and `1`; `-1` and `0.5` each printed the
+domain diagnostic on stderr, produced no stdout and exited with status 1.
+This guard belongs to the illustrative sketch; the compiled recipe retains its
+documented nonnegative integer input domain.

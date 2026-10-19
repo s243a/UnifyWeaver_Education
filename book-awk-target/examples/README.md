@@ -5,7 +5,8 @@
 ## Recursion examples
 
 Run these from a separate **UnifyWeaver compiler checkout root**, with the
-Education repository path supplied through the shell environment:
+Education repository path supplied through the shell environment. Use a full
+compiler checkout, including `templates/` for shared graph compilation:
 
 ```bash
 export EDUCATION_ROOT=/absolute/path/to/UnifyWeaver_Education

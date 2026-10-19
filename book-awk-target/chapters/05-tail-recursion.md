@@ -106,8 +106,15 @@ fact(N, Result) :-
 
 ### Illustrative AWK
 
+This sketch expects numeric, nonnegative integer `N`. It rejects negative or
+fractional values before entering the loop.
+
 ```awk
 function factorial(N, Acc) {
+    if (N < 0 || N != int(N)) {
+        print "factorial expects a nonnegative integer" > "/dev/stderr"
+        exit 1
+    }
     while (1) {
         if (N == 0) {
             return Acc
