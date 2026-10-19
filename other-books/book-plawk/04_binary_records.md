@@ -23,7 +23,7 @@ You assign a string to `BINFMT` in the `BEGIN` block. Each space-separated word 
 - `f64` — an 8-byte double, native byte order.
 - `sN` — a fixed `N`-byte string, for example `s8`. A value shorter than `N` is padded with zero bytes ("alpha" plus three zeros in an `s8`).
 
-("Native byte order" means whatever your machine uses. The book's examples assume a little-endian machine such as x86-64; the byte patterns below would be reversed on a big-endian one.)
+("Native byte order" means whatever your machine uses. The book's examples assume a little-endian machine such as x86-64 — little-endian stores a multi-byte value's least-significant byte first, at the lowest address — so the byte patterns below would be reversed on a big-endian one.)
 
 `BINFMT = "i64 f64"` declares that every record is exactly 16 bytes:
 

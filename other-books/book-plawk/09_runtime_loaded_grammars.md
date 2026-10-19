@@ -16,7 +16,7 @@ around it is a plan.
 
 ## A word on terminology
 
-The plawk README describes this feature as "JIT". This book does not, because
+The plawk README describes this feature as "JIT" (just-in-time compilation — producing native machine code while the program runs). This book does not, because
 the project's own execution-architecture document
 (`docs/design/PLAWK_EXECUTION_ARCHITECTURE.md`) says the opposite in its first
 paragraph: LLVM is used purely as an ahead-of-time backend, and "there is no
@@ -101,7 +101,7 @@ END { print total }
 ```
 
 Here `dyncall_at($1)` passes no inputs beyond the source, so each grammar is a
-one-argument predicate (output only). With lines naming `seven.wamo`,
+one-argument predicate — that single argument is the *output*, and the source field `$1` only names the file and is never passed into the grammar. With lines naming `seven.wamo`,
 `nine.wamo`, `seven.wamo`, `seven.wamo`, the program prints `30`
 (7+9+7+7).
 
