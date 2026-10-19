@@ -39,6 +39,48 @@ An `i64` expression may fill an `f64` slot. The reverse is rejected, along with 
 - a double into an `i64` slot (`OUTFMT = "i64"` with `writebin 1.5`);
 - a string field into an `i64` slot (`s8` in, `i64` out).
 
+### A runnable converter → reader
+
+The tests above decode the bytes inside the harness. Here is the same idea run by hand, start to finish — built and run with `swipl` and `clang`. A converter turns three text lines into binary; a reader sums part of them back.
+
+`to_bin.plawk` writes an `i64` and an `f64` per line:
+
+```awk
+BEGIN { OUTFMT = "i64 f64" }
+{ writebin int($1), float($2) }
+```
+
+`read_bin.plawk` reads that layout and sums the readings of the records whose id is over 100:
+
+```awk
+BEGIN { BINFMT = "i64 f64" }
+$1 > 100 { sum += float($2) }
+END { print sum }
+```
+
+The input `metrics.txt` is three lines:
+
+```text
+50 1.5
+200 2.5
+300 0.25
+```
+
+Run the two stages:
+
+```bash
+plawk run to_bin.plawk metrics.txt > metrics.bin
+plawk run read_bin.plawk metrics.bin
+```
+
+The first command produces a 48-byte `metrics.bin` — three records of 16 bytes each (an `i64` then an `f64`). The second prints:
+
+```text
+2.75
+```
+
+That is `2.5 + 0.25`, the two records whose id is over 100; the `50`-id record is dropped by the `$1 > 100` guard. Each stage also prints one `plawk_cli_marker/0: WAM fallback` line to standard error — a build diagnostic, as in Chapter 1, not part of the output.
+
 ## Strings on the way out
 
 String slots follow the reader's conventions.

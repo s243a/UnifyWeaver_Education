@@ -43,6 +43,15 @@ square(X, R) :- R is X * X.
 write_wam_object([user:square/2], [wamo_entry(square/2)], 'square.wamo').
 ```
 
+Two different things appear in that snippet, and it is worth keeping them
+apart. The first line is the **source clause** that *defines* the grammar
+(`square/2`, ordinary Prolog). The second is the **object-generation query**,
+`write_wam_object/3`, which *compiles* that clause ahead of time into the
+`square.wamo` file. The plawk binary never sees the source clause; it loads the
+compiled `.wamo` at run time. The clause is the definition, the
+`write_wam_object/3` call is the build step, and the `.wamo` is the artifact the
+binary consumes.
+
 This is the form the tests use. The calling convention is fixed by arity: a
 grammar predicate has arity N+1, the N inputs arrive as `A0..A_{N-1}`, and the
 output is the last argument. The result is read back as an i64, and a failed
@@ -105,9 +114,13 @@ keeps its single object). Three values, from `plawk_native_codegen.pl`:
   path id, and is reused. The cache holds 64 grammars; past that, grammars
   still load and run correctly but are not cached.
 - `"mtime"`: as `on`, but the entry also keys on the file's modification time,
-  so recompiling a `.wamo` evicts the stale object and reloads it. The test
-  runs a program once (`7`), sleeps past the timestamp resolution, rewrites the
-  object, runs the same binary again and gets `11`.
+  so a changed `.wamo` is treated as stale and reloaded on the next run that
+  observes the new mtime. The test demonstrates this across **two separate runs
+  of the same binary**: it runs once (`7`), sleeps past the timestamp
+  resolution, rewrites the object on disk, then runs the unchanged binary a
+  second time and gets `11`. The second *run* picks up the new grammar because
+  the file's mtime changed between runs; this does not show a single running
+  process reloading a grammar mid-execution.
 - `"off"`: load fresh and free after every call. Always current, no cache, full
   load cost each time. The test checks only that it gives the same answer
   (`30`) as `on`.
@@ -153,9 +166,12 @@ Design only, or unmeasured:
   around it by construction.
 - Native compilation of the loaded grammar. That is the Phase 5 JIT plan, and
   it does not exist today.
-- `dyncall_at` with multiple input arguments beyond the arity-collection test.
-  The arity machinery accepts them, but every round-trip test uses the
-  zero-input form (`dyncall_at($1)`, source only), so a two-input call such as
-  `dyncall_at($1, $2)` against a two-input grammar is not yet run end to end.
+- `dyncall_at` with a call argument beyond the source. The source field is
+  *not* counted in the call arity: in `dyncall_at($1)` the field `$1` names the
+  grammar and nothing is passed to it (zero call arguments, output only), while
+  `dyncall_at($1, $2)` names the grammar with `$1` and passes exactly *one*
+  argument, `$2` (the parser collects arity `[1]` for it). Every round-trip
+  test uses the source-only form, so a `dyncall_at($1, $2)` call that passes an
+  argument to a one-input grammar is not yet run end to end.
 - Safety of loading untrusted `.wamo` files. Nothing in the source or tests
   addresses it; treat a `.wamo` as code you chose to run.

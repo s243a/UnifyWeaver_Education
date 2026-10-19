@@ -11,7 +11,7 @@ A guide to plawk (the `examples/plawk` app in UnifyWeaver): an awk-like surface 
 
 ## Status: 🚧 Prototype-phase book about a prototype-phase tool
 
-plawk is a prototype. Chapter 1 is written; Chapters 2-11 are skeletons (headings and the source facts each section will draw on). Every chapter separates what has been run from what is design, and Chapter 11 collects that line in one place. Claims were checked against UnifyWeaver revision `0af53d6a3`; they will go through fact-verification and external review before this book is called done.
+plawk is a prototype, and this is a **partial prototype guide** to it. All eleven chapters are written; each separates what has been *run* from what is design, and Chapter 11 collects that line in one place. Claims were checked against UnifyWeaver revision `0af53d6a3`, and the chapters' load-bearing examples were built and run with `swipl` + `clang` (23 of the suite's 44 `test_plawk_*.pl` files, plus direct builds, all passing). Broader testing, benchmarks, and additional runtime-loader demonstrations remain follow-ups, and the book will still go through external review before it is called done.
 
 ## The arc
 
@@ -20,16 +20,16 @@ The book follows what makes plawk *different* from awk, and sends you to the sib
 ## Contents
 
 1. [Introduction](01_introduction.md) - What plawk is, the one-paragraph thesis for how it differs from awk, the running examples, and what runs today versus what is design - *written*
-2. [The awk-like surface, and where it diverges](02_the_awk_like_surface.md) - The pattern-action shape that is shared with awk, the cross-compatible subset, and the constructs plawk does not parse - *skeleton*
-3. [Typed arithmetic: `i64` and `float`](03_typed_arithmetic.md) - Native integer and double expressions, guarded division, scalar slot typing - *skeleton*
-4. [Binary records](04_binary_records.md) - `BINFMT`, fixed and length-prefixed fields, bounded repetition and `foreach` - *skeleton*
-5. [Tagged unions and `case` routing](05_tagged_unions_and_case.md) - One stream, several record kinds; arms, `case K { }` blocks and the `TAG == K` shorthand - *skeleton*
-6. [Writing binary: `OUTFMT`, `writebin`, `writebin_arm`](06_writing_binary.md) - Typed writers, tagged output, and plawk-to-plawk pipelines - *skeleton*
-7. [The Prolog core: Reader, Handler, Writer](07_the_prolog_core.md) - `process_all/4`, state threading, and the interpreter that defines the model - *skeleton*
-8. [Foreign Prolog: `@prolog`, functions, bridged calls](08_foreign_prolog.md) - Prolog clauses compiled into the same binary and called from rules - *skeleton*
-9. [Runtime-loaded grammars: `DYNLOAD` and `dyncall`](09_runtime_loaded_grammars.md) - Swapping behaviour without rebuilding the binary - *skeleton*
-10. [Compiling to native: WAM to LLVM](10_compiling_to_native.md) - The CLI, the compilation path, and what the generated code looks like - *skeleton*
-11. [Demonstrated vs design](11_demonstrated_vs_design.md) - The honest ledger, benchmarks in context, and the roadmap - *skeleton*
+2. [The awk-like surface, and where it diverges](02_the_awk_like_surface.md) - The pattern-action shape that is shared with awk, the cross-compatible subset, and the constructs plawk does not parse - *written*
+3. [Typed arithmetic: `i64` and `float`](03_typed_arithmetic.md) - Native integer and double expressions, guarded division, scalar slot typing - *written*
+4. [Binary records](04_binary_records.md) - `BINFMT`, fixed and length-prefixed fields, bounded repetition and `foreach` - *written*
+5. [Tagged unions and `case` routing](05_tagged_unions_and_case.md) - One stream, several record kinds; arms, `case K { }` blocks and the `TAG == K` shorthand - *written*
+6. [Writing binary: `OUTFMT`, `writebin`, `writebin_arm`](06_writing_binary.md) - Typed writers, tagged output, and plawk-to-plawk pipelines - *written*
+7. [The Prolog core: Reader, Handler, Writer](07_the_prolog_core.md) - `process_all/4`, state threading, and the interpreter that defines the model - *written*
+8. [Foreign Prolog: `@prolog`, functions, bridged calls](08_foreign_prolog.md) - Prolog clauses compiled into the same binary and called from rules - *written*
+9. [Runtime-loaded grammars: `DYNLOAD` and `dyncall`](09_runtime_loaded_grammars.md) - Swapping behaviour without rebuilding the binary - *written*
+10. [Compiling to native: WAM to LLVM](10_compiling_to_native.md) - The CLI, the compilation path, and what the generated code looks like - *written*
+11. [Demonstrated vs design](11_demonstrated_vs_design.md) - The honest ledger, benchmarks in context, and the roadmap - *written*
 
 - Appendix A: Cross-compatibility cheat sheet (the plawk/awk/gawk subset, with the known output differences) - *planned*
 
