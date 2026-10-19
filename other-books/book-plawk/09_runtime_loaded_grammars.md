@@ -16,7 +16,7 @@ around it is a plan.
 
 ## A word on terminology
 
-The plawk README describes this feature as "JIT". This book does not, because
+The plawk README describes this feature as "JIT" (just-in-time compilation — producing native machine code while the program runs). This book does not, because
 the project's own execution-architecture document
 (`docs/design/PLAWK_EXECUTION_ARCHITECTURE.md`) says the opposite in its first
 paragraph: LLVM is used purely as an ahead-of-time backend, and "there is no
