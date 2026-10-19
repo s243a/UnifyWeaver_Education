@@ -31,7 +31,7 @@ The book follows what makes plawk *different* from awk, and sends you to the sib
 10. [Compiling to native: WAM to LLVM](10_compiling_to_native.md) - The CLI, the compilation path, and what the generated code looks like - *written*
 11. [Demonstrated vs design](11_demonstrated_vs_design.md) - The honest ledger, benchmarks in context, and the roadmap - *written*
 
-- Appendix A: Cross-compatibility cheat sheet (the plawk/awk/gawk subset, with the known output differences) - *planned*
+- [Appendix A: Cross-compatibility cheat sheet](appendix_a_cross_compatibility.md) - the plawk/awk/gawk subset, with the known output differences - *written*
 
 ## Prerequisites
 
