@@ -48,7 +48,7 @@ First, the 16 core tests passing does not show that compiled binaries behave as 
 | `@prolog` blocks, bridged calls, `function` | Run (tests) | `prolog_blocks` 6/6; `surface_prolog_calls` 16/16; `functions` 5/5; `f64_foreign` 7/7 |
 | `blobN` Tier-2 payloads | Run (tests), one path | DCG-over-blob end to end in `prolog_blocks` (`119`); dedicated `tier2_blob` file not re-run |
 | `DYNLOAD`, `dyncall`, `dyncall_at` | Run (tests); standalone not reproduced | `dyncall` 5/5, `dyncall_at` 5/5 (harness builds the `.wamo`, runs the binary); no hand-built `.wamo` outside the harness |
-| Reading from stdin | Test-backed, not re-run | `surface_stdin_input` checks the emitted `main` and has stdin smoke tests; I did not run them or a shell pipe |
+| Reading from stdin | Run (tests) | `surface_stdin_input` 8/8, run while preparing this book: it builds native binaries and feeds input four ways — a filename argument, `<` redirection, the `-` stdin alias, and a real shell pipe — comparing output each way, plus a missing-file exit check. A hand-run pipe outside the harness was not separately done. |
 | Benchmarks (W1 to W4) | Project's claim | README table; `bench.sh` not re-run here |
 | Runtime grammar extension (JIT) | Design | Implementation plan Phase 5 |
 
@@ -93,7 +93,7 @@ To check any of this, run `N=2000000 sh examples/plawk/bench/bench.sh` on your o
 
 What the project's documents flag as next, in their words and with their status:
 
-- **Typed double slots.** The README names them as the follow-up to the scalar-slot restriction above.
+- **Typed double slots — already landed.** The README lists these as a follow-up to the scalar-slot restriction, but that line is stale: double-typed scalar slots are implemented and tested (Chapter 3; `float_slots` 13/13), so this is demonstrated, not roadmap. The genuinely open scalar-typing question is narrower — the bridge's text-field coercion, below.
 - **More of awk.** None of the Chapter 2 omissions is described as planned; they are the current boundary. I found no stated commitment to add `while`, `sub`, or general arrays, so do not read the list as a backlog.
 - **Grammar-to-native readers.** `PLAWK_DCG_BINARY_READERS` fixes a three-tier design: Tier 1, LL(1)-over-fields grammars with compile-time caps lowered to native read sequences; Tier 2, native framing plus WAM-bytecode payload parsing through the foreign bridge; Tier 3, a full DCG fallback. The `lpsN`, union, and `repK` readers are its first slices, and the implementation plan says Tier-2 composition sugar remains.
 - **Phases 4 and 5.** The implementation plan lists file descriptors and subprocess redirection (Phase 4) and runtime grammar extension, clause assertion, and a REPL (Phase 5) as goals. Neither is shown by a test in this book's survey. `dyncall` is the nearest existing piece to Phase 5, and it loads a pre-built object, which is narrower than that phase's stated success condition of a running binary accepting new rules and compiling them.
@@ -108,7 +108,7 @@ The implementation plan supplies the likeliest reading: Phase 0 is the Prolog co
 
 ## What the ledger adds up to
 
-The front door is real for the subset: a `.plawk` file in, a native binary out, with output matching gawk on the one cross-compatible program I ran, and with binary records, tagged unions, writers, the `@prolog` bridge, and runtime-loaded grammars all backed by passing tests that build and run native code. What is not there is the breadth of awk, a link between the reference interpreter and the compiled output, a *standalone* `dyncall` reproduction outside the test harness, a settled design for doubles as general scalars and for text-field coercion at the bridge, and an independent measurement of the speed claims. The thesis, that typed binary records beat parsing text, is the best-evidenced part structurally and the least independently measured numerically.
+The front door is real for the subset: a `.plawk` file in, a native binary out, with output matching gawk on the one cross-compatible program I ran, and with binary records, tagged unions, writers, the `@prolog` bridge, and runtime-loaded grammars all backed by passing tests that build and run native code. What is not there is the breadth of awk, a link between the reference interpreter and the compiled output, a *standalone* `dyncall` reproduction outside the test harness, a settled design for text-field coercion at the bridge, and an independent measurement of the speed claims. The thesis, that typed binary records beat parsing text, is the best-evidenced part structurally and the least independently measured numerically.
 
 ## Remaining checks
 

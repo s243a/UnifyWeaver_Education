@@ -113,14 +113,18 @@ keeps its single object). Three values, from `plawk_native_codegen.pl`:
 - `"on"` (default): each distinct grammar loads once, keyed by an interned
   path id, and is reused. The cache holds 64 grammars; past that, grammars
   still load and run correctly but are not cached.
-- `"mtime"`: as `on`, but the entry also keys on the file's modification time,
-  so a changed `.wamo` is treated as stale and reloaded on the next run that
-  observes the new mtime. The test demonstrates this across **two separate runs
-  of the same binary**: it runs once (`7`), sleeps past the timestamp
-  resolution, rewrites the object on disk, then runs the unchanged binary a
-  second time and gets `11`. The second *run* picks up the new grammar because
-  the file's mtime changed between runs; this does not show a single running
-  process reloading a grammar mid-execution.
+- `"mtime"`: as `on`, but the cache entry also keys on the file's modification
+  time, so that *within one process* a grammar whose `.wamo` has been rewritten
+  (new mtime) is treated as stale and reloaded on the next `dyncall_at` instead
+  of being served from the cached entry. The accompanying test does **not**
+  actually exercise that in-process invalidation. It runs the binary once (`7`),
+  sleeps past the timestamp resolution, rewrites the object on disk, then runs
+  the *unchanged binary a second time* and gets `11` — but a second process
+  starts with an empty cache and would read the current file under any
+  `DYNCACHE` mode (`on`, `mtime`, or `off`), so the `7`→`11` result only shows
+  two independent runs each reading the file as it then stood. It does not
+  establish that the mtime key invalidates a live cached entry; that remains the
+  documented source behaviour, not something this test demonstrates.
 - `"off"`: load fresh and free after every call. Always current, no cache, full
   load cost each time. The test checks only that it gives the same answer
   (`30`) as `on`.

@@ -23,7 +23,7 @@ That already explains the first divergence. Take the lines `1 7` and `2 8`:
 { s += $2 } END { print "avg", s / NR }
 ```
 
-`s` accumulates `i64` values, `NR` is an `i64`, and `/` on two `i64`s is integer division: 15 / 2 is `7`. gawk converts everything to double and prints `7.5`. The test suite pins the same split on a single field: `{ print $2 / 2.0, $2 / 2 }` over `a 7` expects `3.5 3` (`test_plawk_surface_float_exprs.pl`, `surface_int_and_float_division_differ`). The `7.5` for `$2 / 2.0` holds in gawk too; only the integer-only form differs.
+`s` accumulates `i64` values, `NR` is an `i64`, and `/` on two `i64`s is integer division: 15 / 2 is `7`. gawk converts everything to double and prints `7.5`. The test suite pins the same split on a single field: `{ print $2 / 2.0, $2 / 2 }` over `a 7` expects `3.5 3` (`test_plawk_surface_float_exprs.pl`, `surface_int_and_float_division_differ`). The `3.5` for `$2 / 2.0` holds in gawk too; only the integer-only form differs.
 
 ### Guarded division
 

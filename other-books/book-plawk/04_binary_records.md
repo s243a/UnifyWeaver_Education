@@ -11,9 +11,9 @@ Chapter 1 asserted that plawk can treat a record as typed binary data, so that `
 
 ## Why binary
 
-A text record `200 2.5` is five characters and a space. To use the `200` a program must find the word boundary, then turn the digit characters into a number, and it does this again on every use. A binary record stores 200 the way a CPU register already holds it: as 8 bytes. Reading it back is one load instruction.
+A text record `200 2.5` is five characters and a space. To use the `200` a program must find the word boundary and turn the digit characters into a number. A production awk does not repeat that on every mention of the field: gawk splits a record's fields once and, when a field is first used as a number, caches the converted value alongside the string (its "strnum"), so a second use of `$1` in the same record is cheap. The work is still real — the split and the first string-to-number conversion happen once per record, and all of it must be redone for the next record — but it is per-record, not per-use. A binary record stores 200 the way a CPU register already holds it: as 8 bytes. Reading it back is one load instruction, every time, with nothing to split and nothing to convert.
 
-The cost of the text form is therefore *repeated work per field*; the cost of the binary form is that you must tell the compiler, in advance, what the bytes mean. That declaration is `BINFMT`.
+The cost of the text form is therefore *per-record parsing* — a field split, plus a string-to-number conversion the first time a field is read numerically — paid again for every record in the stream; the cost of the binary form is that you must tell the compiler, in advance, what the bytes mean. That declaration is `BINFMT`.
 
 ## Declaring a layout: `BINFMT`
 
