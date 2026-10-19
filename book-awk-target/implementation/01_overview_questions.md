@@ -32,7 +32,7 @@ Q&A companion for [01_overview_impl.md](./01_overview_impl.md).
 
 ```prolog
 ?- compile_predicate_to_awk(high_salary/2, [], AWK),
-   write_awk_script('high_salary.awk', AWK).
+   write_awk_script(AWK, 'high_salary.awk').
 ```
 
 Run with: `awk -f high_salary.awk data.tsv`
@@ -153,11 +153,14 @@ if (match($0, /[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/)) {
 
 | Limitation | Reason |
 |------------|--------|
-| No deep recursion | Only tail recursion |
+| Restricted recursion lowering | Numeric tail loops and specialized graph patterns; see Chapter 5 |
 | No nested structures | Flat data only |
-| No backtracking | First match semantics |
+| General Prolog search | Not implemented by the specialized loop and graph traversals |
 
-These are inherent to AWK's streaming model.
+These are compiler restrictions, not limits on AWK recursion. See
+[Chapter 5](../chapters/05-tail-recursion.md) and the
+[validation snapshot](../examples/VALIDATION.md) for supported graph patterns
+and entry-point caveats.
 
 **See**: [Limitations](./01_overview_impl.md#limitations)
 

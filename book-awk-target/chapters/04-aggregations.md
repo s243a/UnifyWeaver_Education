@@ -392,28 +392,28 @@ engineering_total(Total) :-
 % Generate all scripts
 generate :-
     compile_predicate_to_awk(total_payroll/1, [aggregation(sum)], AWK1),
-    write_awk_script('total_payroll.awk', AWK1),
+    write_awk_script(AWK1, 'total_payroll.awk'),
 
     compile_predicate_to_awk(employee_count/1, [aggregation(count)], AWK2),
-    write_awk_script('employee_count.awk', AWK2),
+    write_awk_script(AWK2, 'employee_count.awk'),
 
     compile_predicate_to_awk(max_salary/1, [aggregation(max)], AWK3),
-    write_awk_script('max_salary.awk', AWK3),
+    write_awk_script(AWK3, 'max_salary.awk'),
 
     compile_predicate_to_awk(min_salary/1, [aggregation(min)], AWK4),
-    write_awk_script('min_salary.awk', AWK4),
+    write_awk_script(AWK4, 'min_salary.awk'),
 
     compile_predicate_to_awk(avg_salary/1, [aggregation(avg)], AWK5),
-    write_awk_script('avg_salary.awk', AWK5),
+    write_awk_script(AWK5, 'avg_salary.awk'),
 
     compile_predicate_to_awk(dept_payroll/2, [aggregation(sum)], AWK6),
-    write_awk_script('dept_payroll.awk', AWK6),
+    write_awk_script(AWK6, 'dept_payroll.awk'),
 
     compile_predicate_to_awk(engineering_total/1, [
         aggregation(sum),
         include_header(true)
     ], AWK7),
-    write_awk_script('engineering_total.awk', AWK7),
+    write_awk_script(AWK7, 'engineering_total.awk'),
 
     format('Generated aggregation scripts~n').
 
