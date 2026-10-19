@@ -43,7 +43,7 @@ The check for undefined predicates (`check_foreign_calls/3`) exists because the 
 4. **Generate the driver.** `plawk_program_native_driver_ir/4` takes the AST plus `[wam_vm(InstrCount, LabelCount)]` and returns the IR text of the native `main` and its helpers. If the AST is not in the compilable surface this fails, and the CLI says so and exits 3 (`:128-135`).
 5. **Append and link.** The driver IR is appended to the same `.ll` file (`:143-146`) and the CLI runs `clang -w -O2 FILE.ll -o OUT -lm` (`:147`). Without `--keep-ll` the `.ll` is deleted afterwards; with it, it is kept next to the output as `OUT.ll`.
 
-The compiler narrates on standard output while it works, so the CLI captures that into a string (`with_output_to`, `:123-126`) to keep stdout clean for the compiled program. The `WAM fallback` notes arrive on standard error and are build diagnostics.
+The compiler narrates on standard output while it works, so the CLI captures that into a string (`with_output_to`, `:123-126`) to keep stdout clean for the compiled program. The `WAM fallback` notes arrive on standard error and are build diagnostics: the target emits one per predicate (`Pred/Arity: WAM fallback`) that it lowers through the general WAM-bytecode path rather than a specialised native one — benign, and never part of the program's output.
 
 If the program uses `dyncall` or `dyncall_at` (Chapter 9), step 3 also gets `emit_wamo_loader(true)` so the loader is compiled into the host module (`:116-121`).
 
