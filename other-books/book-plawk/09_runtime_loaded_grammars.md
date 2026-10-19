@@ -101,7 +101,7 @@ END { print total }
 ```
 
 Here `dyncall_at($1)` passes no inputs beyond the source, so each grammar is a
-one-argument predicate (output only). With lines naming `seven.wamo`,
+one-argument predicate — that single argument is the *output*, and the source field `$1` only names the file and is never passed into the grammar. With lines naming `seven.wamo`,
 `nine.wamo`, `seven.wamo`, `seven.wamo`, the program prints `30`
 (7+9+7+7).
 
