@@ -30,6 +30,33 @@ Interactive notebooks for learning UnifyWeaver through hands-on exploration.
    - Pattern detection
    - Visualize dependencies with DOT
 
+## SciREPL Tutorial Sync
+
+The source cells in these three notebooks are synchronized with the maintained
+tutorial copies packaged in SciREPL Pro and Free under `www/workbooks/`. This
+sync brings their query, compilation, and Bash-demo fixes back into the Education
+notebooks while preserving Education's notebook and cell metadata.
+
+One platform-specific difference is retained: native Jupyter saves the call-graph
+DOT file to `../output/even_odd_graph.dot` (ensure `../output` exists), whereas the
+SciREPL copy uses its shared virtual filesystem at `/shared/data/even_odd_graph.dot`.
+
+Queries rebuild their derived values locally rather than relying on variable
+bindings from another cell. They still require the setup cells and the relevant
+predicate and helper definitions to have been run first.
+
+Run the offline regression checks from the repository root (Node.js and Bash;
+SWI-Prolog enables the Prolog syntax checks):
+
+```bash
+node notebooks/tests/test_scirepl_sync.mjs
+# Optionally also compare every source cell against an app checkout:
+node notebooks/tests/test_scirepl_sync.mjs --app-workbooks /path/to/SciREPL/www/workbooks
+```
+
+These checks validate syntax and the corrected examples; they do not execute
+notebook cells or replace a full Jupyter Run All test.
+
 ## Setup
 
 ### Prerequisites

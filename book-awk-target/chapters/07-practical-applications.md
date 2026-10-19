@@ -87,22 +87,22 @@ slow_requests(Path, ResponseTime) :-
 
 generate :-
     compile_predicate_to_awk(parse_log/6, [], AWK1),
-    write_awk_script('parse_log.awk', AWK1),
+    write_awk_script(AWK1, 'parse_log.awk'),
 
     compile_predicate_to_awk(server_errors/3, [], AWK2),
-    write_awk_script('server_errors.awk', AWK2),
+    write_awk_script(AWK2, 'server_errors.awk'),
 
     compile_predicate_to_awk(client_errors/3, [], AWK3),
-    write_awk_script('client_errors.awk', AWK3),
+    write_awk_script(AWK3, 'client_errors.awk'),
 
     compile_predicate_to_awk(requests_by_ip/2, [aggregation(count)], AWK4),
-    write_awk_script('requests_by_ip.awk', AWK4),
+    write_awk_script(AWK4, 'requests_by_ip.awk'),
 
     compile_predicate_to_awk(requests_by_path/2, [aggregation(count)], AWK5),
-    write_awk_script('requests_by_path.awk', AWK5),
+    write_awk_script(AWK5, 'requests_by_path.awk'),
 
     compile_predicate_to_awk(total_bytes/1, [aggregation(sum)], AWK6),
-    write_awk_script('total_bytes.awk', AWK6),
+    write_awk_script(AWK6, 'total_bytes.awk'),
 
     format('Generated log analysis scripts~n').
 
@@ -214,33 +214,33 @@ generate :-
         record_format(csv),
         include_header(true)
     ], AWK1),
-    write_awk_script('valid_rows.awk', AWK1),
+    write_awk_script(AWK1, 'valid_rows.awk'),
 
     compile_predicate_to_awk(with_tax/5, [
         record_format(csv),
         include_header(true)
     ], AWK2),
-    write_awk_script('with_tax.awk', AWK2),
+    write_awk_script(AWK2, 'with_tax.awk'),
 
     compile_predicate_to_awk(high_value/3, [
         record_format(csv),
         include_header(true)
     ], AWK3),
-    write_awk_script('high_value.awk', AWK3),
+    write_awk_script(AWK3, 'high_value.awk'),
 
     compile_predicate_to_awk(customer_total/2, [
         record_format(csv),
         include_header(true),
         aggregation(sum)
     ], AWK4),
-    write_awk_script('customer_total.awk', AWK4),
+    write_awk_script(AWK4, 'customer_total.awk'),
 
     compile_predicate_to_awk(total_amount/1, [
         record_format(csv),
         include_header(true),
         aggregation(sum)
     ], AWK5),
-    write_awk_script('total_amount.awk', AWK5),
+    write_awk_script(AWK5, 'total_amount.awk'),
 
     format('Generated CSV processing scripts~n').
 
@@ -331,13 +331,13 @@ mem_value(Key, Value) :-
 
 generate :-
     compile_predicate_to_awk(shell_users/2, [field_separator(':')], AWK1),
-    write_awk_script('shell_users.awk', AWK1),
+    write_awk_script(AWK1, 'shell_users.awk'),
 
     compile_predicate_to_awk(disk_warning/3, [], AWK2),
-    write_awk_script('disk_warning.awk', AWK2),
+    write_awk_script(AWK2, 'disk_warning.awk'),
 
     compile_predicate_to_awk(conn_by_state/2, [aggregation(count)], AWK3),
-    write_awk_script('conn_by_state.awk', AWK3),
+    write_awk_script(AWK3, 'conn_by_state.awk'),
 
     format('Generated system monitoring scripts~n').
 
@@ -418,13 +418,13 @@ error_count(N) :-
 
 generate :-
     compile_predicate_to_awk(parse_input/3, [], AWK1),
-    write_awk_script('stage1_parse.awk', AWK1),
+    write_awk_script(AWK1, 'stage1_parse.awk'),
 
     compile_predicate_to_awk(filter_errors/2, [], AWK2),
-    write_awk_script('stage2_errors.awk', AWK2),
+    write_awk_script(AWK2, 'stage2_errors.awk'),
 
     compile_predicate_to_awk(error_count/1, [aggregation(count)], AWK3),
-    write_awk_script('stage3_count.awk', AWK3),
+    write_awk_script(AWK3, 'stage3_count.awk'),
 
     format('Generated pipeline scripts~n').
 
@@ -524,7 +524,7 @@ trap_sum(N, A, H, Acc, Result) :-
 
 generate :-
     compile_predicate_to_awk(calc_compound/4, [], AWK1),
-    write_awk_script('compound.awk', AWK1),
+    write_awk_script(AWK1, 'compound.awk'),
 
     format('Generated math scripts~n').
 

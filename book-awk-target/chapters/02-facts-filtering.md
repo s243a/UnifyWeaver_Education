@@ -280,7 +280,7 @@ generate :-
         record_format(tsv),
         include_header(true)
     ], AWK),
-    write_awk_script('qualified.awk', AWK),
+    write_awk_script(AWK, 'qualified.awk'),
     format('Generated qualified.awk~n').
 
 :- initialization(generate, main).
