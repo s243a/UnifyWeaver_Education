@@ -9,7 +9,7 @@ This documentation is dual-licensed under MIT and CC-BY-4.0.
 
 This appendix answers two questions about a program you are about to write: *will it run under both plawk and gawk*, and *will it print the same thing?* It is a reference, not a lesson. It condenses [Chapter 2](02_the_awk_like_surface.md) and [Chapter 3](03_typed_arithmetic.md) and does not re-teach them.
 
-The "cross-compatible" entries below were checked by running each program under plawk's CLI and under gawk 5.1.0 and comparing the output. The same convention as [Chapter 11](11_demonstrated_vs_design.md) applies: where a claim was run, it is labelled as run; where it rests on a chapter, the chapter is named. Examples use the five-line log from [Chapter 1](01_introduction.md): `INFO boot ok`, `ERROR disk full`, `WARN cpu hot`, `ERROR net down`, `ERROR disk again`.
+The "cross-compatible" entries below were checked by running each program under plawk's CLI (UnifyWeaver revision `0d2abe3e2`) and under gawk 5.1.0 and comparing the output; newer feature-stack work not yet on `main` does not change this baseline. The same convention as [Chapter 11](11_demonstrated_vs_design.md) applies: where a claim was run, it is labelled as run; where it rests on a chapter, the chapter is named. Examples use the five-line log from [Chapter 1](01_introduction.md): `INFO boot ok`, `ERROR disk full`, `WARN cpu hot`, `ERROR net down`, `ERROR disk again`.
 
 ## 1. The cross-compatible subset
 
@@ -25,7 +25,7 @@ The "cross-compatible" entries below were checked by running each program under 
 | `length`, `substr`, `index`, `tolower`, `toupper`, `int` | yes | yes |
 | `printf` with `%%`, `%s`, `%d`/`%i`/`%ld`, `%f`/`%g`/`%e` | yes | yes |
 
-Building only from this table, and steering clear of the differences in section 2, gives a program that runs under both. Four programs that were run under both, with identical output:
+Building only from this table, and steering clear of the differences in section 2, gives a program that runs under both — but section 2 lists the *common* divergences, not an exhaustive guarantee of identical output. The deeper difference is numeric conversion: plawk moves between text and numbers under the strict `i64`/double rules of [Chapter 3](03_typed_arithmetic.md), where awk coerces strings to numbers on demand, so two programs built only from the shared constructs can still diverge wherever a value crosses the text/number boundary. Four programs that were run under both, with identical output:
 
 | Program | Output (both) |
 |---|---|
@@ -48,7 +48,7 @@ Types are the cause. plawk gives integer expressions the `i64` type, and scalars
 | `$1 == "NOPE" { c++ } END { print c }` | `a` | `0` | an empty line | the scalar is `i64` zero, not an unset string |
 | `{ print $2 / 2, $2 / 2.0 }` | `a 7` | `3 3.5` | `3.5 3.5` | the first division is `i64`; the literal `2.0` makes the second a double |
 
-Two further plawk behaviours, both run under plawk here: integer division by zero yields `0`, whereas float division has no zero guard and gives `inf` (`{ print $2 / 0 }` prints `0`; `{ print float($2) / 0.0 }` prints `inf`). And doubles print with `%g`, six significant digits — `2.0 * 10` prints `20`, not `20.0`, and `0.1 + 0.2` prints `0.3` ([Chapter 3](03_typed_arithmetic.md)).
+Two further plawk behaviours, both run under plawk here: integer division by zero yields `0` (`{ print $2 / 0 }` over `a 7` prints `0`), whereas float division has no zero guard and follows IEEE — a nonzero numerator over zero is an infinity (`{ print float($2) / 0.0 }` over `7` prints `inf`), and `0.0 / 0.0` is NaN (the same program over `0` prints `-nan`). And doubles print with `%g`, six significant digits — `2.0 * 10` prints `20`, not `20.0`, and `0.1 + 0.2` prints `0.3` ([Chapter 3](03_typed_arithmetic.md)).
 
 ## 3. Not accepted: parse error, exit 2
 
