@@ -125,21 +125,33 @@ Rust's expression-based semantics mean the generated code is concise — no expl
 ## Compiling and Running
 
 ```bash
-# Generate
+# Generate (the exported writer is write_rust_program/2)
 swipl -g "
     use_module('src/unifyweaver/targets/rust_target'),
     assert(user:(classify(X, small) :- X > 0, X < 10)),
     assert(user:(classify(X, large) :- X >= 10)),
     compile_predicate_to_rust(classify/2, [], Code),
-    write_to_file('classify.rs', Code)
+    write_rust_program(Code, 'classify.rs')
 " -t halt
-
-# Compile and run
-rustc classify.rs -o classify
-./classify
 ```
 
-Verified output: `classify(5)` returns `"small"`, `classify(25)` returns `"large"`.
+The generated file ships a default `main` that calls `classify(0)` — which matches
+neither clause and panics — so replace it with a harness that calls the cases you
+want to check:
+
+```rust
+fn main() {
+    assert_eq!(classify(5),  "small");
+    assert_eq!(classify(25), "large");
+    println!("ok");
+}
+```
+
+```bash
+rustc classify.rs -o classify && ./classify   # prints: ok
+```
+
+With that harness, `classify(5)` yields `small` and `classify(25)` yields `large`.
 
 ## How Rust Makes Hybrid WAM Concrete
 
@@ -232,28 +244,31 @@ becomes an instruction vector that mirrors the symbolic listing one-to-one:
 
 ```rust
 // parent/2 (abridged: register operands are a packed `Reg`, and the
-// alternative-clause target is an instruction index, not a label string)
+// alternative-clause target is a one-based instruction index (PC), not a label)
 vec![
-    Instruction::TryMeElsePc(5),
-    Instruction::GetConstant(Value::Atom(intern("alice")), Reg::a(1)),
-    Instruction::GetConstant(Value::Atom(intern("bob")),   Reg::a(2)),
+    Instruction::TryMeElsePc(5),                               // on fail, jump to PC 5
+    Instruction::GetConstant(Value::atom("alice"), Reg::a(1)),
+    Instruction::GetConstant(Value::atom("bob"),   Reg::a(2)),
     Instruction::Proceed,
-    // index 5:
+    // PC 5 (one-based; fetched as code[pc - 1]):
     Instruction::TrustMe,
-    Instruction::GetConstant(Value::Atom(intern("bob")),     Reg::a(1)),
-    Instruction::GetConstant(Value::Atom(intern("charlie")), Reg::a(2)),
+    Instruction::GetConstant(Value::atom("bob"),     Reg::a(1)),
+    Instruction::GetConstant(Value::atom("charlie"), Reg::a(2)),
     Instruction::Proceed,
 ]
 ```
 
 That listing is **abridged** — the shapes matter, not the exact tokens. In the
 current encoding the register operand is a packed numeric `Reg` (`Reg::a(1)`; a
-`Reg(u16)` whose bit 15 marks a permanent `Y` register, bit 14 an argument `A`, and
-the low bits the flat index), decoded once at **generation time** rather than
+`Reg(u16)` whose bit 15 marks a permanent `Y` register). An `A`/`X` register (bit 15
+clear) carries its flat index in the low bits; a `Y` register carries its ordinal
+`n` (its flat register index is `n + 199`, and inside an environment frame it is
+slot `n - 1`). The operand is decoded once at **generation time** rather than
 resolved from a string at runtime — so the signature is `GetConstant(Value, Reg)`.
-Alternative-clause targets are likewise resolved to instruction indices at
-generation time (`TryMeElsePc(..)`, with relatives `TryMeElsePcArgs`,
-`RetryMeElsePc`, `TrustMePc`), not carried as label strings.
+Alternative-clause targets are likewise resolved at generation time to **one-based**
+instruction indices (`TryMeElsePc`, with relatives `TryMeElsePcArgs`,
+`RetryMeElsePc`), not carried as label strings; the final clause's `TrustMe` is
+operandless (no alternative to jump to).
 
 The interpreter dispatches on these variants. The generated body for
 `GetConstant` (emitted by the `wam_instruction_arm` rules in
