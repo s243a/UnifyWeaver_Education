@@ -145,8 +145,10 @@ shared Hybrid WAM contract is still semantic, but LLVM forces control flow,
 register movement, value representation, and foreign-call boundaries into a
 lower-level form.
 
-- Default generation path: structured WAM items or target-ready lowering data
-  should feed LLVM emission directly.
+- Default generation path: WAM bytecode run through the interpreter —
+  `emit_mode(interpreter)` is the default (`wam_llvm_target.pl`). Lowering
+  structured WAM items to target-ready LLVM is opt-in (`emit_mode(functions)` /
+  `mixed(...)`), not the default path.
 - Symbolic WAM text: useful as a compact listing before showing lower-level
   control-flow shapes.
 - Target-specific emphasis: basic blocks, branches, value layout, and ABI

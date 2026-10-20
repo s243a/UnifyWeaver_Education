@@ -7,6 +7,7 @@ Compile Prolog predicates to native code via LLVM IR.
 1. [Introduction](01_introduction.md) - Getting started with LLVM target
 2. [Integration](02_integration.md) - C, Go, and Rust FFI
 3. [Recursive Queries](03_recursive_queries.md) - All recursion patterns
+4. [Standard-library builtins (libc-backed)](04_standard_library_builtins.md) - The SWI-compatible clock, filesystem, environment, process, and random builtins the WAM target exposes by calling into the C library
 
 ## Prerequisites
 
