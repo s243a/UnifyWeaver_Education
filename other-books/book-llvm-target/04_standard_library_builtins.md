@@ -12,14 +12,21 @@ describe; keep the two apart. Beyond unification, arithmetic, and control, the W
 target exposes a **standard-library surface** — clock, filesystem, environment,
 process, random, and error builtins — implemented by calling into the C library.
 This is what lets a compiled Prolog program (and, by extension, a plawk program that
-bridges to Prolog) read the clock, list a directory, or run a shell command, without
-an interpreter in the loop.
+bridges to Prolog) read the clock, list a directory, or run a shell command, with no
+external `swipl` process in the loop. (The native binary still contains the
+WAM-bytecode interpreter the target compiles in; "no external process" is the point,
+not "no interpreter.")
 
-The names are deliberately **SWI-Prolog-compatible**: `getenv/2`, `shell/1`,
-`get_time/1`, `make_directory/1`, `directory_files/2` are the same predicates SWI
-offers from `library(system)` and `library(filesex)`. The same source therefore runs
-under `swipl` for testing and compiles to native code here, which is the point of the
-compatibility.
+The names are deliberately modelled on **SWI-Prolog**: `getenv/2`, `shell/1`,
+`get_time/1`, `make_directory/1`, `directory_files/2` echo predicates SWI offers from
+`library(system)` and `library(filesex)`, so much of a program can be run under
+`swipl` for testing and then compiled to native code here. The compatibility is
+*close, not total*, though — treat it as a convenience, not a guarantee: some of the
+names here have no stock SWI predicate, and at least one differs in its calling
+convention. `format_time/3` is the known example: this target binds its first
+argument directly to a result atom, whereas SWI's `format_time/3` writes to a stream
+and the comparable "format to an atom" form takes `atom(A)` rather than a bare `A`.
+Check a given builtin against your SWI version before relying on cross-running it.
 
 ## How a name becomes a libc call
 
@@ -30,16 +37,17 @@ Three pieces connect a predicate call to a C function.
    `builtin_op_to_id('getenv/2', 99)`.
 2. **A WAM instruction.** The compiler lowers a call to a known builtin into a single
    `builtin_call <Id>` instruction rather than a general predicate call.
-3. **Per-builtin LLVM.** `wam_llvm_case('builtin_call', ...)` emits, for that id, the
-   IR that marshals the WAM arguments, calls the C extern (the module `declare`s
+3. **Per-builtin LLVM.** The `builtin_call` arm does not inline each builtin itself;
+   it delegates to the shared `@execute_builtin` dispatcher, which carries one arm per
+   id. That arm marshals the WAM arguments, calls the C extern (the module `declare`s
    `@getenv`, `@system`, `@clock_gettime`, and the rest), and turns the result back
    into a WAM value — succeeding, failing, or binding an output argument as the
    builtin's contract says.
 
 A worked example ties the three together: `getenv/2` is id `99`. A `getenv(Name,
-Value)` call lowers to `builtin_call 99`; that id's arm in `wam_llvm_case('builtin_call',
-...)` marshals `Name`, calls the `@getenv` C extern, and binds `Value` to the result
-atom (or fails if the variable is unset).
+Value)` call lowers to `builtin_call 99`, which dispatches into `@execute_builtin`;
+the id-99 arm there marshals `Name`, calls the `@getenv` C extern, and binds `Value`
+to the result atom (or fails if the variable is unset).
 
 So "the libc surface" is concretely the set of `builtin_op_to_id` entries whose
 lowering calls a C-library function. There is no FFI for the program author to
