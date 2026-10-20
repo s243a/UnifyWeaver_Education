@@ -74,7 +74,7 @@ Key options (defaults in parentheses):
 
 | Option | Values | Effect |
 |---|---|---|
-| `emit_mode(Mode)` | `interpreter` (default), `functions` | Keep the WAM interpreter loop, or lower deterministic predicates to plain Rust functions. |
+| `emit_mode(Mode)` | `interpreter` (default), `functions` | Keep the WAM interpreter loop, or lower eligible predicates to plain Rust functions — not only single-clause deterministic ones, but also constant-switch clause chains and inline multi-clause / if-then-else cases. (These lowered functions take `&mut WamState` and return `bool`; they are the WAM-runtime lowering, distinct from the standalone native Rust functions produced by Chapter 5's direct clause-body lowering.) |
 | `lmdb_mode(Mode)` | `none` (default), `cursor` | Back fact predicates with an LMDB cursor source instead of inlined facts. |
 | `lmdb_crate(Crate)` | `auto` (default → `lmdb_zero`), `lmdb_zero`, `heed` | Which Rust LMDB binding to emit when `lmdb_mode(cursor)`. |
 | `parallel(Bool)` | `false` (default), `true` | Enable Rayon parallel query execution. |
