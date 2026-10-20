@@ -503,4 +503,4 @@ Choose Go when you need:
 
 ## Navigation
 
-**←** [Previous: Chapter 3: Project Generation](03_project_generation) | [📖 Book 9: Rust Target](./) | [Next: Book 10: SQL Target →](../book-10-sql-target/)
+**←** [Previous: Chapter 3: Project Generation](03_project_generation) | [📖 Book 9: Rust Target](./) | [Next: Chapter 5: Native Clause Lowering →](05_native_clause_lowering)

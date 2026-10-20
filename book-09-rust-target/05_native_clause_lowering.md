@@ -155,22 +155,25 @@ abridged) is:
 
 ```rust
 pub enum Value {
-    Atom(String),
+    Atom(Sym),                 // interned symbol id (u32), not a String
     Integer(i64),
     Float(f64),
-    Str(String, Vec<Value>),   // compound term: functor + args
-    List(Vec<Value>),
+    Str(Sym, Args),            // compound: interned functor + a shared arg spine
+    List(Args),                // shared arg spine
     Ref(usize),                // heap reference
-    Unbound(String),           // unbound variable — a named hole, not an id
+    Unbound(Sym),              // unbound variable, by interned id
     Bool(bool),
     Uninit,                    // empty register-slot sentinel
 }
 ```
 
-An unbound variable is `Unbound(String)`, not an interned integer, so debug
-dumps stay readable. (A separate `u32` atom-interning layer — `atom_intern` /
-`ffi_facts` in the state — exists *only* for the LMDB/FFI fast path; ordinary
-WAM terms keep their string names.)
+Atoms, functors, and variable names are **interned** `Sym`s — a `u32` index into a
+global symbol table — by default (the `intern` Cargo feature is on in normal builds
+and can be switched off for A/B comparison). Compound and list arguments are not
+owned `Vec<Value>`s but an `Args` spine: an `Arc`-backed vector plus an offset, so
+cloning a term or taking a list tail is O(1) and structurally shared, and a spine is
+never mutated in place. (An earlier design used `String` atoms and `Vec<Value>`
+arguments; that is no longer the representation.)
 
 The runtime state (`state.rs.mustache`, heavily abridged — the real struct has
 ~30 fields) makes ownership explicit:
@@ -178,13 +181,15 @@ The runtime state (`state.rs.mustache`, heavily abridged — the real struct has
 ```rust
 pub struct WamState {
     pub pc: usize,
-    pub regs: Vec<Value>,          // A1->0.., X1->100.., Y1->200..
+    regs: Vec<Value>,              // PRIVATE (D121): every write keeps ax_dirty in step
+    ax_dirty: AxDirty,             // which argument registers were written since last save
     pub stack: Arc<Vec<StackEntry>>,   // Arc so WamState: Send for Rayon
     pub heap: Vec<Value>,
     pub trail: Vec<TrailEntry>,
     pub choice_points: Vec<ChoicePoint>,
-    pub bindings: HashMap<String, Value>,
-    // ... indexed_atom_fact2, ffi_facts, lazy_lookups, foreign_predicates, ...
+    pub code: Arc<Vec<Instruction>>,   // shared immutable program — no per-step clone (D122)
+    pub labels: HashMap<String, usize>,
+    // ... ~30 fields in all ...
 }
 ```
 
@@ -226,38 +231,44 @@ parent(bob, charlie).
 becomes an instruction vector that mirrors the symbolic listing one-to-one:
 
 ```rust
-// parent/2
+// parent/2 (abridged: register operands are a packed `Reg`, and the
+// alternative-clause target is an instruction index, not a label string)
 vec![
-    Instruction::TryMeElse("L_parent_2_2"),
-    Instruction::GetConstant(Value::Atom("alice".into()), "A1"),
-    Instruction::GetConstant(Value::Atom("bob".into()),   "A2"),
+    Instruction::TryMeElsePc(5),
+    Instruction::GetConstant(Value::Atom(intern("alice")), Reg::a(1)),
+    Instruction::GetConstant(Value::Atom(intern("bob")),   Reg::a(2)),
     Instruction::Proceed,
-    // L_parent_2_2:
+    // index 5:
     Instruction::TrustMe,
-    Instruction::GetConstant(Value::Atom("bob".into()),     "A1"),
-    Instruction::GetConstant(Value::Atom("charlie".into()), "A2"),
+    Instruction::GetConstant(Value::Atom(intern("bob")),     Reg::a(1)),
+    Instruction::GetConstant(Value::Atom(intern("charlie")), Reg::a(2)),
     Instruction::Proceed,
 ]
 ```
 
-Each variant is the real signature from `instructions.rs.mustache`
-(`GetConstant(Value, String)`, `TryMeElse(String)`, `Proceed`). Register names
-stay as strings and are resolved to indices at runtime.
+That listing is **abridged** — the shapes matter, not the exact tokens. In the
+current encoding the register operand is a packed numeric `Reg` (`Reg::a(1)`; a
+`Reg(u16)` whose bit 15 marks a permanent `Y` register, bit 14 an argument `A`, and
+the low bits the flat index), decoded once at **generation time** rather than
+resolved from a string at runtime — so the signature is `GetConstant(Value, Reg)`.
+Alternative-clause targets are likewise resolved to instruction indices at
+generation time (`TryMeElsePc(..)`, with relatives `TryMeElsePcArgs`,
+`RetryMeElsePc`, `TrustMePc`), not carried as label strings.
 
 The interpreter dispatches on these variants. The generated body for
 `GetConstant` (emitted by the `wam_instruction_arm` rules in
 `wam_rust_target.pl`) is the three-way unify-a-constant logic:
 
 ```rust
+// abridged; `ai` is a `Reg`, and the register accessors take it directly
 Instruction::GetConstant(c, ai) => {
-    let raw_val = self.get_reg_raw(ai);
-    let val = raw_val.map(|v| self.deref_var(&v));
+    let val = self.get_reg_raw_r(*ai).map(|v| self.deref_var(&v));
     match val {
         Some(v) if v == *c => { self.pc += 1; true }      // already equal: advance
-        Some(Value::Unbound(ref var_name)) => {           // unbound: bind + trail
-            self.trail_binding(ai);
-            self.set_reg_str(ai, c.clone());
-            self.bind_var(var_name, c.clone());
+        Some(Value::Unbound(ref var)) => {                // unbound: bind + trail
+            self.trail_reg(*ai);
+            self.set_reg_r(*ai, c.clone());
+            self.bind_var(var, c.clone());
             self.pc += 1;
             true
         }
